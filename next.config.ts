@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Produce the minimal self-contained server copied into the production
+  // Docker image. Static assets are added by the Dockerfile.
+  output: "standalone",
   // DSGVO: no telemetry
   // typedRoutes disabled during scaffold; enable once all routes exist
   // Allow an isolated build dir for parallel dev servers (e.g. e2e runs that

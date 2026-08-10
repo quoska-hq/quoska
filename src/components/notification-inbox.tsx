@@ -21,6 +21,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Palmtree,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,6 +32,9 @@ const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
   correction_request: AlertTriangle,
   correction_approved: CheckCircle,
   correction_rejected: XCircle,
+  leave_request: Palmtree,
+  leave_approved: CheckCircle,
+  leave_rejected: XCircle,
 };
 
 function getNotificationIcon(type: string): LucideIcon {
@@ -38,12 +42,10 @@ function getNotificationIcon(type: string): LucideIcon {
 }
 
 function getNotificationIconBg(type: string): string {
-  if (type.startsWith("correction_approved")) return "bg-green-50 text-green-600";
-  if (type.startsWith("correction_rejected")) return "bg-red-50 text-red-500";
-  if (type.startsWith("correction_request")) return "bg-amber-50 text-amber-600";
-  if (type === "forgot_clockout") return "bg-blue-50 text-primary";
-  if (type === "break_reminder") return "bg-purple-50 text-purple-600";
-  return "bg-blue-50 text-primary";
+  if (type.endsWith("_approved")) return "bg-emerald-50 text-emerald-700";
+  if (type.endsWith("_rejected")) return "bg-red-50 text-red-700";
+  if (type.endsWith("_request")) return "bg-amber-50 text-amber-700";
+  return "bg-[#efede7] text-[#6658d3]";
 }
 
 /** Format a relative time string like "vor 2 Stunden" */
@@ -121,7 +123,7 @@ export function NotificationInbox() {
   if (!notifications || notifications.length === 0) {
     return (
       <div className="text-center py-16">
-        <div className="inline-flex items-center justify-center size-14 rounded-full bg-blue-50 text-primary mb-4">
+        <div className="mb-4 inline-flex size-14 items-center justify-center border border-slate-900/15 text-[#6658d3]">
           <Bell className="size-6" />
         </div>
         <p className="text-muted-foreground">
@@ -156,7 +158,7 @@ export function NotificationInbox() {
       </div>
 
       {/* Notification list */}
-      <div className="rounded-xl border bg-white shadow-sm">
+      <div className="border border-slate-900/15 bg-white">
         {notifications.map((notification, index) => {
           const IconComponent = getNotificationIcon(notification.type as NotificationType);
           const iconBg = getNotificationIconBg(notification.type);
@@ -175,7 +177,7 @@ export function NotificationInbox() {
                   isUnread ? "bg-primary/5" : "opacity-60"
                 }`}
               >
-                <div className={`flex items-center justify-center size-8 rounded-lg shrink-0 mt-0.5 ${iconBg}`}>
+                <div className={`mt-0.5 flex size-8 shrink-0 items-center justify-center border border-current/15 ${iconBg}`}>
                   <IconComponent className="size-4" />
                 </div>
                 <div className="flex-1 min-w-0">

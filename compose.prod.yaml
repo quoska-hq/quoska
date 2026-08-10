@@ -1,0 +1,57 @@
+name: quoska
+
+services:
+  app:
+    image: ${QUOSKA_IMAGE:-ghcr.io/oskarsync/quoska:latest}
+    init: true
+    restart: unless-stopped
+    env_file:
+      - ${QUOSKA_ENV_FILE:-.env.production}
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      NEXT_TELEMETRY_DISABLED: "1"
+    expose:
+      - "3000"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=64m,mode=1777
+    volumes:
+      - next_cache:/app/.next/cache
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    environment:
+      QUOSKA_DOMAIN: ${QUOSKA_DOMAIN:?Set QUOSKA_DOMAIN in the shell or Compose environment}
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  next_cache:
+  caddy_data:
+  caddy_config:

@@ -59,6 +59,13 @@ export function InviteStep({
         </Alert>
       )}
 
+      {invites.length === 0 && (
+        <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center">
+          <p className="text-sm font-medium">Du kannst diesen Schritt überspringen.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Mitarbeiter lassen sich jederzeit später hinzufügen.</p>
+        </div>
+      )}
+
       {invites.map((invite, index) => (
         <Card key={index} size="sm">
           <CardContent>
@@ -67,7 +74,7 @@ export function InviteStep({
                 <span className="text-xs font-medium text-muted-foreground">
                   Mitarbeiter {index + 1}
                 </span>
-                {invites.length > 1 && (
+                {invites.length > 0 && (
                   <Button
                     variant="link"
                     size="xs"
@@ -124,7 +131,7 @@ export function InviteStep({
           onClick={onSubmit}
           disabled={loading}
         >
-          {loading ? "Wird eingeladen..." : "Einladen & Weiter"}
+          {loading ? "Wird gespeichert..." : invites.length === 0 ? "Ohne Einladungen weiter" : "Weiter zur Übersicht"}
         </Button>
       </div>
     </div>

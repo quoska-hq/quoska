@@ -29,7 +29,7 @@ import {
 } from "@/repos/leaveRepo";
 import { notifyManagers, sendNotification } from "@/services/notificationService";
 import { getNowIso } from "@/config/server/timestamps";
-import { calculateWorkDaysCount, getEmployeeBundesland, getEmployeeName, formatDate, getYear } from "@/services/leaveHelpers";
+import { calculateWorkDaysCount, getEmployeeBundesland, getEmployeeName, getEmployeeWorkSchedule, formatDate, getYear } from "@/services/leaveHelpers";
 
 // ---------------------------------------------------------------------------
 // Submit
@@ -58,8 +58,9 @@ export async function submitLeaveRequest(
   }
 
   // 2. Calculate work days count
+  const workSchedule = await getEmployeeWorkSchedule(supabase, tenantId, employeeId);
   const workDaysCount = await calculateWorkDaysCount(
-    supabase, bundesland, data.start_date, data.end_date,
+    supabase, bundesland, data.start_date, data.end_date, workSchedule,
   );
 
   if (workDaysCount <= 0) {

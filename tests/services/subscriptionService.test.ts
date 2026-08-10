@@ -161,22 +161,22 @@ describe("processWebhookEvent — idempotency", () => {
 
     const first = await processWebhookEvent(supabase as never, ev);
     expect(first.data?.status).toBe("processed");
-    expect(supabase._tenants[0].plan).toBe("pro");
+    expect(supabase._tenants[0].plan).toBe("free");
 
     const second = await processWebhookEvent(supabase as never, ev);
     expect(second.data?.status).toBe("ignored_duplicate");
     // plan unchanged by the duplicate
-    expect(supabase._tenants[0].plan).toBe("pro");
+    expect(supabase._tenants[0].plan).toBe("free");
   });
 });
 
 describe("processWebhookEvent — checkout.session.completed", () => {
-  test("paid checkout links customer and upgrades to pro", async () => {
+  test("paid checkout with an unknown price links customer but fails closed", async () => {
     const supabase = makeSupabase([{ id: "t1", plan: "free", stripe_customer_id: null }]);
     const ev = checkoutEvent({ id: "evt_co1", tenantId: "t1", customerId: "cus_X", paid: true });
     const res = await processWebhookEvent(supabase as never, ev);
     expect(res.data?.status).toBe("processed");
-    expect(supabase._tenants[0].plan).toBe("pro");
+    expect(supabase._tenants[0].plan).toBe("free");
     expect(supabase._tenants[0].stripe_customer_id).toBe("cus_X");
   });
 
@@ -191,7 +191,7 @@ describe("processWebhookEvent — checkout.session.completed", () => {
 });
 
 describe("processWebhookEvent — subscription sync", () => {
-  test("active subscription → pro", async () => {
+  test("active subscription with an unknown price fails closed", async () => {
     const supabase = makeSupabase([{ id: "t1", plan: "free", stripe_customer_id: "cus_A" }]);
     const ev = subscriptionEvent({
       id: "evt_sub1",
@@ -201,7 +201,7 @@ describe("processWebhookEvent — subscription sync", () => {
     });
     const res = await processWebhookEvent(supabase as never, ev);
     expect(res.data?.status).toBe("processed");
-    expect(supabase._tenants[0].plan).toBe("pro");
+    expect(supabase._tenants[0].plan).toBe("free");
   });
 
   test("canceled subscription → free", async () => {

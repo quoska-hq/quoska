@@ -192,9 +192,7 @@ export function ClockView() {
 
   const isActive = activeEntry?.status === "running" || !!activeBreak || !!optimisticAction;
   const activePulse = isActive && pulsePhase;
-  const btnShadow = activePulse
-    ? `0 0 40px ${btn.shadowColor}, 0 8px 32px ${btn.shadowColor}`
-    : `0 8px 32px ${btn.shadowColor}`;
+  const btnShadow = `0 1px 0 rgba(255,255,255,0.12) inset, 0 16px 34px ${btn.shadowColor}`;
 
   if (isLoading) {
     return (
@@ -204,8 +202,8 @@ export function ClockView() {
     );
   }
 
-  const ringSize = 240;
-  const ringStroke = 8;
+  const ringSize = 216;
+  const ringStroke = 6;
   const ringProgress = Math.min(progressFraction, 1);
 
   return (
@@ -215,7 +213,7 @@ export function ClockView() {
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Stempeln</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Clock in und out mit einem Klick
+            Arbeitszeit mit einem Klick erfassen
           </p>
         </div>
 

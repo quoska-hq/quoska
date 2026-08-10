@@ -3,7 +3,7 @@
  *
  * Create a Stripe Checkout Session for upgrading the caller's tenant to a paid
  * tier. Body: { tier: "team" | "business" | "pro" }.
- * Auth: any authenticated user (the upgrade applies to their tenant).
+ * Auth: tenant admin only (the upgrade applies to their tenant).
  * Returns the hosted Checkout URL to redirect to.
  *
  * Inert when billing is disabled (no STRIPE_SECRET_KEY / price IDs).
@@ -19,11 +19,15 @@ import { PLANS } from "@/config/plans";
 import type { Plan } from "@/types/tenant";
 import type { ApiResponse } from "@/types/api";
 
-const PRICE_ID_BY_TIER: Record<"team" | "business" | "pro", string | undefined> = {
-  team: serverEnv.STRIPE_TEAM_PRICE_ID,
-  business: serverEnv.STRIPE_BUSINESS_PRICE_ID,
-  pro: serverEnv.STRIPE_PRO_PRICE_ID,
-};
+function priceIdForTier(
+  tier: "team" | "business" | "pro",
+): string | undefined {
+  return {
+    team: serverEnv.STRIPE_TEAM_PRICE_ID,
+    business: serverEnv.STRIPE_BUSINESS_PRICE_ID,
+    pro: serverEnv.STRIPE_PRO_PRICE_ID,
+  }[tier];
+}
 
 export async function POST(request: Request) {
   if (!isBillingEnabled()) {
@@ -43,7 +47,7 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    const priceId = PRICE_ID_BY_TIER[tier];
+    const priceId = priceIdForTier(tier);
     if (!priceId) {
       return NextResponse.json<ApiResponse<{ url: string }>>(
         { data: null, error: `Tarif „${PLANS[tier as Plan].label}" ist nicht konfiguriert.` },
@@ -57,6 +61,13 @@ export async function POST(request: Request) {
       return NextResponse.json<ApiResponse<{ url: string }>>(
         { data: null, error: authResult.error },
         { status: 401 },
+      );
+    }
+
+    if (authResult.data.role !== "admin") {
+      return NextResponse.json<ApiResponse<{ url: string }>>(
+        { data: null, error: "Nur Administratoren können Tarife buchen." },
+        { status: 403 },
       );
     }
 

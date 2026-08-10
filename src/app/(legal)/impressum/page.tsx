@@ -5,11 +5,11 @@ import { legalStandDate } from "@/config/server/site-meta";
 
 export const metadata: Metadata = {
   title: "Impressum",
-  description: "Anbieterkennzeichnung gemäß § 5 TMG und § 18 MStV.",
+  description: "Anbieterkennzeichnung gemäß § 5 DDG und § 18 MStV.",
   alternates: { canonical: "/impressum" },
   openGraph: {
     title: "Impressum | Quoska",
-    description: "Anbieterkennzeichnung gemäß § 5 TMG und § 18 MStV.",
+    description: "Anbieterkennzeichnung gemäß § 5 DDG und § 18 MStV.",
     type: "article",
     locale: "de_DE",
   },
@@ -24,7 +24,7 @@ export default function ImpressumPage() {
       </p>
       <h1>Impressum</h1>
       <p className="text-sm">
-        Angaben gemäß §&nbsp;5 TMG (Telemediengesetz) und §&nbsp;18 MStV
+        Angaben gemäß §&nbsp;5 DDG (Digitale-Dienste-Gesetz) und §&nbsp;18 MStV
         (Medienstaatsvertrag).
       </p>
 
@@ -32,9 +32,8 @@ export default function ImpressumPage() {
         <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
           ⚠️ Hinweis (nur in der Entwicklung sichtbar): Die mit <code>[TODO:]</code>{" "}
           markierten Felder müssen vor dem Live-Gang mit den echten
-          Anbieterdaten (nach Gewerbe- bzw. Handelsregister-Anmeldung) ausgefüllt
-          werden. Siehe <code>src/lib/site.ts</code> und{" "}
-          <code>OPERATIONS/LEGAL.md</code>.
+          Anbieterdaten ausgefüllt werden. Siehe <code>src/lib/site.ts</code> und{" "}
+          <code>docs/deployment-hetzner.md</code>.
         </p>
       )}
 
@@ -53,8 +52,12 @@ export default function ImpressumPage() {
 
       <h2>Kontakt</h2>
       <p>
-        Telefon: <LegalValue value={legalInfo.phone} />
-        <br />
+        {legalInfo.phone && (
+          <>
+            Telefon: <LegalValue value={legalInfo.phone} />
+            <br />
+          </>
+        )}
         E-Mail:{" "}
         <a href={`mailto:${legalInfo.email.replace("[TODO: ", "").replace("]", "")}`}>
           <LegalValue value={legalInfo.email} />
@@ -70,15 +73,19 @@ export default function ImpressumPage() {
         </>
       )}
 
-      <h2>Umsatzsteuer</h2>
-      <p>
-        Umsatzsteuer-Identifikationsnummer gemäß §&nbsp;27a Umsatzsteuergesetz
-        (UStG):
-        <br />
-        <LegalValue value={legalInfo.vatId} />
-      </p>
+      {legalInfo.vatId && (
+        <>
+          <h2>Umsatzsteuer</h2>
+          <p>
+            Umsatzsteuer-Identifikationsnummer gemäß §&nbsp;27a
+            Umsatzsteuergesetz (UStG):
+            <br />
+            <LegalValue value={legalInfo.vatId} />
+          </p>
+        </>
+      )}
 
-      {!legalInfo.taxNumber.includes("[TODO") && legalInfo.taxNumber !== "[TODO: optional]" && (
+      {legalInfo.taxNumber && (
         <p>
           Steuernummer (Finanzamt): <LegalValue value={legalInfo.taxNumber} />
         </p>
@@ -103,21 +110,13 @@ export default function ImpressumPage() {
       <h2>Streitschlichtung</h2>
       <p>{legalInfo.disputeResolution}</p>
 
-      <h2>Verbraucherstreitbeilegung / Universalschlichtungsstelle</h2>
-      <p>
-        Wir sind nicht verpflichtet und nicht bereit, an
-        Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle
-        teilzunehmen.
-      </p>
-
       <h2>Haftung für Inhalte</h2>
       <p>
-        Als Diensteanbieter sind wir gemäß §&nbsp;7 Abs.&nbsp;1 TMG für eigene
-        Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.
-        Nach §§&nbsp;8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht
-        verpflichtet, übermittelte oder gespeicherte fremde Informationen zu
-        überwachen oder nach Umständen zu forschen, die auf eine
-        rechtswidrige Tätigkeit hinweisen.
+        Als Diensteanbieter sind wir für eigene Inhalte auf diesen Seiten nach
+        den allgemeinen Gesetzen verantwortlich. Wir sind jedoch nicht ohne
+        konkreten Anlass verpflichtet, übermittelte oder gespeicherte fremde
+        Informationen zu überwachen oder nach Umständen zu forschen, die auf
+        eine rechtswidrige Tätigkeit hinweisen.
       </p>
       <p>
         Verpflichtungen zur Entfernung oder Sperrung der Nutzung von

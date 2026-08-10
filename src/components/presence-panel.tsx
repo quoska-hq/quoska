@@ -78,7 +78,7 @@ export function PresencePanel({ open, onClose }: PresencePanelProps) {
         data-testid="presence-panel"
         role="complementary"
         aria-label="Anwesenheit"
-        className={`fixed top-14 bottom-0 right-0 z-40 w-[340px] max-w-[86vw] bg-white border-l border-gray-200 shadow-xl flex flex-col transition-transform duration-200 ease-out ${
+        className={`fixed bottom-0 right-0 top-14 z-40 flex w-[340px] max-w-[86vw] flex-col border-l border-slate-900/15 bg-[#f5f3ee] shadow-[0_20px_55px_rgba(15,23,42,0.14)] transition-transform duration-200 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

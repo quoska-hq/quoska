@@ -6,7 +6,10 @@ export type NotificationType =
   | "break_reminder"
   | "correction_request"
   | "correction_approved"
-  | "correction_rejected";
+  | "correction_rejected"
+  | "leave_request"
+  | "leave_approved"
+  | "leave_rejected";
 
 /** Map notification type to display icon. */
 export const NOTIFICATION_ICON: Record<NotificationType, string> = {
@@ -15,6 +18,9 @@ export const NOTIFICATION_ICON: Record<NotificationType, string> = {
   correction_request: "📝",
   correction_approved: "✅",
   correction_rejected: "❌",
+  leave_request: "🌴",
+  leave_approved: "✅",
+  leave_rejected: "❌",
 };
 
 /** Query params for listing notifications. */

@@ -1,0 +1,17 @@
+[Unit]
+Description=Export and upload the Quoska production backup
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/quoska/deploy/run-backup.sh
+TimeoutStartSec=30min
+UMask=0077
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+
+[Install]
+WantedBy=multi-user.target

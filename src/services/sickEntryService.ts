@@ -31,7 +31,7 @@ import {
   getActiveSickForTenant,
 } from "@/repos/sickEntryRepo";
 import { sendNotification } from "@/services/notificationService";
-import { calculateWorkDaysCount, getEmployeeBundesland, formatDate } from "@/services/leaveHelpers";
+import { calculateWorkDaysCount, getEmployeeBundesland, getEmployeeWorkSchedule, formatDate } from "@/services/leaveHelpers";
 
 // ---------------------------------------------------------------------------
 // Create
@@ -50,7 +50,8 @@ export async function createSickEntryRecord(
 
   let workDaysCount: number | null = null;
   if (data.end_date && bundesland) {
-    workDaysCount = await calculateWorkDaysCount(supabase, bundesland, data.start_date, data.end_date);
+    const schedule = await getEmployeeWorkSchedule(supabase, tenantId, employeeId);
+    workDaysCount = await calculateWorkDaysCount(supabase, bundesland, data.start_date, data.end_date, schedule);
   }
 
   const entry = await createSickEntry(supabase, {
@@ -107,7 +108,8 @@ export async function updateSickEntryRecord(
     updates.end_date = data.end_date;
     const bundesland = await getEmployeeBundesland(supabase, tenantId, entry.employee_id);
     if (bundesland) {
-      updates.work_days_count = await calculateWorkDaysCount(supabase, bundesland, entry.start_date, data.end_date);
+      const schedule = await getEmployeeWorkSchedule(supabase, tenantId, entry.employee_id);
+      updates.work_days_count = await calculateWorkDaysCount(supabase, bundesland, entry.start_date, data.end_date, schedule);
     }
   }
 

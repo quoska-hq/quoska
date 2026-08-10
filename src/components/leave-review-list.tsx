@@ -58,14 +58,15 @@ export function LeaveReviewList({ requests, isLoading }: LeaveReviewListProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pendingLeaveRequests"] });
       queryClient.invalidateQueries({ queryKey: ["leaveRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["absenceCalendar"] });
     },
   });
 
-  if (loading) return <Skeleton className="h-32 rounded-xl" />;
+  if (loading) return <Skeleton className="h-32 rounded-sm" />;
 
   if (items.length === 0) {
     return (
-      <Card className="rounded-xl">
+      <Card>
         <CardContent className="py-6 text-center">
           <p className="text-sm text-muted-foreground">
             Keine ausstehenden Urlaubsanträge. Alles erledigt! ✅
@@ -84,7 +85,7 @@ export function LeaveReviewList({ requests, isLoading }: LeaveReviewListProps) {
   return (
     <div className="space-y-2">
       {items.map((req) => (
-        <Card key={req.id} className="rounded-xl">
+        <Card key={req.id}>
           <CardContent className="py-3 px-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">

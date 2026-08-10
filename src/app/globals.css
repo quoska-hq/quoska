@@ -18,32 +18,37 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-brand: var(--brand);
+  --color-canvas: var(--canvas);
 }
 
 :root {
+  /* Quoska application theme */
   /* Primary */
-  --primary: #7c3aed;
+  --primary: #17181b;
   --primary-foreground: #ffffff;
+  --brand: #6658d3;
+  --canvas: #f5f3ee;
 
   /* Surfaces */
-  --muted: #f9fafb;
-  --muted-foreground: #6b7280;
-  --background: #ffffff;
-  --foreground: #111827;
+  --muted: #ebe8e0;
+  --muted-foreground: #667085;
+  --background: #f5f3ee;
+  --foreground: #17181b;
   --card: #ffffff;
-  --card-foreground: #111827;
+  --card-foreground: #17181b;
   --popover: #ffffff;
-  --popover-foreground: #111827;
-  --secondary: #f3f4f6;
-  --secondary-foreground: #111827;
-  --accent: #f3f4f6;
-  --accent-foreground: #111827;
+  --popover-foreground: #17181b;
+  --secondary: #e7e3da;
+  --secondary-foreground: #17181b;
+  --accent: #efede7;
+  --accent-foreground: #17181b;
 
   /* Borders & inputs */
-  --border: #e5e7eb;
-  --input: #d1d5db;
-  --ring: #7c3aed;
-  --radius: 0.625rem;
+  --border: #d6d1c7;
+  --input: #b8b1a5;
+  --ring: #6658d3;
+  --radius: 0.25rem;
 
   /* Semantic */
   --destructive: #ef4444;
@@ -54,27 +59,31 @@
   --success-foreground: #ffffff;
 
   /* Charts */
-  --chart-1: #7c3aed;
+  --chart-1: #6658d3;
   --chart-2: #6b7280;
   --chart-3: #e5e7eb;
   --chart-4: #10b981;
   --chart-5: #f59e0b;
 
   /* Sidebar */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #111827;
-  --sidebar-primary: #7c3aed;
+  --sidebar: #efede7;
+  --sidebar-foreground: #17181b;
+  --sidebar-primary: #6658d3;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f3f4f6;
-  --sidebar-accent-foreground: #111827;
-  --sidebar-border: #e5e7eb;
-  --sidebar-ring: #7c3aed;
+  --sidebar-accent: #e3dfd5;
+  --sidebar-accent-foreground: #17181b;
+  --sidebar-border: #d6d1c7;
+  --sidebar-ring: #6658d3;
 }
 
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 22%, transparent);
 }
 
 @theme inline {
@@ -163,6 +172,20 @@ body {
   [type="submit"]:disabled,
   [type="reset"]:disabled {
     cursor: not-allowed;
+  }
+}
+
+@layer components {
+  [data-app-content] h1 {
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    color: #0f172a;
+  }
+
+  [data-app-content] [data-slot="card"] {
+    border-radius: 0.125rem;
+    box-shadow: none;
   }
 }
 

@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { MarketingNav } from "@/components/marketing/nav";
 import { MarketingFooter } from "@/components/marketing/footer";
 import { HeroSection } from "@/components/marketing/sections/hero";
-import { ProblemSection } from "@/components/marketing/sections/problem";
 import { FeaturesSection } from "@/components/marketing/sections/features";
-import { SavingsSection } from "@/components/marketing/sections/savings";
 import { HowItWorksSection } from "@/components/marketing/sections/how-it-works";
 import { PricingSection } from "@/components/marketing/sections/pricing";
 import { FaqSection, FAQ } from "@/components/marketing/sections/faq";
@@ -13,16 +11,16 @@ import { site, legalInfo } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Quoska — Zeiterfassung für deutsche KMU (39 € Flatrate)",
+    absolute: "Quoska — Zeiterfassung, die im Betrieb funktioniert",
   },
   description:
-    "Gesetzlich vorgeschriebene Zeiterfassung für dein Team: Pausen nach §4 ArbZG, revisionssicherer Audit-Trail, DSGVO-konform in Frankfurt gehostet. 39 € im Monat — egal wie viele Mitarbeiter.",
+    "Arbeitszeiten, Pausen, Korrekturen und Auswertungen für deutsche Betriebe. Klar für Mitarbeitende, übersichtlich für Verantwortliche.",
   alternates: { canonical: "/" },
   category: "Business & Industrial",
   openGraph: {
     title: "Quoska — Zeiterfassung für deutsche KMU",
     description:
-      "ArbZG-konforme Zeiterfassung als Flatrate. 39 €/Monat für das ganze Team. Server in Frankfurt, AVV inklusive.",
+      "Arbeitszeit erfassen, Pausen dokumentieren und Auswertungen erstellen — ohne komplizierte Einführung.",
     locale: "de_DE",
     type: "website",
     siteName: "Quoska",
@@ -32,7 +30,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Quoska — Zeiterfassung für deutsche KMU",
     description:
-      "ArbZG-konforme Zeiterfassung als Flatrate. 39 €/Monat für das ganze Team. Server in Frankfurt.",
+      "Arbeitszeit erfassen, Pausen dokumentieren und Auswertungen erstellen.",
   },
 };
 
@@ -66,11 +64,13 @@ const jsonLd = {
       inLanguage: "de-DE",
       url: site.url,
       description:
-        "ArbZG-konforme Zeiterfassung für deutsche KMU. Flatrate statt Pro-Kopf-Preis.",
+        "Zeiterfassung für deutsche KMU mit Pausen, Korrekturen und Auswertungen.",
       publisher: { "@id": `${site.url}/#organization` },
       offers: [
         { "@type": "Offer", name: "Free", price: "0", priceCurrency: "EUR" },
-        { "@type": "Offer", name: "Team", price: "39", priceCurrency: "EUR" },
+        { "@type": "Offer", name: "Team", price: "9", priceCurrency: "EUR" },
+        { "@type": "Offer", name: "Business", price: "59", priceCurrency: "EUR" },
+        { "@type": "Offer", name: "Pro", price: "99", priceCurrency: "EUR" },
       ],
     },
     {
@@ -87,7 +87,7 @@ const jsonLd = {
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-full flex-col bg-white">
+    <div className="flex min-h-full flex-col bg-[#f5f3ee]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -96,9 +96,7 @@ export default function HomePage() {
 
       <main className="flex-1">
         <HeroSection />
-        <ProblemSection />
         <FeaturesSection />
-        <SavingsSection />
         <HowItWorksSection />
         <PricingSection />
         <FaqSection />

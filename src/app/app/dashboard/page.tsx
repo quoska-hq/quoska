@@ -6,6 +6,7 @@
  */
 
 import { createClient } from "@/config/supabase/server";
+import { AdminCockpit } from "@/components/admin-cockpit";
 import { ManagerDashboard } from "@/components/manager-dashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,15 +52,18 @@ export default async function DashboardPage() {
   }
 
   const isManager = role === "admin" || role === "manager";
+  const isAdmin = role === "admin";
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-          Willkommen bei Quoska{firstName ? `, ${firstName}` : ""}
+        <h1 className="text-3xl text-slate-950">
+          {isAdmin
+            ? "Cockpit"
+            : `Willkommen bei Quoska${firstName ? `, ${firstName}` : ""}`}
         </h1>
-        <p className="mt-1 text-gray-500">
-          Zeiterfassung für dein Team
+        <p className="mt-2 text-sm text-slate-500">
+          {isAdmin ? "Arbeitszeit und Aktivitäten im Überblick" : "Zeiterfassung für dein Team"}
         </p>
       </div>
 
@@ -67,7 +71,7 @@ export default async function DashboardPage() {
         <Alert className="border-amber-200 bg-amber-50/50">
           <AlertDescription>
             <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center size-8 rounded-lg bg-amber-100 text-amber-600 shrink-0">
+              <div className="flex size-8 shrink-0 items-center justify-center border border-amber-300 text-amber-700">
                 <AlertTriangle className="size-4" />
               </div>
               <div>
@@ -88,18 +92,21 @@ export default async function DashboardPage() {
         </Alert>
       )}
 
-      {isManager ? (
+      {isAdmin ? (
+        <AdminCockpit />
+      ) : isManager ? (
         <ManagerDashboard />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link href="/app/clock">
-            <Card className="rounded-xl border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow cursor-pointer bg-white">
+            <Card className="group cursor-pointer border-slate-900/15 bg-white transition-colors hover:border-[#6658d3]">
               <CardContent className="p-6">
-                <div className="flex items-center justify-center size-10 rounded-lg bg-violet-100 text-violet-600 mb-4">
-                  <Clock className="size-5" />
+                <div className="mb-5 flex items-center justify-between border-b border-slate-900/10 pb-4">
+                  <span className="font-mono text-xs text-[#6658d3]">01</span>
+                  <Clock className="size-5 text-slate-400 group-hover:text-[#6658d3]" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Stempeln</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="mb-1 font-semibold text-slate-950">Stempeln</h3>
+                <p className="text-sm text-slate-500">
                   Clock in und out mit einem Klick
                 </p>
               </CardContent>
@@ -107,13 +114,14 @@ export default async function DashboardPage() {
           </Link>
 
           <Link href="/app/my-times">
-            <Card className="rounded-xl border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow cursor-pointer bg-white">
+            <Card className="group cursor-pointer border-slate-900/15 bg-white transition-colors hover:border-[#6658d3]">
               <CardContent className="p-6">
-                <div className="flex items-center justify-center size-10 rounded-lg bg-emerald-100 text-emerald-600 mb-4">
-                  <ClipboardList className="size-5" />
+                <div className="mb-5 flex items-center justify-between border-b border-slate-900/10 pb-4">
+                  <span className="font-mono text-xs text-[#6658d3]">02</span>
+                  <ClipboardList className="size-5 text-slate-400 group-hover:text-[#6658d3]" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Meine Zeiten</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="mb-1 font-semibold text-slate-950">Meine Zeiten</h3>
+                <p className="text-sm text-slate-500">
                   Übersicht aller erfassten Zeiten
                 </p>
               </CardContent>
@@ -121,13 +129,14 @@ export default async function DashboardPage() {
           </Link>
 
           <Link href="/app/notifications">
-            <Card className="rounded-xl border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow cursor-pointer bg-white">
+            <Card className="group cursor-pointer border-slate-900/15 bg-white transition-colors hover:border-[#6658d3]">
               <CardContent className="p-6">
-                <div className="flex items-center justify-center size-10 rounded-lg bg-amber-100 text-amber-600 mb-4">
-                  <Bell className="size-5" />
+                <div className="mb-5 flex items-center justify-between border-b border-slate-900/10 pb-4">
+                  <span className="font-mono text-xs text-[#6658d3]">03</span>
+                  <Bell className="size-5 text-slate-400 group-hover:text-[#6658d3]" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Benachrichtigungen</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="mb-1 font-semibold text-slate-950">Benachrichtigungen</h3>
+                <p className="text-sm text-slate-500">
                   Warnungen und Hinweise
                 </p>
               </CardContent>

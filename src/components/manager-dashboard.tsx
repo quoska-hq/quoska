@@ -52,15 +52,15 @@ export function ManagerDashboard() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-sm" />
+        <Skeleton className="h-48 w-full rounded-sm" />
       </div>
     );
   }
 
   if (!data) {
     return (
-      <Card className="shadow-sm rounded-xl">
+      <Card>
         <CardContent className="py-8 text-center">
           <p className="text-muted-foreground">
             Dashboard-Daten konnten nicht geladen werden.
@@ -76,10 +76,10 @@ export function ManagerDashboard() {
     <div className="space-y-6">
       {/* Compliance alerts */}
       {complianceAlerts.length > 0 && (
-        <Card className="border-amber-200 bg-amber-50/50 shadow-sm rounded-xl">
+        <Card className="border-amber-300 bg-amber-50/50">
           <CardContent>
             <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center justify-center size-7 rounded-lg bg-amber-100 text-amber-600">
+              <div className="flex size-7 items-center justify-center border border-amber-300 text-amber-700">
                 <AlertTriangle className="size-4" />
               </div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-amber-700">

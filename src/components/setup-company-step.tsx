@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BUNDESLAENDER, BUNDESLAND_LABELS } from "@/types";
+import { BUNDESLAENDER, BUNDESLAND_LABELS, getBundeslandLabel } from "@/types/tenant";
 import { setupCompanySchema, type SetupCompanyInput } from "@/types/setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,13 +18,15 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CompanyStepProps {
+  initialData: SetupCompanyInput;
   onSubmit: (data: SetupCompanyInput) => Promise<void>;
+  onBack: () => void;
   loading: boolean;
   error: string | null;
 }
 
-export function CompanyStep({ onSubmit, loading, error }: CompanyStepProps) {
-  const [selectedBundesland, setSelectedBundesland] = useState("");
+export function CompanyStep({ initialData, onSubmit, onBack, loading, error }: CompanyStepProps) {
+  const [selectedBundesland, setSelectedBundesland] = useState(initialData.bundesland);
 
   const {
     register,
@@ -33,7 +35,7 @@ export function CompanyStep({ onSubmit, loading, error }: CompanyStepProps) {
     formState: { errors },
   } = useForm<SetupCompanyInput>({
     resolver: zodResolver(setupCompanySchema),
-    defaultValues: { bundesland: "" },
+    defaultValues: initialData,
   });
 
   function handleFormSubmit(data: SetupCompanyInput) {
@@ -69,7 +71,9 @@ export function CompanyStep({ onSubmit, loading, error }: CompanyStepProps) {
           setValue("bundesland", v ?? "", { shouldValidate: true });
         }}>
           <SelectTrigger id="bundesland" className="w-full">
-            <SelectValue placeholder="Bitte wählen..." />
+            <SelectValue placeholder="Bitte wählen...">
+              {getBundeslandLabel(selectedBundesland) || "Bitte wählen..."}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">Bitte wählen...</SelectItem>
@@ -87,13 +91,14 @@ export function CompanyStep({ onSubmit, loading, error }: CompanyStepProps) {
         )}
       </div>
 
-      <Button
-        type="submit"
-        disabled={loading}
-        className="w-full"
-      >
-        {loading ? "Wird gespeichert..." : "Weiter"}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" className="flex-1" onClick={onBack}>
+          Zurück
+        </Button>
+        <Button type="submit" disabled={loading} className="flex-1">
+          {loading ? "Wird gespeichert..." : "Weiter"}
+        </Button>
+      </div>
     </form>
   );
 }

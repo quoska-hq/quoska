@@ -8,6 +8,10 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Employee, TimeEntry } from "@/types/database";
+import {
+  normalizeWorkSchedule,
+  type WorkdayKey,
+} from "@/types/work-schedule";
 
 // ---------------------------------------------------------------------------
 // Team Status
@@ -117,7 +121,7 @@ export async function getMissingEntries(
   // Get all active employees
   const { data: employees } = await supabase
     .from("employees")
-    .select("id, first_name, last_name")
+    .select("id, first_name, last_name, target_hours_week, work_schedule")
     .eq("tenant_id", tenantId)
     .is("deleted_at", null);
 
@@ -140,13 +144,26 @@ export async function getMissingEntries(
     }
   }
 
-  // Check each workday for each employee
+  // Check each contractual workday for each employee.
   const missing: MissingEntry[] = [];
-  const workdays = getWorkdaysInRange(startDate, endDate, holidayDates);
+  const dayKeys: readonly WorkdayKey[] = [
+    "sunday", "monday", "tuesday", "wednesday",
+    "thursday", "friday", "saturday",
+  ];
 
   for (const emp of employees) {
-    for (const date of workdays) {
-      if (!entrySet.has(`${emp.id}:${date}`)) {
+    const schedule = normalizeWorkSchedule(
+      emp.work_schedule,
+      emp.target_hours_week,
+    );
+    let date = startDate;
+    while (date <= endDate) {
+      const dayKey = dayKeys[getDayOfWeek(date)] ?? "monday";
+      if (
+        schedule[dayKey] > 0 &&
+        !holidayDates.has(date) &&
+        !entrySet.has(`${emp.id}:${date}`)
+      ) {
         missing.push({
           employeeId: emp.id,
           employeeFirstName: emp.first_name,
@@ -154,6 +171,8 @@ export async function getMissingEntries(
           date,
         });
       }
+      const ms = Date.parse(date + "T12:00:00Z");
+      date = isoFromMs(ms + 86_400_000);
     }
   }
 
@@ -164,7 +183,7 @@ export async function getMissingEntries(
  * Get all workday dates (Mon-Fri, not holidays) in a range.
  * Returns YYYY-MM-DD strings.
  */
-function getWorkdaysInRange(
+export function getWorkdaysInRange(
   startDate: string,
   endDate: string,
   holidayDates: Set<string>,

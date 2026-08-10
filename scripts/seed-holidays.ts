@@ -92,16 +92,18 @@ const HOLIDAYS: HolidayDef[] = [
 
   // ── State-specific (fixed) ──
   { name: "Heilige Drei Könige", getDate: (y) => new Date(y, 0, 6), bundesland: ["baden-wuerttemberg", "bayern", "sachsen-anhalt"] },
+  { name: "Internationaler Frauentag", getDate: (y) => new Date(y, 2, 8), bundesland: ["berlin", "mecklenburg-vorpommern"] },
   { name: "Weltkindertag", getDate: (y) => new Date(y, 8, 20), bundesland: ["thueringen"] },
-  { name: "Reformationstag", getDate: (y) => new Date(y, 9, 31), bundesland: ["brandenburg", "mecklenburg-vorpommern", "sachsen", "sachsen-anhalt", "thueringen"] },
+  { name: "Reformationstag", getDate: (y) => new Date(y, 9, 31), bundesland: ["brandenburg", "bremen", "hamburg", "mecklenburg-vorpommern", "niedersachsen", "sachsen", "sachsen-anhalt", "schleswig-holstein", "thueringen"] },
   { name: "Allerheiligen", getDate: (y) => new Date(y, 10, 1), bundesland: ["baden-wuerttemberg", "bayern", "nordrhein-westfalen", "rheinland-pfalz", "saarland"] },
 
   // ── State-specific (variable, Easter-based) ──
   { name: "Fronleichnam", getDate: (y) => addDays(easterSunday(y), 60), bundesland: ["baden-wuerttemberg", "bayern", "hessen", "nordrhein-westfalen", "rheinland-pfalz", "saarland"] },
 
-  // ── Bayern-specific: Mariä Himmelfahrt (only in Catholic municipalities) ──
-  // We include it for bayern as a whole (simplification)
-  { name: "Mariä Himmelfahrt", getDate: (y) => new Date(y, 7, 15), bundesland: ["saarland", "bayern"] },
+  // Mariä Himmelfahrt is statewide only in Saarland. In Bayern it depends on
+  // the municipality's Catholic population and cannot be derived from the
+  // Bundesland field alone, so it must not be applied to all Bavarian users.
+  { name: "Mariä Himmelfahrt", getDate: (y) => new Date(y, 7, 15), bundesland: ["saarland"] },
 
   // ── Sachsen-specific: Buß- und Bettag ──
   // Wednesday before the last Sunday of the church year
@@ -159,7 +161,12 @@ async function seed() {
   // Insert in batches of 100
   for (let i = 0; i < rows.length; i += 100) {
     const batch = rows.slice(i, i + 100);
-    const { error } = await supabase.from("public_holidays").insert(batch);
+    const { error } = await supabase
+      .from("public_holidays")
+      .upsert(batch, {
+        onConflict: "date,name,bundesland",
+        ignoreDuplicates: true,
+      });
 
     if (error) {
       console.error("Error inserting holidays:", error);

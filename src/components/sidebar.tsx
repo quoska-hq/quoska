@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import type { Role } from "@/types";
 import { NotificationBadge } from "@/components/notification-badge";
@@ -17,6 +18,7 @@ import {
   Palmtree,
   Thermometer,
   Briefcase,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface NavItem {
@@ -28,6 +30,13 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  {
+    href: "/app/dashboard",
+    label: "Cockpit",
+    icon: <LayoutDashboard className="size-[18px]" />,
+    roles: ["admin"],
+    group: "manage",
+  },
   {
     href: "/app/clock",
     label: "Stempeln",
@@ -107,27 +116,29 @@ export function Sidebar({ role, userName, onSignOut }: SidebarProps) {
   const manageItems = visibleItems.filter((i) => i.group === "manage");
 
   return (
-    <aside className="hidden md:flex md:w-[260px] md:flex-col md:fixed md:inset-y-0 border-r border-gray-200 bg-white">
+    <aside className="fixed inset-y-0 hidden border-r border-slate-900/15 bg-[#efede7] md:flex md:w-[260px] md:flex-col">
       {/* Logo */}
-      <div className="flex items-center gap-2 px-5 h-16 border-b border-gray-100">
-        {/* Plain <img> (not next/image) so size is predictable and not subject
-            to the optimizer's cached variants — see marketing/nav.tsx. */}
-        <img
+      <Link
+        href="/app/dashboard"
+        data-testid="sidebar-header"
+        className="flex h-16 items-center gap-2 border-b border-slate-900/15 bg-[#f8f7f3] px-5"
+      >
+        <Image
           src="/icons/logo.png"
           alt="Quoska"
-          width={26}
-          height={26}
-          className="size-[26px] shrink-0"
+          width={122}
+          height={125}
+          className="h-[26px] w-auto shrink-0"
         />
-        <span className="text-base font-bold text-gray-900">
+        <span className="text-base font-bold tracking-[-0.03em] text-slate-950">
           Quoska
         </span>
-      </div>
+      </Link>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+      <nav className="flex-1 space-y-7 overflow-y-auto px-3 py-6">
         <div className="space-y-0.5">
-          <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+          <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
             Zeiterfassung
           </p>
           {mainItems.map((item) => (
@@ -142,7 +153,7 @@ export function Sidebar({ role, userName, onSignOut }: SidebarProps) {
 
         {manageItems.length > 0 && (
           <div className="space-y-0.5">
-            <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
               Verwaltung
             </p>
             {manageItems.map((item) => (
@@ -157,21 +168,21 @@ export function Sidebar({ role, userName, onSignOut }: SidebarProps) {
       </nav>
 
       {/* User section */}
-      <div className="border-t border-gray-100 px-3 py-3">
+      <div className="border-t border-slate-900/15 px-3 py-4">
         <div className="flex items-center gap-3 px-2">
           <Avatar size="sm">
-            <AvatarFallback className="bg-violet-100 text-violet-700 text-xs font-semibold">
+            <AvatarFallback className="bg-[#dcd8cf] text-[#5548ba] text-xs font-semibold">
               {userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+            <p className="truncate text-sm font-medium text-slate-900">{userName}</p>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onSignOut}
-            className="size-8 text-gray-400 hover:text-gray-600 shrink-0"
+            className="size-8 shrink-0 text-slate-500 hover:bg-transparent hover:text-[#6658d3]"
             aria-label="Abmelden"
           >
             <LogOut className="size-4" />
@@ -194,16 +205,16 @@ function NavItemLink({
   return (
     <Link
       href={item.href}
-      className={`relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+      className={`relative flex items-center gap-2.5 border-l-2 px-3 py-2.5 text-sm font-medium transition-colors ${
         isActive
-          ? "bg-violet-50 text-violet-700"
-          : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+          ? "border-[#6658d3] bg-white/70 text-slate-950"
+          : "border-transparent text-slate-500 hover:border-slate-400 hover:text-slate-950"
       }`}
     >
       {isActive ? (
-        <span className="text-violet-600">{item.icon}</span>
+        <span className="text-[#6658d3]">{item.icon}</span>
       ) : (
-        <span className="text-gray-400">{item.icon}</span>
+        <span className="text-slate-400">{item.icon}</span>
       )}
       <span>{item.label}</span>
       {showNotificationBadge && <NotificationBadge />}

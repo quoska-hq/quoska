@@ -42,8 +42,8 @@ export function WeekSummaryCard({ weekSummary }: { weekSummary: WeekSummary }) {
             style={{
               width: `${Math.min((weekSummary.totalMinutes / weekSummary.targetMinutes) * 100, 100)}%`,
               background: weekSummary.totalMinutes >= weekSummary.targetMinutes
-                ? "linear-gradient(90deg, #34d399, #fbbf24)"
-                : "linear-gradient(90deg, #8b5cf6, #6366f1)",
+                ? "#059669"
+                : "#6658d3",
             }}
           />
         </div>

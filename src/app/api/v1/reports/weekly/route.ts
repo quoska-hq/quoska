@@ -16,6 +16,7 @@ import { netMinutesForEntry, netMinutesForRunningEntry } from "@/services/overti
 import type { ApiResponse } from "@/types/api";
 import type { TimeEntry } from "@/types/database";
 import { z } from "zod";
+import { scheduledMinutesForDate } from "@/services/workScheduleService";
 
 /** Per-day cell in the weekly report. */
 export interface DayCell {
@@ -140,7 +141,7 @@ export async function GET(request: Request) {
       // Build day cells
       const days: DayCell[] = [];
       let totalNet = 0;
-      let workingDays = 0;
+      let targetMinutes = 0;
 
       for (let i = 0; i < 7; i++) {
         const date = addDays(weekStart, i);
@@ -149,7 +150,13 @@ export async function GET(request: Request) {
         const holidayName = holidayMap.get(date) ?? null;
         const dayOfWeek = getDayOfWeek(date);
 
-        if (!weekend && !holiday) workingDays++;
+        if (!holiday) {
+          targetMinutes += scheduledMinutesForDate(
+            emp.work_schedule,
+            date,
+            emp.target_hours_week,
+          );
+        }
 
         // Find entries for this day
         const dayEntries = empEntries.filter((e) => e.date === date);
@@ -216,9 +223,6 @@ export async function GET(request: Request) {
           netMinutes: hasEntries ? dayNet : null,
         });
       }
-
-      const dailyTarget = emp.target_hours_week / 5;
-      const targetMinutes = workingDays * dailyTarget * 60;
 
       employeeRows.push({
         employeeId: emp.id,

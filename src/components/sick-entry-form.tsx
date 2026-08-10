@@ -55,6 +55,7 @@ export function SickEntryForm({ employeeId, onSuccess }: SickEntryFormProps) {
       resetForm();
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ["sickEntries"] });
+      queryClient.invalidateQueries({ queryKey: ["absenceCalendar"] });
       onSuccess?.();
     },
     onError: (err) => {

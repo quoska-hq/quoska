@@ -1,78 +1,64 @@
 export const FAQ = [
   {
-    q: "Ist eine elektronische Zeiterfassung wirklich gesetzlich vorgeschrieben?",
-    a: "Ja. Der Europäische Gerichtshof (EuGH, C-55/18, 14. Mai 2019) hat entschieden, dass Mitgliedsstaaten Arbeitgeber verpflichten müssen, die tägliche Arbeitszeit systematisch zu erfassen. Das Bundesarbeitsgericht (BAG, 1 ABR 22/21, 13. September 2022) hat bestätigt, dass dies in Deutschland aufgrund des geltenden Arbeitszeitgesetzes sofort gilt. Die geplante ArbZG-Reform regelt die elektronische Erfassung zusätzlich für die Zukunft.",
+    q: "Was brauche ich für den Start?",
+    a: "Einen Account und einen Browser. Du legst den Betrieb an, lädst das Team ein und kannst direkt mit der Erfassung beginnen. Eine Kreditkarte ist für den kostenlosen Tarif nicht nötig.",
   },
   {
-    q: "Was kostet Quoska bei 20 Mitarbeitern?",
-    a: "39 € im Monat — Punkt. Im Team-Tarif ist die Anzahl der Mitarbeiter unbegrenzt. Bei den meisten Wettbewerbern zahlst du für 20 Personen zwischen 110 € und 160 € pro Monat. Bis 3 Mitarbeiter ist Quoska dauerhaft kostenlos.",
+    q: "Was kostet Quoska?",
+    a: "Der Free-Tarif gilt für bis zu 3 Mitarbeitende. Team kostet 9 € monatlich für bis zu 10, Business 59 € für bis zu 50 und Pro 99 € ohne Personenlimit. Gemäß § 19 UStG wird derzeit keine Umsatzsteuer ausgewiesen.",
   },
   {
-    q: "Wo werden meine Daten gespeichert?",
-    a: "Ausschließlich in der EU — konkret in Frankfurt am Main (Supabase / PostgreSQL). Es findet keine Übermittlung in Drittstaaten statt. Mit der Einrichtung erhältst du einen Auftragsverarbeitungsvertrag (AVV) nach Art. 28 DSGVO zum Download.",
+    q: "Können Mitarbeitende ihre eigenen Zeiten sehen?",
+    a: "Ja. Mitarbeitende sehen ihre persönlichen Arbeitszeiten, Pausen und Abwesenheiten in einer eigenen Ansicht. Andere Teamdaten bleiben entsprechend der Rolle geschützt.",
   },
   {
-    q: "Wie wird die Revisionssicherheit gewährleistet?",
-    a: "Jeder Zeit-Eintrag erhält einen unveränderbaren Originaldatensatz mit vom Server gesetztem Zeitstempel (Schutz vor Manipulation der Client-Uhr). Änderungen werden in einem separaten, nur-anhängbaren Audit-Log protokolliert: wer, wann, was wurde geändert, alter und neuer Wert. Hard-Deletes gibt es nicht — Einträge werden mit Begründung als gelöscht markiert. Aufbewahrt wird 2 Jahre gemäß §16 Abs. 2 ArbZG, danach erfolgt die automatische Löschung.",
+    q: "Wie funktionieren Korrekturen?",
+    a: "Mitarbeitende stellen einen Korrekturantrag mit Begründung. Verantwortliche können ihn prüfen und freigeben oder ablehnen. Der Änderungsverlauf bleibt nachvollziehbar.",
   },
   {
-    q: "Können Mitarbeiter ihre eigenen Zeiten einsehen?",
-    a: "Ja. Das ArbZG verlangt, dass Beschäftigte Zugriff auf ihre aufgezeichneten Arbeitszeiten haben. Jede:r Mitarbeiter:in bekommt eine eigene Self-Service-Ansicht für die eigenen Zeiten und kann Korrekturanträge stellen, die der Arbeitgeber freigeben muss.",
+    q: "Unterstützt Quoska die Vorgaben zur Arbeitszeit?",
+    a: "Quoska dokumentiert Arbeitszeiten, verwendet serverseitige Zeitstempel und macht auf fehlende Pausen oder auffällige Arbeitszeiten aufmerksam. Die konkrete betriebliche und rechtliche Umsetzung bleibt in der Verantwortung des Arbeitgebers.",
   },
   {
-    q: "Was passiert, wenn ich kündige?",
-    a: "Du kannst jederzeit kündigen — ohne Frist, ohne Mindestlaufzeit. Auf Wunsch exportierst du alle Daten als CSV und löscht deinen Account samt Daten nach Ablauf der gesetzlichen Aufbewahrungsfrist vollständig.",
-  },
-  {
-    q: "Bekommt Quoska Zugriff auf Lohn- oder Gehaltsdaten?",
-    a: "Nein. Quoska ist reine Zeiterfassung — keine Lohnabrechnung, kein Payroll. Das vermeidet sowohl Rechtsrisiken als auch unnötige Datenflüsse. Für die Lohnabrechnung exportierst du die fertigen Stundenzettel.",
-  },
-  {
-    q: "Funktioniert das auch auf dem Handy der Mitarbeiter?",
-    a: "Ja. Quoska ist als Progressive Web App (PWA) ausgelegt und läuft im Handy-Browser — ohne App-Store. Stempeln, Pause und Korrekturen funktionieren unterwegs. GPS-Tracking gibt es standardmäßig nicht und ist nur optional zuschaltbar.",
+    q: "Funktioniert Quoska auf dem Handy?",
+    a: "Ja. Die Oberfläche ist für mobile Browser ausgelegt. Mitarbeitende können dort stempeln, Pausen erfassen und ihre Zeiten einsehen — ohne separate App aus einem Store.",
   },
 ] as const;
 
 export function FaqSection() {
   return (
-    <section id="faq" className="border-t border-slate-200 bg-slate-50">
-      <div className="mx-auto max-w-3xl px-5 py-16 sm:px-6 sm:py-24">
-        <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-violet-600">
-            FAQ
+    <section id="faq" className="border-t border-slate-900/10 bg-[#f5f3ee]">
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20 lg:py-28">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6658d3]">
+            Fragen und Antworten
           </p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Häufige Fragen
+          <h2 className="mt-4 font-serif text-4xl leading-tight tracking-[-0.035em] text-slate-950 sm:text-5xl">
+            Was vor dem Start wichtig ist.
           </h2>
-          <p className="mt-3 text-slate-600">
-            Kein Marketing-Blabla — konkrete Antworten zu Recht, Preis und Datenschutz.
+          <p className="mt-5 max-w-sm leading-7 text-slate-600">
+            Konkrete Antworten zu Einrichtung, Preisen und täglicher Nutzung.
           </p>
         </div>
 
-        <div className="mt-10 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          {FAQ.map((item, i) => (
-            <details key={i} className="group">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50">
-                <span className="text-sm font-semibold text-slate-900 sm:text-base">
-                  {item.q}
-                </span>
+        <div className="border-t border-slate-900/20">
+          {FAQ.map((item) => (
+            <details key={item.q} className="group border-b border-slate-900/20">
+              <summary className="flex list-none items-center justify-between gap-6 py-5 text-left sm:py-6">
+                <span className="font-semibold text-slate-950">{item.q}</span>
                 <span
                   aria-hidden
-                  className="ml-2 flex size-6 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-transform group-open:rotate-45"
+                  className="text-xl font-light text-[#6658d3] transition-transform group-open:rotate-45"
                 >
                   +
                 </span>
               </summary>
-              <div className="px-5 pb-5 pt-0 text-sm leading-relaxed text-slate-600">
+              <p className="max-w-2xl pb-6 pr-10 text-sm leading-7 text-slate-600">
                 {item.a}
-              </div>
+              </p>
             </details>
           ))}
         </div>
-
-        <p className="mt-6 text-center text-sm text-slate-500">
-          Noch Fragen? Schreib uns — wir antworten in der Regel innerhalb eines Werktages.
-        </p>
       </div>
     </section>
   );

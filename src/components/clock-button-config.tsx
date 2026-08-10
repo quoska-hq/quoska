@@ -1,6 +1,6 @@
 /**
  * Clock button configuration — computes the main stamp-button's label,
- * gradient, shadow color and icon based on the current clock state and the
+ * color, shadow and icon based on the current clock state and the
  * optimistic action (what the user just pressed).
  */
 
@@ -27,9 +27,9 @@ export function getButtonConfig(
   if (optimisticAction === "clock-in") {
     return {
       label: "Ausstempeln",
-      bgClass: "bg-gradient-to-br from-rose-400 to-red-600",
+      bgClass: "bg-[#b84b4b]",
       hoverClass: "",
-      shadowColor: "rgba(239,68,68,0.35)",
+      shadowColor: "rgba(184,75,75,0.22)",
       iconSvg: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="6" width="12" height="12" rx="1.5" />
@@ -40,9 +40,9 @@ export function getButtonConfig(
   if (optimisticAction === "clock-out") {
     return {
       label: "Stempeln",
-      bgClass: "bg-gradient-to-br from-violet-500 to-indigo-600",
+      bgClass: "bg-[#202126]",
       hoverClass: "",
-      shadowColor: "rgba(124,58,237,0.35)",
+      shadowColor: "rgba(15,23,42,0.18)",
       iconSvg: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.14-6.86a1 1 0 0 0 0-1.72L9.5 4.28a1 1 0 0 0-1.5.86z" />
@@ -53,9 +53,9 @@ export function getButtonConfig(
   if (optimisticAction === "pause") {
     return {
       label: "Pause beenden",
-      bgClass: "bg-gradient-to-br from-amber-400 to-amber-600",
+      bgClass: "bg-[#b7791f]",
       hoverClass: "",
-      shadowColor: "rgba(245,158,11,0.35)",
+      shadowColor: "rgba(183,121,31,0.20)",
       iconSvg: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.14-6.86a1 1 0 0 0 0-1.72L9.5 4.28a1 1 0 0 0-1.5.86z" />
@@ -66,9 +66,9 @@ export function getButtonConfig(
   if (optimisticAction === "resume") {
     return {
       label: "Ausstempeln",
-      bgClass: "bg-gradient-to-br from-rose-400 to-red-600",
+      bgClass: "bg-[#b84b4b]",
       hoverClass: "",
-      shadowColor: "rgba(239,68,68,0.35)",
+      shadowColor: "rgba(184,75,75,0.22)",
       iconSvg: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="6" width="12" height="12" rx="1.5" />
@@ -81,9 +81,9 @@ export function getButtonConfig(
   if (activeBreak) {
     return {
       label: "Pause beenden",
-      bgClass: "bg-gradient-to-br from-amber-400 to-amber-600",
-      hoverClass: "hover:from-amber-500 hover:to-amber-700",
-      shadowColor: "rgba(245,158,11,0.35)",
+      bgClass: "bg-[#b7791f]",
+      hoverClass: "hover:bg-[#9f6819]",
+      shadowColor: "rgba(183,121,31,0.20)",
       iconSvg: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.14-6.86a1 1 0 0 0 0-1.72L9.5 4.28a1 1 0 0 0-1.5.86z" />
@@ -94,9 +94,9 @@ export function getButtonConfig(
   if (activeEntry?.status === "running") {
     return {
       label: "Ausstempeln",
-      bgClass: "bg-gradient-to-br from-rose-400 to-red-600",
-      hoverClass: "hover:from-rose-500 hover:to-red-700",
-      shadowColor: "rgba(239,68,68,0.35)",
+      bgClass: "bg-[#b84b4b]",
+      hoverClass: "hover:bg-[#9f3f3f]",
+      shadowColor: "rgba(184,75,75,0.22)",
       iconSvg: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="6" width="12" height="12" rx="1.5" />
@@ -106,9 +106,9 @@ export function getButtonConfig(
   }
   return {
     label: "Stempeln",
-    bgClass: "bg-gradient-to-br from-violet-500 to-indigo-600",
-    hoverClass: "hover:from-violet-600 hover:to-indigo-700",
-    shadowColor: "rgba(124,58,237,0.35)",
+    bgClass: "bg-[#202126]",
+    hoverClass: "hover:bg-[#2d2f35]",
+    shadowColor: "rgba(15,23,42,0.18)",
     iconSvg: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
         <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.14-6.86a1 1 0 0 0 0-1.72L9.5 4.28a1 1 0 0 0-1.5.86z" />

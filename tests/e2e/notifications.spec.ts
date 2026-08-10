@@ -227,8 +227,7 @@ test.describe("Notification Cron API — Story 7.1", () => {
     page,
   }) => {
     const res = await page.request.post("/api/v1/cron/notifications");
-    // Should be 401 (CRON_SECRET set, no auth header) or 200 (dev mode)
-    expect([200, 401, 500]).toContain(res.status());
+    expect(res.status()).toBe(401);
   });
 });
 

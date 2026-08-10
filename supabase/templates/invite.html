@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+  <body style="margin:0;background:#f5f3ee;color:#0f172a;font-family:Arial,sans-serif">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f3ee;padding:32px 16px">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-top:3px solid #0f172a">
+            <tr>
+              <td style="padding:32px">
+                <p style="margin:0 0 12px;color:#6658d3;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">Quoska</p>
+                <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:30px;line-height:1.2;font-weight:500">Du wurdest eingeladen</h1>
+                <p style="margin:0 0 24px;color:#475569;font-size:16px;line-height:1.6">Nimm deine Einladung zu Quoska an und lege anschließend dein persönliches Passwort fest.</p>
+                <p style="margin:0 0 24px">
+                  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=invite&amp;next=/auth/set-password" style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;padding:12px 18px;font-size:15px;font-weight:700">Einladung annehmen</a>
+                </p>
+                <p style="margin:0;color:#64748b;font-size:13px;line-height:1.6">Wenn du diese Einladung nicht erwartet hast, kannst du die Nachricht ignorieren.</p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:16px 0 0;color:#64748b;font-size:12px">Hilfe: <a href="mailto:support@quoska.de" style="color:#6658d3">support@quoska.de</a></p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

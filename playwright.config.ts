@@ -28,7 +28,10 @@ export default defineConfig({
           "E2E_DIST_DIR=.next-e2e STRIPE_SECRET_KEY= STRIPE_PRO_PRICE_ID= STRIPE_WEBHOOK_SECRET= npx next dev -p 3100 --turbopack",
         url: TEST_URL,
         timeout: 90_000,
-        reuseExistingServer: !process.env.CI,
+        // A stale dev server can serve an older working tree and turn the
+        // release suite into a test of the wrong build. Reuse is still
+        // available explicitly through E2E_BASE_URL above.
+        reuseExistingServer: false,
         stdout: "pipe",
         stderr: "pipe",
       },
@@ -36,6 +39,9 @@ export default defineConfig({
     baseURL: TEST_URL,
     trace: "on-first-retry",
     headless: true,
+    // Quoska's legal day/week boundaries are German local calendar dates.
+    // Keep browser-side date pickers aligned with the server and test fixtures.
+    timezoneId: "Europe/Berlin",
   },
   projects: [
     {

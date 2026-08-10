@@ -230,7 +230,6 @@ test.describe("Retention Cron API — Access Control", () => {
     page,
   }) => {
     const res = await page.request.post("/api/v1/cron/retention");
-    // Should be 401 (CRON_SECRET set, no auth header) or 200 (CRON_SECRET not set, allowed in dev)
-    expect([200, 401, 500]).toContain(res.status());
+    expect(res.status()).toBe(401);
   });
 });

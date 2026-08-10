@@ -40,7 +40,7 @@ export function OvertimeDisplay({
   return (
     <div className="grid gap-4 sm:grid-cols-2 mb-6">
       {/* Cumulative overtime */}
-      <Card className="shadow-sm rounded-xl">
+      <Card>
         <CardContent className="py-4">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="size-4 text-muted-foreground" />
@@ -64,7 +64,7 @@ export function OvertimeDisplay({
 
       {/* Current week overtime */}
       {weeklySummaries.length > 0 && (
-        <Card className="shadow-sm rounded-xl">
+        <Card>
           <CardContent className="py-4">
             <div className="flex items-center gap-2 mb-1">
               <CalendarDays className="size-4 text-muted-foreground" />

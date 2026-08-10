@@ -56,14 +56,14 @@ function StatusDot({ status }: { status: TeamMemberStatus["status"] }) {
 export function TeamStatusList({ members }: TeamStatusListProps) {
   if (members.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed p-8 text-center shadow-sm bg-white">
+      <div className="border border-dashed border-slate-900/20 bg-white p-8 text-center">
         <p className="text-muted-foreground">Keine Mitarbeiter gefunden.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border bg-white shadow-sm">
+    <div className="border border-slate-900/15 bg-white">
       {members.map((member, index) => (
         <div key={member.employeeId}>
           {index > 0 && <Separator />}

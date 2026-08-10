@@ -9,7 +9,7 @@
 <p align="center">Gesetzlich vorgeschriebene Zeiterfassung für deutsche KMU — als Flatrate.</p>
 
 <p align="center">
-  <a href="https://quoska.app">Website</a> ·
+  <a href="https://quoska.de">Website</a> ·
   <a href="#-selbst-hosting">Selbst hosten</a> ·
   <a href="docs">Dokumentation</a> ·
   <a href="https://github.com/OskarSync/quoska/blob/main/CONTRIBUTING.md">Mitmachen</a>
@@ -31,7 +31,7 @@ Quoska ist die Arbeitzeit-Erfassung, die das Arbeitszeitgesetz (ArbZG) von sich 
 
 | Option | Beschreibung |
 | --- | --- |
-| **[Hosted Service](https://quoska.app)** | Am schnellsten startklar — EU-gehostet, AVV-Vertrag, Updates inklusive. |
+| **[Hosted Service](https://quoska.de)** | Am schnellsten startklar — EU-gehostet, AVV-Vertrag, Updates inklusive. |
 | **Selbst hosten** | Dieser Codebase. Komplett kontrollierbar auf dem eigenen Server. Siehe [Selbst-Hosting](#-selbst-hosting). |
 
 > **Open Source, nicht Open-Core.** Die gesamte Anwendung ist offen — auch das

@@ -4,7 +4,7 @@
 
 Please **do not** open a public GitHub issue for security problems.
 
-Instead, email **[TODO: security@quoska.app]** with a description and, if possible, steps to reproduce. We aim to acknowledge within 72 hours and to coordinate a fix and disclosure timeline with you.
+Instead, email **security@quoska.de** with a description and, if possible, steps to reproduce. We aim to acknowledge within 72 hours and to coordinate a fix and disclosure timeline with you.
 
 ## Scope
 

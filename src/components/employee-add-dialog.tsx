@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { BUNDESLAENDER, BUNDESLAND_LABELS } from "@/types/tenant";
+import { BUNDESLAENDER, BUNDESLAND_LABELS, getBundeslandLabel } from "@/types/tenant";
 import type { Bundesland } from "@/types/tenant";
 import {
   Dialog,
@@ -30,19 +30,36 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { WorkScheduleEditor } from "@/components/work-schedule-editor";
+import {
+  DEFAULT_WORK_SCHEDULE,
+  normalizeWorkSchedule,
+  scheduleHours,
+  type WorkSchedule,
+} from "@/types/work-schedule";
 
 interface EmployeeAddDialogProps {
+  defaultBundesland: string | null;
+  defaultWorkSchedule: WorkSchedule | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function EmployeeAddDialog({ onClose, onSuccess }: EmployeeAddDialogProps) {
+export function EmployeeAddDialog({
+  defaultBundesland,
+  defaultWorkSchedule,
+  onClose,
+  onSuccess,
+}: EmployeeAddDialogProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("employee");
-  const [targetHours, setTargetHours] = useState("40");
-  const [bundesland, setBundesland] = useState("");
+  const [workSchedule, setWorkSchedule] = useState<WorkSchedule>(
+    normalizeWorkSchedule(defaultWorkSchedule ?? DEFAULT_WORK_SCHEDULE),
+  );
+  const [bundesland, setBundesland] = useState(defaultBundesland ?? "");
+  const [workScheduleValid, setWorkScheduleValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const mutation = useMutation({
@@ -55,7 +72,8 @@ export function EmployeeAddDialog({ onClose, onSuccess }: EmployeeAddDialogProps
           lastName,
           email,
           role,
-          targetHoursWeek: Number(targetHours),
+          targetHoursWeek: scheduleHours(workSchedule),
+          workSchedule,
           bundesland: bundesland || null,
         }),
       });
@@ -75,7 +93,7 @@ export function EmployeeAddDialog({ onClose, onSuccess }: EmployeeAddDialogProps
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Mitarbeiter hinzufügen</DialogTitle>
         </DialogHeader>
@@ -135,15 +153,11 @@ export function EmployeeAddDialog({ onClose, onSuccess }: EmployeeAddDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="add-targetHours">Wochenstunden (Soll)</Label>
-            <Input
-              id="add-targetHours"
-              type="number"
-              value={targetHours}
-              onChange={(e) => setTargetHours(e.target.value)}
-              min="1"
-              max="48"
-              required
+            <Label>Arbeitszeit</Label>
+            <WorkScheduleEditor
+              value={workSchedule}
+              onChange={setWorkSchedule}
+              onValidityChange={setWorkScheduleValid}
             />
           </div>
 
@@ -151,7 +165,9 @@ export function EmployeeAddDialog({ onClose, onSuccess }: EmployeeAddDialogProps
             <Label htmlFor="add-bundesland">Bundesland</Label>
             <Select value={bundesland} onValueChange={(v) => setBundesland(v ?? "")}>
               <SelectTrigger id="add-bundesland" className="w-full">
-                <SelectValue placeholder="Nicht festgelegt" />
+                <SelectValue placeholder="Nicht festgelegt">
+                  {getBundeslandLabel(bundesland) || "Nicht festgelegt"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Nicht festgelegt</SelectItem>
@@ -168,7 +184,7 @@ export function EmployeeAddDialog({ onClose, onSuccess }: EmployeeAddDialogProps
             <DialogClose render={<Button variant="outline" />}>
               Abbrechen
             </DialogClose>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={mutation.isPending || !workScheduleValid}>
               {mutation.isPending ? "Wird hinzugefügt…" : "Einladen"}
             </Button>
           </DialogFooter>

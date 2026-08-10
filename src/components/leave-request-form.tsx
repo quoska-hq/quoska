@@ -62,6 +62,7 @@ export function LeaveRequestForm({ onSuccess }: LeaveRequestFormProps) {
       setWarning(data.data?.warning ?? null);
       queryClient.invalidateQueries({ queryKey: ["leaveRequests"] });
       queryClient.invalidateQueries({ queryKey: ["leaveBalance"] });
+      queryClient.invalidateQueries({ queryKey: ["absenceCalendar"] });
       if (!data.data?.warning) {
         resetForm();
         setOpen(false);

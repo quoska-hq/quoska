@@ -92,7 +92,7 @@ test.describe("Absence calendar indicators", () => {
     await expect(gridcell).toBeVisible({ timeout: 5_000 });
 
     // Should contain an emerald indicator bar (absolute positioned span with bg-emerald-400)
-    const indicator = gridcell.locator("span.absolute");
+    const indicator = gridcell.locator("span.bg-emerald-400");
     await expect(indicator).toBeVisible({ timeout: 5_000 });
     const classes = await indicator.getAttribute("class") ?? "";
     expect(classes).toContain("bg-emerald-400");
@@ -183,6 +183,83 @@ test.describe("Absence calendar indicators", () => {
 
     const indicator = gridcell.locator("span.absolute");
     await expect(indicator).not.toBeVisible({ timeout: 2_000 });
+  });
+
+  test("month toolbar stays aligned and navigates in both directions", async ({
+    page,
+  }) => {
+    await loginAsEmployee(page);
+    await page.goto("/app/vacation");
+    await page.getByRole("tab", { name: /kalender/i }).click();
+
+    const calendarPanel = page.getByRole("tabpanel", { name: /kalender/i });
+    const calendar = calendarPanel.locator('[data-slot="calendar"]');
+    await expect(calendar).toBeVisible({ timeout: 10_000 });
+
+    const caption = calendarPanel.getByRole("status");
+    const previousButton = calendarPanel.getByRole("button", {
+      name: "Vorheriger Monat",
+    });
+    const nextButton = calendarPanel.getByRole("button", {
+      name: "Nächster Monat",
+    });
+    const initialCaption = await caption.textContent();
+
+    const captionBox = await caption.boundingBox();
+    const previousBox = await previousButton.boundingBox();
+    const nextBox = await nextButton.boundingBox();
+    expect(captionBox).not.toBeNull();
+    expect(previousBox).not.toBeNull();
+    expect(nextBox).not.toBeNull();
+    expect(Math.abs(previousBox!.y - nextBox!.y)).toBeLessThanOrEqual(1);
+    expect(captionBox!.x).toBeGreaterThan(previousBox!.x + previousBox!.width);
+    expect(captionBox!.x + captionBox!.width).toBeLessThan(nextBox!.x);
+
+    await nextButton.click();
+    await expect(caption).not.toHaveText(initialCaption ?? "");
+
+    await previousButton.click();
+    await expect(caption).toHaveText(initialCaption ?? "");
+  });
+
+  test("keeps the calendar mounted while an uncached month loads", async ({
+    page,
+  }) => {
+    await loginAsEmployee(page);
+    await page.goto("/app/vacation");
+    await page.getByRole("tab", { name: /kalender/i }).click();
+
+    const calendarPanel = page.getByRole("tabpanel", { name: /kalender/i });
+    const calendar = calendarPanel.locator('[data-slot="calendar"]');
+    await expect(calendar).toBeVisible({ timeout: 10_000 });
+    const caption = calendarPanel.getByRole("status");
+    const initialCaption = await caption.textContent();
+
+    await page.route("**/api/v1/absence-calendar?*", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 750));
+      await route.continue();
+    });
+
+    const nextButton = calendarPanel.getByRole("button", {
+      name: "Nächster Monat",
+    });
+
+    // The adjacent month is prefetched. Moving there starts prefetching the
+    // following month, which this route deliberately keeps pending.
+    await nextButton.click();
+    await expect(caption).not.toHaveText(initialCaption ?? "");
+    const adjacentCaption = await caption.textContent();
+    await nextButton.click();
+    await expect(caption).not.toHaveText(adjacentCaption ?? "");
+
+    await expect(calendar).toBeVisible({ timeout: 300 });
+    await expect(calendarPanel.locator('[data-slot="skeleton"]')).toHaveCount(0);
+    await expect(
+      calendarPanel.getByLabel("Kalenderdaten werden geladen"),
+    ).toBeVisible({ timeout: 300 });
+    await expect(
+      calendarPanel.getByLabel("Kalenderdaten werden geladen"),
+    ).toBeHidden({ timeout: 2_000 });
   });
 
   test("legend shows Urlaub and Krank without Beides", async ({ page }) => {

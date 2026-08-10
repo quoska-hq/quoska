@@ -72,6 +72,8 @@ export async function createCheckout(
     line_items: [{ price: priceId, quantity: 1 }],
     client_reference_id: tenantId,
     customer_email: customerEmail,
+    billing_address_collection: "required",
+    tax_id_collection: { enabled: true },
     subscription_data: {
       metadata: { tenantId, tenantName, priceId, tier },
     },
@@ -154,12 +156,12 @@ function planForSubscription(status: string, priceId?: string | null): Plan {
   if (status !== "active" && status !== "trialing" && status !== "past_due") {
     return "free";
   }
-  // Paid & active → resolve the tier from the purchased price id. If the price
-  // is unrecognized (legacy/unknown), default to pro so access isn't revoked.
+  // Paid & active → resolve the tier from the purchased price id. Unknown or
+  // missing prices fail closed so a configuration error cannot grant Pro.
   if (priceId) {
-    return planFromStripePriceId(priceId) ?? "pro";
+    return planFromStripePriceId(priceId) ?? "free";
   }
-  return "pro";
+  return "free";
 }
 
 async function applyEvent(
@@ -179,7 +181,7 @@ async function applyEvent(
       // metadata by createProCheckout); paid → that tier, unpaid → free.
       const priceId = (session.metadata?.priceId ?? null) as string | null;
       const tier = priceId ? planFromStripePriceId(priceId) : null;
-      const plan: Plan = session.payment_status === "paid" ? (tier ?? "pro") : "free";
+      const plan: Plan = session.payment_status === "paid" ? (tier ?? "free") : "free";
       if (tenantId) {
         await setTenantPlan(supabase, tenantId, plan);
         return { status: "processed", tenantId, plan };

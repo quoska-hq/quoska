@@ -1,4 +1,12 @@
 import { z } from "zod";
+import { workScheduleSchema } from "@/types/work-schedule";
+
+export const setupProfileSchema = z.object({
+  firstName: z.string().trim().min(1, "Vorname ist erforderlich"),
+  lastName: z.string().trim().min(1, "Nachname ist erforderlich"),
+});
+
+export type SetupProfileInput = z.infer<typeof setupProfileSchema>;
 
 export const setupCompanySchema = z.object({
   companyName: z.string().min(1, "Firmenname ist erforderlich"),
@@ -6,6 +14,12 @@ export const setupCompanySchema = z.object({
 });
 
 export type SetupCompanyInput = z.infer<typeof setupCompanySchema>;
+
+export const setupScheduleSchema = z.object({
+  workSchedule: workScheduleSchema,
+});
+
+export type SetupScheduleInput = z.infer<typeof setupScheduleSchema>;
 
 export const inviteEmployeeSchema = z.object({
   employees: z

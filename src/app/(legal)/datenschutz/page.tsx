@@ -56,12 +56,10 @@ export default function DatenschutzPage() {
         </a>
       </p>
 
-      <h2>2. Datenschutzbeauftragte:r</h2>
+      <h2>2. Datenschutzkontakt</h2>
       <p>
-        Als kleines Unternehmen sind wir nach §&nbsp;38 BDSG nicht zur Benennung
-        eines betrieblichen Datenschutzbeauftragten verpflichtet. Anfragen zum
-        Datenschutz richtest du bitte an die oben genannte E-Mail-Adresse mit
-        dem Betreff „Datenschutz“.
+        Anfragen zum Datenschutz richtest du bitte an die oben genannte
+        E-Mail-Adresse mit dem Betreff „Datenschutz“.
       </p>
 
       <h2>3. Allgemeines zur Verarbeitung</h2>
@@ -87,8 +85,8 @@ export default function DatenschutzPage() {
       <p>
         Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO
         (berechtigtes Interesse an der technischen Auslieferung und
-        IT-Sicherheit). Die Speicherdauer beträgt in der Regel 7 Tage und dient
-        der Abwehr von Angriffen.
+        IT-Sicherheit). Die Speicherdauer wird auf das hierfür erforderliche Maß
+        begrenzt.
       </p>
 
       <h2>5. Kontaktaufnahme</h2>
@@ -124,9 +122,10 @@ export default function DatenschutzPage() {
       <h2>7. Auftragsverarbeiter (Art. 28 DSGVO)</h2>
       <p>
         Für die Erbringung der Dienstleistung setzen wir folgende
-        Auftragsverarbeiter ein. Mit jedem besteht ein Auftragsverarbeitungsvertrag
-        (AVV), der den Anforderungen des Art.&nbsp;28 DSGVO entspricht. Kunden
-        (Arbeitgeber) können den AVV nach Registrierung im Konto herunterladen.
+        Auftragsverarbeiter ein. Die jeweils erforderlichen vertraglichen
+        Vereinbarungen und Garantien werden vor dem Produktivbetrieb
+        abgeschlossen. Informationen zur Auftragsverarbeitung durch Quoska
+        werden Geschäftskunden auf Anfrage bereitgestellt.
       </p>
       <ul>
         {processors.map((p) => (
@@ -141,11 +140,15 @@ export default function DatenschutzPage() {
         ))}
       </ul>
 
-      <h2>8.Hosting in der EU</h2>
+      <h2>8. Hosting und internationale Datenübermittlungen</h2>
       <p>
-        Sämtliche Verarbeitung personenbezogener Daten findet auf Servern
-        innerhalb der Europäischen Union statt. Eine Übermittlung in
-        Drittstaaten außerhalb der EU/des EWR findet nicht statt.
+        Die primären Anwendungs- und Datenbankregionen befinden sich in
+        Deutschland. Einzelne Dienstleister oder deren Unterauftragsverarbeiter
+        können Daten auch außerhalb der EU bzw. des EWR verarbeiten. Soweit dies
+        geschieht, stützen wir die Übermittlung auf die jeweils anwendbaren
+        Garantien, insbesondere Angemessenheitsbeschlüsse oder
+        EU-Standardvertragsklauseln. Einzelheiten ergeben sich aus den
+        Vereinbarungen und Datenschutzhinweisen der oben genannten Anbieter.
       </p>
 
       <h2>9. Kein Tracking, keine Werbung</h2>
@@ -154,7 +157,7 @@ export default function DatenschutzPage() {
         Reichweitenmessung (z.&nbsp;B. Google Analytics), kein Remarketing und
         keine Werbe-Cookies ein. Es werden ausschließlich technisch notwendige
         Cookies verwendet (Sitzungs-Cookie nach Login). Daher ist auch keine
-        Einwilligung im Sinne des §&nbsp;25 Abs.&nbsp;2 TTDSG erforderlich.
+        Einwilligung im Sinne des §&nbsp;25 Abs.&nbsp;2 TDDDG erforderlich.
       </p>
 
       <h2>10. Deine Rechte als betroffene Person</h2>
@@ -191,8 +194,8 @@ export default function DatenschutzPage() {
       <p>
         Wir erfassen nur die Daten, die für die vertragliche und gesetzliche
         Pflicht zur Arbeitszeiterfassung erforderlich sind. Eine GPS- oder
-        Standorterfassung findet standardmäßig nicht statt und ist ausschließlich
-        optional zuschaltbar. Die Datenübertragung erfolgt verschlüsselt über
+        Standorterfassung findet nicht statt. Die Datenübertragung erfolgt
+        verschlüsselt über
         HTTPS/TLS. Zugangskontrollen, regelmäßige Backups und eine strikte
         Trennung der Mandanten (Tenant-Isolation) verhindern den unbefugten
         Zugriff zwischen verschiedenen Arbeitgebern.

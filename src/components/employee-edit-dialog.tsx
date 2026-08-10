@@ -11,7 +11,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { Employee } from "@/types/database";
 import type { Bundesland } from "@/types/tenant";
-import { BUNDESLAENDER, BUNDESLAND_LABELS } from "@/types/tenant";
+import { BUNDESLAENDER, BUNDESLAND_LABELS, getBundeslandLabel } from "@/types/tenant";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { WorkScheduleEditor } from "@/components/work-schedule-editor";
+import {
+  normalizeWorkSchedule,
+  scheduleHours,
+  type WorkSchedule,
+} from "@/types/work-schedule";
 
 interface EmployeeEditDialogProps {
   employee: Employee;
@@ -46,12 +52,13 @@ export function EmployeeEditDialog({
   const [firstName, setFirstName] = useState(employee.first_name);
   const [lastName, setLastName] = useState(employee.last_name);
   const [role, setRole] = useState<Employee["role"]>(employee.role);
-  const [targetHours, setTargetHours] = useState(
-    String(employee.target_hours_week),
+  const [workSchedule, setWorkSchedule] = useState<WorkSchedule>(
+    normalizeWorkSchedule(employee.work_schedule, employee.target_hours_week),
   );
   const [bundesland, setBundesland] = useState<string>(
     employee.bundesland ?? "",
   );
+  const [workScheduleValid, setWorkScheduleValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const mutation = useMutation({
@@ -60,7 +67,8 @@ export function EmployeeEditDialog({
         first_name: firstName,
         last_name: lastName,
         role,
-        target_hours_week: Number(targetHours),
+        target_hours_week: scheduleHours(workSchedule),
+        work_schedule: workSchedule,
         bundesland: bundesland || null,
       };
 
@@ -85,7 +93,7 @@ export function EmployeeEditDialog({
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Mitarbeiter bearbeiten</DialogTitle>
         </DialogHeader>
@@ -134,14 +142,11 @@ export function EmployeeEditDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Wochenstunden (Soll)</Label>
-            <Input
-              type="number"
-              value={targetHours}
-              onChange={(e) => setTargetHours(e.target.value)}
-              min="1"
-              max="48"
-              required
+            <Label>Arbeitszeit</Label>
+            <WorkScheduleEditor
+              value={workSchedule}
+              onChange={setWorkSchedule}
+              onValidityChange={setWorkScheduleValid}
             />
           </div>
 
@@ -149,7 +154,9 @@ export function EmployeeEditDialog({
             <Label>Bundesland</Label>
             <Select value={bundesland} onValueChange={(v) => setBundesland(v ?? "")}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Nicht festgelegt" />
+                <SelectValue placeholder="Nicht festgelegt">
+                  {getBundeslandLabel(bundesland) || "Nicht festgelegt"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Nicht festgelegt</SelectItem>
@@ -166,7 +173,7 @@ export function EmployeeEditDialog({
             <DialogClose render={<Button variant="outline" />}>
               Abbrechen
             </DialogClose>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={mutation.isPending || !workScheduleValid}>
               {mutation.isPending ? "Wird gespeichert…" : "Speichern"}
             </Button>
           </DialogFooter>

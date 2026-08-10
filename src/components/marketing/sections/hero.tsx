@@ -1,174 +1,144 @@
 import Link from "next/link";
+import { ArrowRight, Check, Coffee, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Server, FileCheck2, Lock } from "lucide-react";
 
-const TRUST = [
-  { icon: ShieldCheck, label: "ArbZG-konform" },
-  { icon: Lock, label: "DSGVO + AVV" },
-  { icon: Server, label: "Server Frankfurt" },
-  { icon: FileCheck2, label: "Revisionssicher" },
+const PRODUCT_FACTS = [
+  "Server-Zeitstempel",
+  "Pausenhinweise",
+  "Korrekturverlauf",
+  "CSV-Export",
 ] as const;
 
-/**
- * Hero — anchored on the German legal trigger (EuGH/BAG), not on a generic
- * "be more productive" pitch. Concrete price, concrete obligation, concrete
- * proof points.
- */
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
-      {/* Subtle dotted grid + soft violet glow */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(15,23,42,0.06)_1px,transparent_0)] [background-size:22px_22px]" />
-      <div className="pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-violet-200/40 blur-3xl" />
+    <section className="border-b border-slate-900/10">
+      <div className="mx-auto max-w-7xl px-5 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20 lg:pb-20 lg:pt-24">
+        <div className="grid items-center gap-12 lg:grid-cols-[0.88fr_1.12fr] lg:gap-16">
+          <div className="max-w-xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6658d3]">
+              Zeiterfassung für deutsche Betriebe
+            </p>
+            <h1 className="mt-5 font-serif text-5xl leading-[0.98] tracking-[-0.045em] text-slate-950 sm:text-6xl lg:text-7xl">
+              Arbeitszeit erfassen. Ohne Theater.
+            </h1>
+            <p className="mt-6 max-w-lg text-lg leading-8 text-slate-600">
+              Quoska bringt Stempeluhr, Pausen, Korrekturen und Auswertungen an
+              einen Ort. Mitarbeitende verstehen es sofort. Verantwortliche
+              behalten den Überblick.
+            </p>
 
-      <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 px-5 py-12 sm:px-6 lg:grid-cols-2 lg:gap-10">
-        {/* Copy */}
-        <div className="max-w-xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3 py-1 text-xs font-semibold text-violet-700 shadow-sm">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-violet-400 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-violet-600" />
-            </span>
-            Seit dem BAG-Urteil 2022 gesetzlich Pflicht
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link href="/register">
+                <Button className="h-12 w-full rounded-none bg-slate-950 px-6 text-base text-white hover:bg-[#6658d3] sm:w-auto">
+                  Kostenlos ausprobieren
+                  <ArrowRight className="ml-2 size-4" />
+                </Button>
+              </Link>
+              <Link
+                href="/#features"
+                className="inline-flex h-12 items-center justify-center border-b border-slate-400 px-1 text-sm font-semibold text-slate-800 transition-colors hover:border-[#6658d3] hover:text-[#6658d3]"
+              >
+                Produkt ansehen
+              </Link>
+            </div>
+
+            <p className="mt-5 text-sm text-slate-500">
+              Bis 3 Personen kostenlos · Keine Kreditkarte · Direkt im Browser
+            </p>
           </div>
 
-          <h1 className="mt-5 text-4xl font-extrabold leading-[1.07] tracking-tight text-slate-900 sm:text-5xl lg:text-[3.4rem]">
-            Zeiterfassung,{" "}
-            <span className="text-violet-600">
-              die vor dem Arbeitsschutz besteht.
-            </span>
-          </h1>
-
-          <p className="mt-5 text-lg leading-relaxed text-slate-600">
-            Quoska erfasst Arbeitszeiten lückenlos, berechnet Pausen nach{" "}
-            <strong className="font-semibold text-slate-800">§&nbsp;4&nbsp;ArbZG</strong>{" "}
-            automatisch und ist revisionssicher.{" "}
-            <strong className="font-semibold text-slate-800">
-              39&nbsp;€ im Monat
-            </strong>{" "}
-            für das ganze Team — egal wie viele Mitarbeiter.
-          </p>
-
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link href="/register" className="flex-1 sm:flex-none">
-              <Button className="h-12 w-full bg-violet-600 px-7 text-base text-white shadow-lg shadow-violet-600/25 hover:bg-violet-700 sm:w-auto">
-                In 2 Minuten starten
-              </Button>
-            </Link>
-            <Link href="/#preise" className="flex-1 sm:flex-none">
-              <Button
-                variant="outline"
-                className="h-12 w-full border-slate-300 px-7 text-base sm:w-auto"
-              >
-                Preise ansehen
-              </Button>
-            </Link>
-          </div>
-
-          <p className="mt-4 text-xs text-slate-500">
-            Keine Kreditkarte nötig · Bis 3 Mitarbeiter dauerhaft gratis · Jederzeit kündbar
-          </p>
-
-          {/* Trust row */}
-          <ul className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2">
-            {TRUST.map(({ icon: Icon, label }) => (
-              <li
-                key={label}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600"
-              >
-                <Icon className="size-4 text-violet-600" />
-                {label}
-              </li>
-            ))}
-          </ul>
+          <ProductPreview />
         </div>
 
-        {/* Product mock — looks like the real clock card */}
-        <div className="relative lg:pl-4">
-          <ClockMock />
-        </div>
+        <ul className="mt-12 grid border-y border-slate-900/15 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
+          {PRODUCT_FACTS.map((fact) => (
+            <li
+              key={fact}
+              className="flex items-center gap-2 border-slate-900/15 py-4 text-sm font-medium text-slate-700 sm:border-r sm:px-5 sm:first:pl-0 sm:nth-2:border-r-0 lg:nth-2:border-r lg:last:border-r-0 lg:last:pr-0"
+            >
+              <Check className="size-4 shrink-0 text-[#6658d3]" />
+              {fact}
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
 }
 
-/** Lightweight, static mock of the in-app clock card. */
-function ClockMock() {
+function ProductPreview() {
   return (
-    <div className="relative mx-auto w-full max-w-sm">
-      {/* Floating "compliance ok" chip */}
-      <div className="absolute -left-3 top-6 z-10 hidden rotate-[-6deg] rounded-xl border border-emerald-200 bg-white px-3 py-2 shadow-lg sm:block">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600">
-          ArbZG ✓
-        </p>
-        <p className="text-xs text-slate-500">Pause eingehalten</p>
-      </div>
+    <div className="border border-slate-900/20 bg-[#ebe8e0] p-2 sm:p-3">
+      <div className="overflow-hidden border border-slate-900/15 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
+        <div className="flex h-11 items-center justify-between border-b border-slate-200 px-4">
+          <div className="flex items-center gap-2">
+            <span className="size-2 bg-[#6658d3]" />
+            <span className="text-xs font-bold tracking-tight text-slate-900">QUOSKA</span>
+          </div>
+          <span className="text-[11px] text-slate-500">Bäckerei Hoffmann</span>
+        </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              Heute · Mi, 18. Juni
+        <div className="grid sm:grid-cols-[9rem_1fr]">
+          <aside className="hidden border-r border-slate-200 bg-[#faf9f6] p-4 sm:block">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Übersicht
             </p>
-            <p className="mt-0.5 text-sm font-semibold text-slate-700">
-              Anna · Bäckerei Müller
-            </p>
+            <div className="mt-4 space-y-3 text-xs text-slate-500">
+              <p className="font-semibold text-slate-950">Stempeluhr</p>
+              <p>Meine Zeiten</p>
+              <p>Korrekturen</p>
+              <p>Team</p>
+              <p>Auswertungen</p>
+            </div>
+          </aside>
+
+          <div className="p-5 sm:p-6 lg:p-8">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs text-slate-500">Guten Morgen, Anna.</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950">
+                  Stempeluhr
+                </h2>
+              </div>
+              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                <span className="size-1.5 rounded-full bg-emerald-600" />
+                Aktiv
+              </span>
+            </div>
+
+            <div className="mt-7 border-y border-slate-200 py-6 text-center">
+              <p className="font-mono text-4xl font-semibold tabular-nums tracking-tight text-slate-950 sm:text-5xl">
+                06:24:51
+              </p>
+              <p className="mt-2 text-xs text-slate-500">Heute seit 08:02 Uhr</p>
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-hidden="true"
+                className="mt-5 bg-slate-950 px-8 py-3 text-sm font-semibold text-white"
+              >
+                Ausstempeln
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="border border-slate-200 p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                  <Coffee className="size-4 text-[#6658d3]" />
+                  Pause erfasst
+                </div>
+                <p className="mt-2 text-xs text-slate-500">12:03–12:34 · 31 Min.</p>
+              </div>
+              <div className="border border-slate-200 p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                  <History className="size-4 text-[#6658d3]" />
+                  Letzte Änderung
+                </div>
+                <p className="mt-2 text-xs text-slate-500">Korrektur bestätigt</p>
+              </div>
+            </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            Eingestempelt
-          </span>
         </div>
-
-        <div className="mt-5 flex items-baseline gap-2">
-          <span className="font-mono text-4xl font-bold tabular-nums text-slate-900">
-            06:24:51
-          </span>
-          <span className="text-sm text-slate-400">laufend</span>
-        </div>
-
-        {/* Progress to 8h target */}
-        <div className="mt-4">
-          <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
-            <span>Arbeitszeit heute</span>
-            <span className="font-medium text-slate-700">6h 24m / 8h</span>
-          </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500"
-              style={{ width: "80%" }}
-            />
-          </div>
-        </div>
-
-        {/* Break log */}
-        <div className="mt-5 space-y-2 rounded-xl bg-slate-50 p-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500">Pause (12:00 – 12:30)</span>
-            <span className="font-medium text-slate-700">30 min · §4 ArbZG ✓</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500">Projekt</span>
-            <span className="font-medium text-slate-700">Verkauf / Theke</span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          className="mt-5 w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white shadow-sm"
-          tabIndex={-1}
-          aria-hidden="true"
-        >
-          Ausstempeln
-        </button>
-      </div>
-
-      {/* floating audit chip */}
-      <div className="absolute -bottom-4 -right-3 z-10 hidden rotate-[5deg] rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-lg sm:block">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-          Audit-Trail
-        </p>
-        <p className="text-xs text-slate-600">jede Änderung protokolliert</p>
       </div>
     </div>
   );

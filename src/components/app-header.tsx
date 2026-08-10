@@ -19,7 +19,7 @@ import { UserCheck } from "lucide-react";
 
 /** Route prefix → human label, ordered most-specific first. */
 const ROUTE_LABELS: { match: string; label: string }[] = [
-  { match: "/app/dashboard", label: "Dashboard" },
+  { match: "/app/dashboard", label: "Cockpit" },
   { match: "/app/clock", label: "Stempeln" },
   { match: "/app/my-times", label: "Meine Zeiten" },
   { match: "/app/notifications", label: "Benachrichtigungen" },
@@ -70,13 +70,13 @@ export function AppHeader({
   return (
     <header
       data-testid="app-header"
-      className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-gray-200"
+      className="sticky top-0 z-30 h-16 border-b border-slate-900/15 bg-[#f8f7f3]"
     >
-      <div className="flex items-center justify-between h-14 px-4 sm:px-6 gap-3">
+      <div className="flex h-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
         {/* Left: current tab name (contextual label, not a heading — each page
             has its own <h1> as the primary document heading). */}
         <p
-          className="text-base font-semibold text-gray-900 truncate max-w-[45vw] sm:max-w-xs"
+          className="max-w-[45vw] truncate text-sm font-semibold uppercase tracking-[0.12em] text-slate-700 sm:max-w-xs"
           title={label}
           data-testid="app-header-tab"
         >
@@ -94,7 +94,11 @@ export function AppHeader({
             aria-label="Anwesenheit"
             aria-expanded={presenceOpen}
             aria-pressed={presenceOpen}
-            className="gap-1.5"
+            className={`h-8 gap-1.5 shadow-none ${
+              presenceOpen
+                ? ""
+                : "border-slate-900/15 bg-white hover:border-slate-900/30"
+            }`}
           >
             <UserCheck className="size-4" />
             <span className="hidden sm:inline">Anwesenheit</span>
@@ -103,7 +107,7 @@ export function AppHeader({
                 className={`ml-0.5 inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full text-[11px] font-semibold ${
                   presenceOpen
                     ? "bg-white/20 text-white"
-                    : "bg-violet-100 text-violet-700"
+                    : "bg-[#e3dfd5] text-[#5548ba]"
                 }`}
                 data-testid="presence-count"
               >

@@ -34,6 +34,7 @@ test.describe("App Shell — Admin Navigation", () => {
     await expect(page.getByRole("link", { name: /stempeln/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /meine zeiten/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /benachrichtigungen/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /cockpit/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /mitarbeiter/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /berichte/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /einstellungen/i })).toBeVisible();
@@ -41,16 +42,15 @@ test.describe("App Shell — Admin Navigation", () => {
     await expect(page.getByText("Anna Admin")).toBeVisible();
   });
 
-  test("dashboard shows welcome message and feature cards", async ({ page }) => {
+  test("dashboard shows the admin cockpit", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("E-Mail").fill(email);
     await page.getByLabel("Passwort").fill(TEST_PASSWORD);
     await page.getByRole("button", { name: /anmelden/i }).click();
     await expect(page).toHaveURL(/\/app\/dashboard/, { timeout: 10_000 });
 
-    await expect(page.getByRole("heading", { name: /willkommen bei quoska/i })).toBeVisible();
-    // Admin/manager sees the ManagerDashboard (team status), not employee feature cards
-    await expect(page.getByText(/team-übersicht/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /cockpit/i })).toBeVisible();
+    await expect(page.getByTestId("cockpit-overview")).toBeVisible();
   });
 });
 
@@ -147,10 +147,28 @@ test.describe("App Shell — Mobile Responsive", () => {
 
     const sidebar = page.locator("aside");
     await expect(sidebar).toBeVisible();
+
+    const sidebarHeader = page.getByTestId("sidebar-header");
+    const appHeader = page.getByTestId("app-header");
+    const [sidebarBox, appBox] = await Promise.all([
+      sidebarHeader.boundingBox(),
+      appHeader.boundingBox(),
+    ]);
+    expect(sidebarBox).not.toBeNull();
+    expect(appBox).not.toBeNull();
+    expect(sidebarBox!.height).toBe(appBox!.height);
+    await expect(sidebarHeader).toHaveCSS("background-color", "rgb(248, 247, 243)");
+    await expect(appHeader).toHaveCSS("background-color", "rgb(248, 247, 243)");
   });
 });
 
 test.describe("PWA", () => {
+  test("health endpoint reports the application revision", async ({ request }) => {
+    const response = await request.get("/api/health");
+    expect(response.ok()).toBeTruthy();
+    await expect(response.json()).resolves.toMatchObject({ status: "ok" });
+  });
+
   test("manifest.json is valid", async ({ request }) => {
     const response = await request.get("/manifest.json");
     expect(response.ok()).toBeTruthy();
@@ -159,7 +177,7 @@ test.describe("PWA", () => {
     expect(manifest.short_name).toBe("Quoska");
     expect(manifest.display).toBe("standalone");
     expect(manifest.lang).toBe("de");
-    expect(manifest.theme_color).toBe("#2563eb");
+    expect(manifest.theme_color).toBe("#f5f3ee");
     expect(manifest.icons.length).toBeGreaterThan(0);
   });
 

@@ -1,66 +1,50 @@
-import { UserPlus, Send, Stamp } from "lucide-react";
-
 const STEPS = [
   {
-    icon: UserPlus,
-    step: "01",
-    title: "Account anlegen",
-    body: "Firma, E-Mail, Passwort — in 2 Minuten eingerichtet. Keine Kreditkarte, kein Termin.",
+    number: "01",
+    title: "Betrieb anlegen",
+    body: "Account erstellen, Firmendaten ergänzen und Arbeitszeitmodell festlegen.",
   },
   {
-    icon: Send,
-    step: "02",
+    number: "02",
     title: "Team einladen",
-    body: "Mitarbeiter per E-Mail hinzufügen, Soll-Stunden und Rolle festlegen. Fertig.",
+    body: "Mitarbeitende per E-Mail hinzufügen und die passenden Rollen vergeben.",
   },
   {
-    icon: Stamp,
-    step: "03",
-    title: "Stempeln & auswerten",
-    body: "Ein Klick zum Kommen und Gehen. Pausen, Überstunden und Reports werden automatisch erfasst.",
+    number: "03",
+    title: "Einfach anfangen",
+    body: "Im Browser einstempeln. Zeiten, Pausen und Korrekturen landen direkt in der Übersicht.",
   },
 ] as const;
 
 export function HowItWorksSection() {
   return (
-    <section className="border-y border-slate-200 bg-slate-50">
-      <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-wider text-violet-600">
-            So funktioniert&apos;s
-          </p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            In drei Schritten startklar.
-          </h2>
-        </div>
+    <section id="ablauf" className="border-y border-slate-900/10 bg-[#dcd8cf]">
+      <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
+        <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6658d3]">
+              Der Einstieg
+            </p>
+            <h2 className="mt-4 font-serif text-4xl leading-tight tracking-[-0.035em] text-slate-950 sm:text-5xl">
+              Heute eingerichtet. Morgen selbstverständlich.
+            </h2>
+          </div>
 
-        <ol className="mt-12 grid gap-8 md:grid-cols-3">
-          {STEPS.map(({ icon: Icon, step, title, body }, i) => (
-            <li key={step} className="relative">
-              {/* connector line on desktop */}
-              {i < STEPS.length - 1 && (
-                <span
-                  aria-hidden
-                  className="absolute left-[calc(50%+2.5rem)] top-7 hidden h-px w-[calc(100%-5rem)] bg-gradient-to-r from-slate-300 to-transparent md:block"
-                />
-              )}
-              <div className="relative flex flex-col items-center text-center">
-                <span className="relative z-10 flex size-14 items-center justify-center rounded-2xl bg-white text-violet-600 shadow-sm ring-1 ring-slate-200">
-                  <Icon className="size-6" />
-                  <span className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-violet-600 text-[11px] font-bold text-white">
-                    {i + 1}
-                  </span>
+          <ol className="border-t border-slate-900/20">
+            {STEPS.map((step) => (
+              <li
+                key={step.number}
+                className="grid gap-2 border-b border-slate-900/20 py-6 sm:grid-cols-[3rem_0.8fr_1.2fr] sm:gap-6 sm:py-8"
+              >
+                <span className="font-mono text-xs text-[#6658d3]">
+                  {step.number}
                 </span>
-                <h3 className="mt-4 text-base font-semibold text-slate-900">
-                  {title}
-                </h3>
-                <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-600">
-                  {body}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
+                <h3 className="font-semibold text-slate-950">{step.title}</h3>
+                <p className="text-sm leading-6 text-slate-600">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
     </section>
   );

@@ -9,6 +9,7 @@
  */
 
 import { test, expect, type Page } from "@playwright/test";
+import { epochToDate, getCurrentEpochDays } from "@/config/client/date-utils";
 import { adminClient } from "./helpers";
 import {
   setupProjectAssignmentEnv,
@@ -56,7 +57,7 @@ test.describe("Project Reports — Epic 11", () => {
       .eq("status", "completed");
 
     if (!existing || existing.length === 0) {
-      const today = new Date().toISOString().split("T")[0];
+      const today = epochToDate(getCurrentEpochDays());
       const h = (offset: number) =>
         new Date(Date.now() - offset * 3600_000).toISOString().replace("T", " ");
 
@@ -90,7 +91,7 @@ test.describe("Project Reports — Epic 11", () => {
       .eq("status", "completed");
 
     if (!unassigned || unassigned.length === 0) {
-      const today = new Date().toISOString().split("T")[0];
+      const today = epochToDate(getCurrentEpochDays());
       const h = (offset: number) =>
         new Date(Date.now() - offset * 3600_000).toISOString().replace("T", " ");
 

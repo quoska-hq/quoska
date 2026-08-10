@@ -325,11 +325,15 @@ test.describe("Sick Day Tracking — Epic 10", () => {
     ).toBeVisible({ timeout: 5_000 });
 
     // Start date should be shown (read-only)
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog", {
+      name: /krankmeldung bearbeiten/i,
+    });
     await expect(dialog.getByText(fmtDate(today)).first()).toBeVisible();
 
     // Fill end date = today (single-day sick entry) via DatePicker
-    const editDialog = page.getByRole("dialog");
+    const editDialog = page.getByRole("dialog", {
+      name: /krankmeldung bearbeiten/i,
+    });
     // Click the end date picker button to open calendar popover
     await editDialog.getByRole("button", { name: /bis/i }).click();
 
@@ -373,7 +377,9 @@ test.describe("Sick Day Tracking — Epic 10", () => {
     await page.getByRole("tab", { name: /kalender/i }).click();
 
     // Calendar should be visible
-    await expect(page.getByText(/juni|juli/i)).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('[data-slot="calendar"]')).toBeVisible({
+      timeout: 5_000,
+    });
 
     // Cleanup
     await adminClient.from("sick_entries").delete().eq("tenant_id", tenantId).eq("start_date", fiveDaysAgo);

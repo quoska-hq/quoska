@@ -60,6 +60,7 @@ export function SickEntryEditDialog({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sickEntries"] });
+      queryClient.invalidateQueries({ queryKey: ["absenceCalendar"] });
       onOpenChange(false);
     },
     onError: (err) => setError(err.message),

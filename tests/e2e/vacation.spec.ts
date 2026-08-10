@@ -236,6 +236,19 @@ test.describe("Vacation Management — Epic 9", () => {
     await expect(
       page.getByText(/keine ausstehenden/i),
     ).toBeVisible({ timeout: 5_000 });
+
+    const { data: approvalNotification, error: approvalNotificationError } = await adminClient
+      .from("notifications")
+      .select("employee_id, type")
+      .eq("tenant_id", tenantId)
+      .eq("employee_id", employeeEmpId)
+      .eq("type", "leave_approved")
+      .single();
+    expect(approvalNotificationError).toBeNull();
+    expect(approvalNotification).toEqual({
+      employee_id: employeeEmpId,
+      type: "leave_approved",
+    });
   });
 
   test("employee sees approved status after manager approval", async ({
@@ -297,6 +310,19 @@ test.describe("Vacation Management — Epic 9", () => {
     await expect(
       page.getByText(/keine ausstehenden/i),
     ).toBeVisible({ timeout: 5_000 });
+
+    const { data: rejectionNotification, error: rejectionNotificationError } = await adminClient
+      .from("notifications")
+      .select("employee_id, type")
+      .eq("tenant_id", tenantId)
+      .eq("employee_id", employeeEmpId)
+      .eq("type", "leave_rejected")
+      .single();
+    expect(rejectionNotificationError).toBeNull();
+    expect(rejectionNotification).toEqual({
+      employee_id: employeeEmpId,
+      type: "leave_rejected",
+    });
 
     // Employee sees rejected status
     await loginAsEmployee(page);

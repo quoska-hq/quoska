@@ -49,16 +49,17 @@ export function LeaveRequestList({ role }: LeaveRequestListProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leaveRequests"] });
       queryClient.invalidateQueries({ queryKey: ["leaveBalance"] });
+      queryClient.invalidateQueries({ queryKey: ["absenceCalendar"] });
     },
   });
 
   if (isLoading) {
-    return <Skeleton className="h-48 rounded-xl" />;
+    return <Skeleton className="h-48 rounded-sm" />;
   }
 
   if (!requests || requests.length === 0) {
     return (
-      <Card className="rounded-xl">
+      <Card>
         <CardContent className="py-8 text-center">
           <p className="text-muted-foreground text-sm">
             Keine Urlaubsanträge vorhanden.
@@ -89,7 +90,7 @@ export function LeaveRequestList({ role }: LeaveRequestListProps) {
         const isManagerView = role === "admin" || role === "manager";
 
         return (
-          <Card key={req.id} className="rounded-xl">
+          <Card key={req.id}>
             <CardContent className="py-3 px-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">

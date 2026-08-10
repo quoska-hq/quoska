@@ -1,0 +1,11 @@
+[Unit]
+Description=Back up Quoska production data daily
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 UTC
+Persistent=true
+RandomizedDelaySec=10min
+Unit=quoska-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -41,20 +41,37 @@ export async function middleware(request: NextRequest) {
 
   const isLoggedIn = !!user;
   const isAuthPage =
-    pathname === "/login" || pathname === "/register";
-  const isOAuthCallback = pathname.startsWith("/auth/callback");
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/forgot-password";
+  const isAuthCallback =
+    pathname.startsWith("/auth/callback") ||
+    pathname.startsWith("/auth/confirm") ||
+    pathname.startsWith("/auth/set-password");
   const isHomePage = pathname === "/";
-  const isAppRoute =
-    pathname.startsWith("/app") || pathname === "/setup";
+  const isAppRoute = pathname.startsWith("/app");
+  const tenantId = user?.app_metadata?.tenant_id as string | undefined;
+  const requiresEmailVerification =
+    process.env.NODE_ENV === "production" &&
+    isLoggedIn &&
+    !user?.email_confirmed_at;
 
   // Redirect authenticated users away from auth pages
   if (isLoggedIn && isAuthPage) {
-    return NextResponse.redirect(new URL("/app/dashboard", request.url));
+    return NextResponse.redirect(
+      new URL(tenantId && !requiresEmailVerification ? "/app/dashboard" : "/setup", request.url),
+    );
+  }
+
+  // An unverified production session must never enter the application. This
+  // is mostly defense in depth because hosted Supabase normally issues no
+  // session before email confirmation.
+  if (requiresEmailVerification && isAppRoute) {
+    return NextResponse.redirect(new URL("/setup", request.url));
   }
 
   // Setup completeness check — redirect to /setup if tenant not fully set up
   if (isLoggedIn) {
-    const tenantId = user?.app_metadata?.tenant_id as string | undefined;
     if (tenantId) {
       const { data: tenant } = await supabase
         .from("tenants")
@@ -77,13 +94,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // Allow unauthenticated users on public pages
-  if (isAuthPage || isHomePage) {
+  if (isAuthPage || isHomePage || pathname === "/setup") {
     return response;
   }
 
   // OAuth callback runs before the session cookie exists — always allow
   // through so the code-for-session exchange can complete.
-  if (isOAuthCallback) {
+  if (isAuthCallback) {
     return response;
   }
 

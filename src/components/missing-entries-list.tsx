@@ -27,7 +27,7 @@ export function MissingEntriesList({ entries }: MissingEntriesListProps) {
   if (entries.length === 0) return null;
 
   return (
-    <Card className="shadow-sm rounded-xl">
+    <Card>
       <CardContent>
         <div className="flex items-center gap-2 mb-2">
           <div className="flex items-center justify-center size-7 rounded-lg bg-amber-50 text-amber-600">

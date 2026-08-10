@@ -54,7 +54,8 @@ export default function AgbPage() {
         (1) Gegenstand des Vertrages ist die zeitlich befristete,
         nicht-ausschließliche Einräumung eines Nutzungsrechts an der
         cloudbasierten Zeiterfassungs-Software Quoska gemäß dem gewählten
-        Tarif (Free, Team oder Pro) und der jeweils aktuellen Leistungsbeschreibung.
+        Tarif (Free, Team, Business oder Pro) und der jeweils aktuellen
+        Leistungsbeschreibung.
       </p>
       <p>
         (2) Die Software unterstützt die Erfüllung der gesetzlichen Pflicht zur
@@ -81,16 +82,17 @@ export default function AgbPage() {
       <h2>§ 4 Tarife und Vergütung</h2>
       <p>
         (1) Es gelten die zum Zeitpunkt der Buchung auf{" "}
-        <a href={site.url}>{site.url}</a> ausgewiesenen Preise. Die
-        monatlichen Preise verstehen sich als Nettopreise zzgl. der gesetzlich
-        geltenden Umsatzsteuer.
+        <a href={site.url}>{site.url}</a> ausgewiesenen Preise. Aufgrund der
+        Kleinunternehmerregelung gemäß
+        §&nbsp;19 UStG wird derzeit keine Umsatzsteuer ausgewiesen.
       </p>
       <p>
-        (2) Der Tarif „Free“ ist für Betriebe bis zu drei Mitarbeitenden
-        kostenlos. Der Tarif „Team“ kostet 39 € netto je Monat bei unbegrenzter
-        Mitarbeiterzahl. Der Tarif „Pro“ kostet 79 € netto je Monat; einzelne
-        Pro-Funktionen (z.&nbsp;B. DATEV-Export) sind ggf. noch nicht verfügbar
-        und werden gesondert ausgewiesen.
+        (2) Der Tarif „Free“ ist für Betriebe mit bis zu drei aktiven
+        Mitarbeitenden kostenlos. Der Tarif „Team“ kostet 9&nbsp;€ je
+        Monat und umfasst bis zu zehn aktive Mitarbeitende. Der Tarif
+        „Business“ kostet 59&nbsp;€ je Monat und umfasst bis zu 50 aktive
+        Mitarbeitende. Der Tarif „Pro“ kostet 99&nbsp;€ je Monat und hat
+        kein Limit für die Zahl aktiver Mitarbeitender.
       </p>
       <p>
         (3) Zahlungen sind monatlich im Voraus fällig. Zahlungsverzug führt
@@ -150,9 +152,9 @@ export default function AgbPage() {
 
       <h2>§ 8 Datensicherheit, Datenschutz und Auftragsverarbeitung</h2>
       <p>
-        (1) Eine Auftragsverarbeitungsvereinbarung (AVV) nach Art.&nbsp;28 DSGVO
-        steht dem Kunden nach Registrierung im Konto zum Download zur Verfügung
-        und wird mit Vertragsbeginn Vertragsbestandteil.
+        (1) Soweit eine Auftragsverarbeitungsvereinbarung (AVV) nach
+        Art.&nbsp;28 DSGVO erforderlich ist, wird sie dem Kunden vor Beginn der
+        entsprechenden Verarbeitung zur Verfügung gestellt.
       </p>
       <p>
         (2) Es gelten unsere separaten Hinweise in der{" "}

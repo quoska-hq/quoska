@@ -1,8 +1,8 @@
 /**
  * POST /api/v1/stripe/portal
  *
- * Create a Stripe Billing Portal session so the caller can manage or cancel
- * their subscription. Requires the tenant to have a linked stripe_customer_id.
+ * Create a Stripe Billing Portal session so a tenant admin can manage or cancel
+ * the subscription. Requires the tenant to have a linked stripe_customer_id.
  * Inert when billing is disabled.
  */
 
@@ -29,6 +29,13 @@ export async function POST() {
       return NextResponse.json<ApiResponse<{ url: string }>>(
         { data: null, error: authResult.error },
         { status: 401 },
+      );
+    }
+
+    if (authResult.data.role !== "admin") {
+      return NextResponse.json<ApiResponse<{ url: string }>>(
+        { data: null, error: "Nur Administratoren können das Abonnement verwalten." },
+        { status: 403 },
       );
     }
 

@@ -56,6 +56,12 @@ export const BUNDESLAND_LABELS: Record<Bundesland, string> = {
   thueringen: "Thüringen",
 };
 
+export function getBundeslandLabel(value: string | null | undefined): string {
+  return value && BUNDESLAENDER.includes(value as Bundesland)
+    ? BUNDESLAND_LABELS[value as Bundesland]
+    : "";
+}
+
 export type TenantInsert = Pick<
   import("./database").Tenant,
   "name" | "plan"
@@ -66,6 +72,6 @@ export type TenantInsert = Pick<
 export type TenantUpdate = Partial<
   Pick<
     import("./database").Tenant,
-    "name" | "plan" | "bundesland" | "setup_complete" | "stripe_customer_id"
+    "name" | "plan" | "bundesland" | "default_work_schedule" | "setup_complete" | "stripe_customer_id"
   >
 >;

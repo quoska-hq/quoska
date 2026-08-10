@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Employee } from "./database";
+import { workScheduleSchema } from "./work-schedule";
 
 export type Role = Employee["role"];
 
@@ -15,6 +16,7 @@ export type EmployeeInsert = Pick<
   | "email"
   | "role"
   | "target_hours_week"
+  | "work_schedule"
   | "bundesland"
   | "invitation_token"
 >;
@@ -25,6 +27,7 @@ export const inviteEmployeeSchema = z.object({
   email: z.string().email("Ungültige E-Mail-Adresse"),
   role: z.enum(["admin", "manager", "employee"]).default("employee"),
   targetHoursWeek: z.number().gt(0).max(48).default(40),
+  workSchedule: workScheduleSchema.optional(),
   bundesland: z
     .enum([
       "baden-wuerttemberg",
@@ -53,6 +56,7 @@ export const updateEmployeeSchema = z.object({
   last_name: z.string().min(1, "Nachname ist erforderlich").optional(),
   role: z.enum(["admin", "manager", "employee"]).optional(),
   target_hours_week: z.number().gt(0).max(48).optional(),
+  work_schedule: workScheduleSchema.optional(),
   bundesland: z
     .enum([
       "baden-wuerttemberg",

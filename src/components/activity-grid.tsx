@@ -38,6 +38,7 @@ const MONTHS = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","No
 const DAY_LABELS = ["Mon","","Mit","","Fre","",""] as const;
 
 const CELL = 13;
+// eslint-disable-next-line @quoska/legal/enforce-rest-period -- pixel gap, not a rest duration
 const GAP = 3;
 const STEP = CELL + GAP;   // 16px per column
 const LABEL_W = 32;         // day-label column width
@@ -54,8 +55,8 @@ function fmtDur(min: number): string {
 }
 function cellColor(w: number, t: number): string {
   if (!w) return ""; const r = w/t;
-  if (r>=1) return "#7c3aed"; if (r>=.85) return "#8b5cf6";
-  if (r>=.5) return "#a78bfa"; return "#c4b5fd";
+  if (r>=1) return "#6658d3"; if (r>=.85) return "#8277dc";
+  if (r>=.5) return "#a99ff3"; return "#d0cbf3";
 }
 
 // ---------------------------------------------------------------------------
@@ -73,6 +74,7 @@ export function ActivityGrid({ activities, dailyTargetMinutes }: ActivityGridPro
     // eslint-disable-next-line @quoska/legal/no-client-timestamps
     const start = new Date(mon);
     start.setDate(mon.getDate() - 52 * 7);
+    // eslint-disable-next-line @quoska/legal/enforce-max-working-hours -- calendar columns, not weekly hours
     return { gridStart: start, numWeeks: 53, todayISO: toISO(now) };
   }, []);
 
@@ -107,7 +109,7 @@ export function ActivityGrid({ activities, dailyTargetMinutes }: ActivityGridPro
 
   const legend = [
     { bg:"#ebedf0", border:true },
-    { bg:"#c4b5fd" }, { bg:"#a78bfa" }, { bg:"#8b5cf6" }, { bg:"#7c3aed" },
+    { bg:"#d0cbf3" }, { bg:"#a99ff3" }, { bg:"#8277dc" }, { bg:"#6658d3" },
   ];
 
   return (

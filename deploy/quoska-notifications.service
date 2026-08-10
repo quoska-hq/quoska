@@ -1,0 +1,13 @@
+[Unit]
+Description=Generate Quoska compliance notifications
+After=network-online.target quoska.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/quoska/deploy/run-cron.sh notifications
+TimeoutStartSec=3min
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

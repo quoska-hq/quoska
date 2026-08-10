@@ -17,6 +17,7 @@ import {
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import type { ApiResponse } from "@/types/api";
 import type { Employee } from "@/types/database";
+import type { WorkSchedule } from "@/types/work-schedule";
 
 interface EmployeeListResponse {
   active: Employee[];
@@ -27,6 +28,10 @@ interface EmployeeListResponse {
     limit: number | null;
     canAddMore: boolean;
   } | null;
+  defaults: {
+    bundesland: string | null;
+    workSchedule: WorkSchedule | null;
+  };
 }
 
 export async function GET() {
@@ -55,9 +60,14 @@ export async function GET() {
     // if JWT claims haven't propagated yet (e.g. fallback auth path).
     const adminClient = createAdminClient();
 
-    const [result, planResult] = await Promise.all([
+    const [result, planResult, tenantResult] = await Promise.all([
       listEmployees(adminClient, tenantId),
       getPlanLimitStatus(adminClient, tenantId),
+      adminClient
+        .from("tenants")
+        .select("bundesland, default_work_schedule")
+        .eq("id", tenantId)
+        .single(),
     ]);
 
     if (!result.data) {
@@ -73,6 +83,10 @@ export async function GET() {
           active: result.data.active,
           deactivated: result.data.deactivated,
           planStatus: planResult.data ?? null,
+          defaults: {
+            bundesland: tenantResult.data?.bundesland ?? null,
+            workSchedule: tenantResult.data?.default_work_schedule ?? null,
+          },
         },
         error: null,
       },
@@ -125,6 +139,7 @@ export async function POST(request: Request) {
       email: parsed.data.email,
       role: parsed.data.role,
       targetHoursWeek: parsed.data.targetHoursWeek,
+      workSchedule: parsed.data.workSchedule,
       bundesland: parsed.data.bundesland,
     });
 

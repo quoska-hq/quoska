@@ -1,11 +1,11 @@
 {
   "name": "Quoska",
   "short_name": "Quoska",
-  "description": "Einfache Zeiterfassung für deutsche KMU — gesetzlich compliant",
+  "description": "Arbeitszeiten, Pausen, Korrekturen und Auswertungen für deutsche Betriebe",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#7c3aed",
+  "background_color": "#f5f3ee",
+  "theme_color": "#f5f3ee",
   "lang": "de",
   "orientation": "portrait-primary",
   "icons": [

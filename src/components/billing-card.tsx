@@ -115,7 +115,7 @@ export function BillingCard() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="size-4 text-violet-600" />
+          <Sparkles className="size-4 text-[#6658d3]" />
           Abrechnung
         </CardTitle>
       </CardHeader>
@@ -148,7 +148,7 @@ export function BillingCard() {
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-lg font-semibold">{PLANS[currentPlan].label}</span>
                   {currentPlan !== "free" && (
-                    <Badge className="bg-violet-100 text-violet-700 border-0">
+                    <Badge className="border-0 bg-[#e3dfd5] text-[#5548ba]">
                       <Check className="size-3 mr-1" />
                       Aktiv
                     </Badge>
@@ -170,8 +170,8 @@ export function BillingCard() {
                 return (
                   <div
                     key={tier}
-                    className={`rounded-lg border p-3 ${
-                      isCurrent ? "border-violet-300 bg-violet-50/50" : "border-border"
+                    className={`border p-3 ${
+                      isCurrent ? "border-[#6658d3] bg-[#efede7]" : "border-border bg-white"
                     }`}
                   >
                     <p className="text-sm font-semibold">{cfg.label}</p>

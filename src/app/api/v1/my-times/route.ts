@@ -12,7 +12,6 @@ import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getTimeEntriesByDateRange, getActiveEntry } from "@/repos/timeEntryRepo";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import {
-  calculateWeekTargetHours,
   getWeekMonday,
   getWeekSunday,
   holidaysToMap,
@@ -26,6 +25,7 @@ import type { ApiResponse } from "@/types/api";
 import type { TimeEntry } from "@/types/database";
 import type { PublicHoliday } from "@/types/database";
 import { weekQuerySchema } from "@/types/holiday";
+import { calculateScheduleTargetMinutes } from "@/services/workScheduleService";
 
 export interface TimeEntryWithNet extends TimeEntry {
   netMinutes: number;
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
     // Get employee config
     const { data: employee } = await supabase
       .from("employees")
-      .select("bundesland, target_hours_week")
+      .select("bundesland, target_hours_week, work_schedule")
       .eq("id", employeeId)
       .is("deleted_at", null)
       .single();
@@ -119,9 +119,10 @@ export async function GET(request: Request) {
       const weekSunday = getWeekSunday(weekMonday);
       const holidays = filterHolidaysForWeek(holidayMap, weekMonday, weekSunday);
       const holidayMapObj = holidaysToMap(holidays);
-      const weekTarget = calculateWeekTargetHours(
+      const targetMin = calculateScheduleTargetMinutes(
         weekMonday,
         holidayMapObj,
+        employee?.work_schedule,
         targetHoursWeek,
       );
 
@@ -136,7 +137,6 @@ export async function GET(request: Request) {
         workedMinutes += netMinutesForRunningEntry(activeEntry, nowIso);
       }
 
-      const targetMin = weekTarget.weekTarget * 60;
       const overtime = workedMinutes - targetMin;
 
       weeklySummaries.push({

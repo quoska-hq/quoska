@@ -25,6 +25,7 @@ import {
   getTenantPlan,
 } from "@/repos/employeeRepo";
 import { getNowIso } from "@/config/server/timestamps";
+import type { WorkSchedule } from "@/types/work-schedule";
 
 /**
  * Invite a new employee.
@@ -40,6 +41,7 @@ export async function inviteEmployee(
     email: string;
     role: string;
     targetHoursWeek?: number;
+    workSchedule?: WorkSchedule;
     bundesland?: string | null;
   },
 ): Promise<ApiResponse<Employee>> {
@@ -71,16 +73,25 @@ export async function inviteEmployee(
         tenant_id: tenantId,
         role: input.role,
       },
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login`,
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/set-password`,
     });
 
-  if (authError && !authError.message.includes("already registered")) {
+  if (authError) {
     console.error("Auth invite failed:", authError);
+    if (authError.message.toLowerCase().includes("already registered")) {
+      return failure(
+        "Diese E-Mail gehört bereits zu einem Quoska-Konto",
+      );
+    }
     return failure("Fehler beim Einladen des Mitarbeiters");
   }
 
+  if (!authData.user?.id) {
+    return failure("Fehler beim Anlegen des Mitarbeiterkontos");
+  }
+
   // 5. Insert employee record
-  const userId = authData?.user?.id ?? "";
+  const userId = authData.user.id;
   const { data: employee, error: empError } = await adminClient
     .from("employees")
     .insert({
@@ -91,6 +102,7 @@ export async function inviteEmployee(
       email: input.email,
       role: input.role,
       target_hours_week: input.targetHoursWeek ?? 40,
+      ...(input.workSchedule ? { work_schedule: input.workSchedule } : {}),
       bundesland: input.bundesland ?? null,
       invitation_token: invitationToken,
       invited_at: getNowIso(),
@@ -127,6 +139,7 @@ export async function updateEmployee(
     last_name?: string;
     role?: string;
     target_hours_week?: number;
+    work_schedule?: WorkSchedule;
     bundesland?: string | null;
   },
 ): Promise<ApiResponse<Employee>> {

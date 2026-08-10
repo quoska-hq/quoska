@@ -49,7 +49,7 @@ export function PresenceRow({ m, isMe }: { m: PresenceMember; isMe: boolean }) {
     <div
       data-testid="presence-row"
       className={`flex items-center justify-between px-4 py-3 ${
-        isMe ? "bg-violet-50/60" : ""
+        isMe ? "bg-[#efede7]" : ""
       }`}
     >
       <div className="flex items-center gap-3 min-w-0">
@@ -63,7 +63,7 @@ export function PresenceRow({ m, isMe }: { m: PresenceMember; isMe: boolean }) {
           <p className="text-sm font-medium truncate">
             {m.firstName} {m.lastName}
             {isMe && (
-              <span className="ml-2 text-[11px] font-semibold text-violet-600">
+              <span className="ml-2 text-[11px] font-semibold text-[#6658d3]">
                 Du
               </span>
             )}

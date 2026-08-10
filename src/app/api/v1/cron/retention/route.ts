@@ -8,25 +8,23 @@
  */
 
 import { NextResponse } from "next/server";
-import { createClient } from "@/config/supabase/server";
+import { createAdminClient } from "@/config/supabase/server";
 import { runRetentionForTenant } from "@/services/retentionService";
 import { getNowIso } from "@/config/server/timestamps";
+import { isAuthorizedCronRequest } from "@/lib/cron-auth";
 import type { ApiResponse } from "@/types/api";
 
 export async function POST(request: Request) {
   try {
-    // Verify cron secret
-    const authHeader = request.headers.get("authorization");
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!isAuthorizedCronRequest(request)) {
       return NextResponse.json<ApiResponse<null>>(
         { data: null, error: "Nicht autorisiert." },
         { status: 401 },
       );
     }
 
-    const supabase = await createClient();
+    // Retention is a system-wide task and must not depend on a user cookie.
+    const supabase = createAdminClient();
     const nowIso = getNowIso();
 
     // Get all tenants

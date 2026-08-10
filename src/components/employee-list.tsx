@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import type { WorkSchedule } from "@/types/work-schedule";
 
 interface PlanStatus {
   plan: string | null;
@@ -29,6 +30,10 @@ interface EmployeeListResponse {
   active: Employee[];
   deactivated: Employee[];
   planStatus: PlanStatus | null;
+  defaults: {
+    bundesland: string | null;
+    workSchedule: WorkSchedule | null;
+  };
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -210,6 +215,8 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
       {/* Dialogs */}
       {showAddDialog && (
         <EmployeeAddDialog
+          defaultBundesland={employeeData?.defaults.bundesland ?? null}
+          defaultWorkSchedule={employeeData?.defaults.workSchedule ?? null}
           onClose={() => setShowAddDialog(false)}
           onSuccess={() => {
             setShowAddDialog(false);

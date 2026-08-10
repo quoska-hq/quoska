@@ -9,6 +9,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getHolidaysInRange } from "@/repos/holidayRepo";
 import { isWeekend } from "@/services/holidayService";
+import { normalizeWorkSchedule, type WorkSchedule } from "@/types/work-schedule";
+import { isScheduledWorkday } from "@/services/workScheduleService";
 
 /** Get employee's bundesland from DB. */
 export async function getEmployeeBundesland(
@@ -24,6 +26,22 @@ export async function getEmployeeBundesland(
     .is("deleted_at", null)
     .maybeSingle();
   return data?.bundesland ?? null;
+}
+
+/** Get an employee's contractual weekday schedule. */
+export async function getEmployeeWorkSchedule(
+  supabase: SupabaseClient,
+  tenantId: string,
+  employeeId: string,
+): Promise<WorkSchedule> {
+  const { data } = await supabase
+    .from("employees")
+    .select("work_schedule, target_hours_week")
+    .eq("id", employeeId)
+    .eq("tenant_id", tenantId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  return normalizeWorkSchedule(data?.work_schedule, data?.target_hours_week ?? 40);
 }
 
 /** Get employee display name. */
@@ -61,6 +79,7 @@ export async function calculateWorkDaysCount(
   bundesland: string,
   startDate: string,
   endDate: string,
+  workSchedule?: WorkSchedule,
 ): Promise<number> {
   const holidays = await getHolidaysInRange(supabase, bundesland, startDate, endDate);
   const holidayDates = new Set(holidays.map((h) => h.date));
@@ -69,7 +88,10 @@ export async function calculateWorkDaysCount(
   let current = startDate;
 
   while (current <= endDate) {
-    if (!isWeekend(current) && !holidayDates.has(current)) {
+    const isWorkday = workSchedule
+      ? isScheduledWorkday(workSchedule, current, holidayDates)
+      : !isWeekend(current) && !holidayDates.has(current);
+    if (isWorkday) {
       count++;
     }
     const ms = Date.parse(current + "T12:00:00Z") + 86_400_000;

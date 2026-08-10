@@ -119,7 +119,7 @@ export function BottomNav({ role }: BottomNavProps) {
       : BOTTOM_NAV_ITEMS.filter((item) => item.roles.includes(role));
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t border-gray-200 bg-white/95 backdrop-blur-md safe-area-bottom">
+    <nav className="safe-area-bottom fixed inset-x-0 bottom-0 z-50 border-t border-slate-900/15 bg-[#efede7]/97 backdrop-blur-sm md:hidden">
       <div className="flex items-center justify-around h-16">
         {items.map((item) => {
           const isActive = pathname.startsWith(item.href);
@@ -129,8 +129,8 @@ export function BottomNav({ role }: BottomNavProps) {
               href={item.href}
               className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
                 isActive
-                  ? "text-violet-600"
-                  : "text-gray-400"
+                  ? "text-[#5548ba]"
+                  : "text-slate-500"
               }`}
             >
               {isActive ? item.activeIcon : item.icon}

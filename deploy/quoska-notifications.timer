@@ -1,0 +1,11 @@
+[Unit]
+Description=Generate Quoska compliance notifications every 15 minutes
+
+[Timer]
+OnCalendar=*-*-* *:0/15:00
+Persistent=true
+RandomizedDelaySec=30s
+Unit=quoska-notifications.service
+
+[Install]
+WantedBy=timers.target

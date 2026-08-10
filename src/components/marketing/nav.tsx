@@ -1,18 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { href: "/#features", label: "Funktionen" },
+  { href: "/#features", label: "Produkt" },
+  { href: "/#ablauf", label: "Ablauf" },
   { href: "/#preise", label: "Preise" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/#faq", label: "Fragen" },
 ] as const;
 
 /**
- * Marketing nav — sticky, blurred, with mobile menu.
+ * Shared marketing navigation with a compact mobile menu.
  * Used on landing page and as a lighter variant on legal pages.
  */
 export function MarketingNav({
@@ -23,24 +25,21 @@ export function MarketingNav({
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-6">
+    <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-[#f5f3ee]/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6">
         <Link
           href="/"
           className="flex items-center gap-2"
           aria-label="Quoska — Startseite"
         >
-          {/* Plain <img>: next/image's optimizer + cache was serving a stale
-              smaller raster whenever logo.png changed. A 32px icon gets no
-              benefit from the optimizer, so we skip it for predictability. */}
-          <img
+          <Image
             src="/icons/logo.png"
             alt="Quoska"
-            width={26}
-            height={26}
-            className="size-[26px] shrink-0"
+            width={122}
+            height={125}
+            className="h-[26px] w-auto shrink-0"
           />
-          <span className="text-lg font-bold tracking-tight text-slate-900">
+          <span className="text-lg font-bold tracking-[-0.03em] text-slate-950">
             Quoska
           </span>
         </Link>
@@ -52,7 +51,7 @@ export function MarketingNav({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                  className="px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-[#6658d3]"
                 >
                   {link.label}
                 </Link>
@@ -64,7 +63,7 @@ export function MarketingNav({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-slate-600 hover:text-slate-900"
+                  className="rounded-none text-slate-600 hover:bg-transparent hover:text-[#6658d3]"
                 >
                   Anmelden
                 </Button>
@@ -72,7 +71,7 @@ export function MarketingNav({
               <Link href="/register">
                 <Button
                   size="sm"
-                  className="bg-violet-600 text-white hover:bg-violet-700"
+                  className="rounded-none bg-slate-950 text-white hover:bg-[#6658d3]"
                 >
                   Kostenlos testen
                 </Button>
@@ -82,7 +81,7 @@ export function MarketingNav({
             {/* Mobile toggle */}
             <button
               type="button"
-              className="inline-flex size-10 items-center justify-center rounded-md text-slate-700 hover:bg-slate-100 md:hidden"
+              className="inline-flex size-10 items-center justify-center text-slate-700 hover:text-[#6658d3] md:hidden"
               aria-label={open ? "Menü schließen" : "Menü öffnen"}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
@@ -103,28 +102,28 @@ export function MarketingNav({
 
       {/* Mobile menu */}
       {variant === "default" && open && (
-        <div className="border-t border-slate-200 bg-white md:hidden">
-          <nav className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-3 sm:px-6">
+        <div className="border-t border-slate-900/10 bg-[#f5f3ee] md:hidden">
+          <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-3 sm:px-6">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="border-b border-slate-900/10 px-1 py-3 text-sm font-medium text-slate-700 hover:text-[#6658d3]"
               >
                 {link.label}
               </Link>
             ))}
             <div className="mt-2 grid grid-cols-2 gap-2">
               <Link href="/login" onClick={() => setOpen(false)}>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full rounded-none">
                   Anmelden
                 </Button>
               </Link>
               <Link href="/register" onClick={() => setOpen(false)}>
                 <Button
                   size="sm"
-                  className="w-full bg-violet-600 text-white hover:bg-violet-700"
+                  className="w-full rounded-none bg-slate-950 text-white hover:bg-[#6658d3]"
                 >
                   Testen
                 </Button>

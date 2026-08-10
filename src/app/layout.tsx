@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | Quoska",
   },
   description:
-    "Gesetzlich vorgeschriebene Zeiterfassung für dein Team: Pausen nach §4 ArbZG, revisionssicherer Audit-Trail, DSGVO-konform in Frankfurt gehostet. 39 € Flatrate — egal wie viele Mitarbeiter.",
+    "Arbeitszeiten, Pausen, Korrekturen und Auswertungen für deutsche Betriebe — übersichtlich und ohne komplizierte Einführung.",
   applicationName: site.name,
   manifest: "/manifest.json",
   keywords: [
@@ -40,13 +40,13 @@ export const metadata: Metadata = {
     siteName: site.name,
     title: "Quoska — Zeiterfassung für deutsche KMU",
     description:
-      "ArbZG-konforme Zeiterfassung als Flatrate. 39 €/Monat für das ganze Team.",
+      "Arbeitszeit erfassen, Pausen dokumentieren und Auswertungen erstellen.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Quoska — Zeiterfassung für deutsche KMU",
     description:
-      "ArbZG-konforme Zeiterfassung als Flatrate. 39 €/Monat für das ganze Team.",
+      "Arbeitszeit erfassen, Pausen dokumentieren und Auswertungen erstellen.",
   },
   appleWebApp: {
     capable: true,
@@ -64,7 +64,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#7c3aed",
+  themeColor: "#f5f3ee",
 };
 
 export default function RootLayout({

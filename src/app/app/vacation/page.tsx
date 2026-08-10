@@ -15,7 +15,6 @@ import { LeaveRequestList } from "@/components/leave-request-list";
 import { LeaveReviewList } from "@/components/leave-review-list";
 import { AbsenceCalendar } from "@/components/absence-calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Palmtree } from "lucide-react";
 
 export default function VacationPage() {
   const { data: authInfo } = useQuery<{ role: string; employeeId: string }>({
@@ -34,13 +33,8 @@ export default function VacationPage() {
   return (
     <div>
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="flex items-center justify-center size-8 rounded-lg bg-emerald-100 text-emerald-600">
-            <Palmtree className="size-4" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">Urlaub</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight">Urlaub</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Urlaubsanträge und Übersicht
         </p>
       </div>

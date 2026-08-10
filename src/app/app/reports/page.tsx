@@ -10,8 +10,15 @@ import { WeeklyReportTable } from "@/components/weekly-report-table";
 import { ProjectReportTable } from "@/components/project-report-table";
 import { CorrectionReviewList } from "@/components/correction-review-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "next/navigation";
 
 export default function ReportsPage() {
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const initialTab = requestedTab === "projects" || requestedTab === "corrections"
+    ? requestedTab
+    : "weekly";
+
   return (
     <div>
       <div className="mb-6">
@@ -21,7 +28,7 @@ export default function ReportsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="weekly">
+      <Tabs defaultValue={initialTab}>
         <TabsList>
           <TabsTrigger value="weekly">Wochenbericht</TabsTrigger>
           <TabsTrigger value="projects">Projekte</TabsTrigger>

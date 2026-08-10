@@ -2,9 +2,9 @@
  * Registration page — create company account.
  *
  * Flow:
- * 1. Sign up with Supabase Auth (email + password)
- * 2. POST /api/v1/auth/register to create tenant + admin employee
- * 3. Redirect to /setup for onboarding wizard
+ * 1. Sign up with Supabase Auth (email + password only)
+ * 2. Store an onboarding draft without sensitive credentials
+ * 3. Redirect to /setup; persistence happens after email verification
  *
  * Uses React Hook Form + Zod for validation.
  */
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { createOnboardingDraft, saveOnboardingDraft } from "@/lib/onboarding-draft";
 
 export default function RegisterPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -36,7 +37,6 @@ export default function RegisterPage() {
     defaultValues: {
       email: "",
       password: "",
-      companyName: "",
     },
   });
 
@@ -52,6 +52,9 @@ export default function RegisterPage() {
         await supabase.auth.signUp({
           email: values.email,
           password: values.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/setup`,
+          },
         });
 
       if (authError) {
@@ -66,37 +69,18 @@ export default function RegisterPage() {
         return;
       }
 
-      const userId = authData.user?.id;
-      if (!userId) {
+      if (!authData.user?.id) {
         setServerError("Registrierung fehlgeschlagen. Bitte versuche es erneut.");
         return;
       }
 
-      // Step 2: Create tenant + admin employee via API
-      const response = await fetch("/api/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: values.email,
-          companyName: values.companyName,
-          userId,
-        }),
-      });
+      // The draft intentionally contains no password. On hosted Supabase the
+      // user can complete it before confirming their email; local Supabase
+      // auto-confirms accounts so the same flow remains easy to test.
+      saveOnboardingDraft(createOnboardingDraft(values.email));
 
-      const result = await response.json();
-
-      if (!response.ok || result.error) {
-        setServerError(
-          result.error ||
-            "Ein Fehler ist aufgetreten. Bitte versuche es erneut."
-        );
-        return;
-      }
-
-      // Step 2.5: Refresh the session so the JWT picks up the new custom claims
-      await supabase.auth.refreshSession();
-
-      // Step 3: Redirect to setup wizard (full navigation to ensure middleware picks up session)
+      // Full navigation ensures a locally auto-confirmed session cookie is
+      // visible to middleware. Hosted signups continue as a public draft.
       // eslint-disable-next-line react-hooks/immutability -- full navigation needed for cookie propagation
       window.location.href = "/setup";
     } catch {
@@ -108,28 +92,18 @@ export default function RegisterPage() {
 
   return (
     <div>
-      <h2 className="mb-6 text-center text-lg font-semibold text-gray-900">
-        Unternehmen registrieren
-      </h2>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#6658d3]">
+        Kostenlos starten
+      </p>
+      <h1 className="mb-7 font-serif text-3xl tracking-[-0.035em] text-slate-950">
+        Account erstellen
+      </h1>
+
+      <p className="mb-6 text-sm text-slate-500">
+        Zuerst nur die Zugangsdaten. Dein Profil und deine Firma richtest du direkt danach ein.
+      </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Company Name */}
-        <div className="space-y-2">
-          <Label htmlFor="companyName">Firmenname</Label>
-          <Input
-            id="companyName"
-            type="text"
-            autoComplete="organization"
-            placeholder="Müller GmbH"
-            {...register("companyName")}
-          />
-          {errors.companyName && (
-            <p className="text-xs text-destructive">
-              {errors.companyName.message}
-            </p>
-          )}
-        </div>
-
         {/* Email */}
         <div className="space-y-2">
           <Label htmlFor="email">E-Mail</Label>
@@ -175,9 +149,9 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+          className="h-10 w-full"
         >
-          {isSubmitting ? "Registrierung…" : "Kostenlos registrieren"}
+          {isSubmitting ? "Account wird erstellt…" : "Weiter zur Einrichtung"}
         </Button>
       </form>
 
@@ -186,21 +160,21 @@ export default function RegisterPage() {
         <>
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-200" />
+              <span className="w-full border-t border-slate-900/15" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-gray-400">oder</span>
+              <span className="bg-white px-2 text-slate-400">oder</span>
             </div>
           </div>
           <GoogleSignInButton label="Mit Google registrieren" />
         </>
       )}
 
-      <p className="mt-6 text-center text-sm text-gray-500">
+      <p className="mt-6 text-center text-sm text-slate-500">
         Schon ein Account?{" "}
         <Link
           href="/login"
-          className="font-medium text-violet-600 hover:text-violet-700"
+          className="font-semibold text-[#6658d3] hover:text-slate-950"
         >
           Anmelden
         </Link>

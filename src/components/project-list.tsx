@@ -137,7 +137,7 @@ export function ProjectList() {
     }
   }
 
-  if (isLoading) return <Skeleton className="h-40 w-full rounded-xl" />;
+  if (isLoading) return <Skeleton className="h-40 w-full rounded-sm" />;
 
   return (
     <div className="space-y-4">
@@ -168,7 +168,7 @@ export function ProjectList() {
       </div>
 
       {projects && projects.length === 0 && (
-        <Card className="rounded-xl">
+        <Card>
           <CardContent className="py-8 text-center">
             <p className="text-muted-foreground text-sm">
               Noch keine Projekte. Erstelle dein erstes Projekt.
@@ -179,7 +179,7 @@ export function ProjectList() {
 
       <div className="space-y-2">
         {projects?.map((project) => (
-          <Card key={project.id} className="rounded-xl">
+          <Card key={project.id}>
             <CardContent className="py-3 px-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">

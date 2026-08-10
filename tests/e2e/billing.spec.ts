@@ -90,7 +90,7 @@ test.describe("Billing — Open-Source Pattern (Story 8.1/8.2)", () => {
     // In the dev/self-host env no Stripe publishable key + price are set.
     expect(json.data.canUpgrade).toBe(false);
     expect(json.data.plan).toBe("free");
-    expect(json.data.freeLimit).toBe(3);
+    expect(json.data.employeeLimit).toBe(3);
   });
 
   test("settings page hides the Abrechnung section when billing is disabled", async ({
@@ -159,6 +159,6 @@ test.describe("Billing — Open-Source Pattern (Story 8.1/8.2)", () => {
     const status = await page.request.get("/api/v1/billing/status");
     const statusJson = await status.json();
     expect(statusJson.data.plan).toBe("pro");
-    expect(statusJson.data.freeLimit).toBeNull();
+    expect(statusJson.data.employeeLimit).toBeNull();
   });
 });

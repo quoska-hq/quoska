@@ -38,7 +38,7 @@ export function ProjectReportTable() {
   });
 
   if (isLoading) {
-    return <Skeleton className="h-40 w-full rounded-xl" />;
+    return <Skeleton className="h-40 w-full rounded-sm" />;
   }
 
   return (
@@ -69,7 +69,7 @@ export function ProjectReportTable() {
 
       {/* Report table */}
       {!rows || rows.length === 0 ? (
-        <Card className="rounded-xl">
+        <Card>
           <CardContent className="py-8 text-center">
             <p className="text-muted-foreground text-sm">
               Keine Projektdaten für diesen Zeitraum.
@@ -77,7 +77,7 @@ export function ProjectReportTable() {
           </CardContent>
         </Card>
       ) : (
-        <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+        <div className="overflow-hidden border border-slate-900/15 bg-white">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b">

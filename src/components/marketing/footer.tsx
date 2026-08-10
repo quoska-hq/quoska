@@ -1,11 +1,13 @@
 import Link from "next/link";
+import Image from "next/image";
 import { currentYear } from "@/config/server/site-meta";
 
 const FOOTER_LINKS = [
   {
     title: "Produkt",
     links: [
-      { href: "/#features", label: "Funktionen" },
+      { href: "/#features", label: "Produkt" },
+      { href: "/#ablauf", label: "Ablauf" },
       { href: "/#preise", label: "Preise" },
       { href: "/#faq", label: "FAQ" },
       { href: "/register", label: "Kostenlos testen" },
@@ -34,35 +36,35 @@ export function MarketingFooter() {
   const year = currentYear;
 
   return (
-    <footer className="border-t border-slate-200 bg-slate-50">
-      <div className="mx-auto max-w-6xl px-5 py-12 sm:px-6">
+    <footer className="border-t border-slate-900/10 bg-[#f5f3ee]">
+      <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 sm:py-16">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2">
-              <img
+              <Image
                 src="/icons/logo.png"
                 alt="Quoska"
-                width={26}
-                height={26}
-                className="size-[26px] shrink-0"
+                width={122}
+                height={125}
+                className="h-[26px] w-auto shrink-0"
               />
               <span className="text-lg font-bold tracking-tight text-slate-900">
                 Quoska
               </span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-500">
-              Zeiterfassung für deutsche KMU. Gesetzlich compliant, fair
-              bepreist, in Deutschland entwickelt.
+              Eine klare Zeiterfassung für den Arbeitsalltag in deutschen
+              Betrieben.
             </p>
-            <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600">
-              🇩🇪 Made in Germany · Server in Frankfurt
+            <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+              Entwickelt in Deutschland
             </p>
           </div>
 
           {FOOTER_LINKS.map((group) => (
             <div key={group.title}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                 {group.title}
               </h3>
               <ul className="mt-3 space-y-2">
@@ -70,7 +72,7 @@ export function MarketingFooter() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-600 transition-colors hover:text-violet-700"
+                      className="text-sm text-slate-600 transition-colors hover:text-[#6658d3]"
                     >
                       {link.label}
                     </Link>

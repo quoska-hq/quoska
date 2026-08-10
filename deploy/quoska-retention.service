@@ -1,0 +1,13 @@
+[Unit]
+Description=Apply Quoska statutory data retention
+After=network-online.target quoska.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/quoska/deploy/run-cron.sh retention
+TimeoutStartSec=10min
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

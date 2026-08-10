@@ -14,7 +14,6 @@ import { SickEntryList } from "@/components/sick-entry-list";
 import { AbsenceCalendar } from "@/components/absence-calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Thermometer } from "lucide-react";
 
 interface EntgeltfortzahlungEntry {
   sickEntry: { id: string; start_date: string; employee_id: string };
@@ -39,13 +38,8 @@ export default function SickPage() {
   return (
     <div>
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="flex items-center justify-center size-8 rounded-lg bg-red-100 text-red-600">
-            <Thermometer className="size-4" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">Krankmeldungen</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight">Krankmeldungen</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Krankheitstage und AU-Bescheinigungen
         </p>
       </div>

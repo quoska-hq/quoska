@@ -18,6 +18,12 @@ import {
 } from "@/services/complianceService";
 import type { ApiResponse } from "@/types/api";
 import type { ClockStatusResponse } from "@/types/compliance";
+import { getHolidayDatesInRange } from "@/repos/holidayRepo";
+import { addDays } from "@/services/holidayService";
+import {
+  calculateScheduleTargetMinutes,
+  scheduledMinutesForDate,
+} from "@/services/workScheduleService";
 
 export async function GET() {
   try {
@@ -127,17 +133,26 @@ export async function GET() {
     // Get employee's actual target hours (not hardcoded)
     const { data: empRecord } = await supabase
       .from("employees")
-      .select("target_hours_week")
+      .select("target_hours_week, work_schedule, bundesland")
       .eq("id", employeeId)
       .single();
     const targetHoursWeek = empRecord?.target_hours_week ?? 40;
-    const targetMinutes = targetHoursWeek * 60;
+    const holidayMap = await getHolidayDatesInRange(
+      supabase,
+      empRecord?.bundesland ?? "berlin",
+      weekStartStr,
+      weekEndStr,
+    );
+    const targetMinutes = calculateScheduleTargetMinutes(
+      weekStartStr,
+      holidayMap,
+      empRecord?.work_schedule,
+      targetHoursWeek,
+    );
 
     // Calculate monthly carry-over: net minutes from previous days this month
     // minus the daily target for each of those days.
     // This represents how much surplus (+) or deficit (-) was accumulated before today.
-    const dailyTargetMinutes = Math.round(targetMinutes / 5); // 480 for 40h week
-
     const monthEntriesBeforeToday = await getMonthEntriesBeforeToday(
       supabase,
       tenantId,
@@ -160,11 +175,24 @@ export async function GET() {
       entriesByDate.set(entry.date, existing + net);
     }
 
-    // Sum up (worked - target) for each previous work day
-    // Days with no entries count as 0 worked (full deficit)
+    const monthHolidayMap = await getHolidayDatesInRange(
+      supabase,
+      empRecord?.bundesland ?? "berlin",
+      monthStart,
+      addDays(todayDate, -1),
+    );
+
+    // Sum every contractual day, including a full deficit when no entry exists.
     let monthCarryOverMinutes = 0;
-    for (const [, dayNet] of entriesByDate) {
-      monthCarryOverMinutes += dayNet - dailyTargetMinutes;
+    for (let date = monthStart; date < todayDate; date = addDays(date, 1)) {
+      const dayTarget = monthHolidayMap.has(date)
+        ? 0
+        : scheduledMinutesForDate(
+            empRecord?.work_schedule,
+            date,
+            targetHoursWeek,
+          );
+      monthCarryOverMinutes += (entriesByDate.get(date) ?? 0) - dayTarget;
     }
 
     const response: ClockStatusResponse = {

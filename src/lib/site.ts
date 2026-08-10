@@ -3,12 +3,11 @@
  *
  * ⚠️  IMPRESSUM / DATENSCHUTZ PLACEHOLDERS
  * -----------
- * Quoska's operating company is NOT YET registered (see
- * (your internal legal entity registration notes)). Every field below that holds
- * real operator data (name, address, tax IDs, contact) MUST be filled in by
- * Oskar before going live. Do not invent or guess these values.
+ * Operator name and address were confirmed against issued invoices and the
+ * ELSTER registration record on 2026-08-02. The production domain was purchased
+ * on 2026-08-09. The production contact mailbox was verified on 2026-08-10.
  *
- * The legal prose in the legal pages (TMG/§5, DSGVO/Art. 13, AGB) is template
+ * The legal prose in the legal pages (DDG/§5, DSGVO/Art. 13, AGB) is template
  * text and is canonical — only the operator fields need real data.
  */
 
@@ -16,64 +15,73 @@ export const site = {
   name: "Quoska",
   tagline: "Zeiterfassung für deutsche KMU",
   /** Production origin — set NEXT_PUBLIC_APP_URL in .env */
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "https://quoska.app",
+  url: process.env.NEXT_PUBLIC_APP_URL ?? "https://quoska.de",
   /** Hero / marketing language is German (de-DE). */
   locale: "de-DE",
 } as const;
 
 /**
- * Operator (Anbieter i.S.d. § 5 TMG / § 18 MStV).
+ * Operator (Anbieter i.S.d. § 5 DDG / § 18 MStV).
  *
- * TODO(oskar): Replace every [TODO: ...] field once the entity is registered.
- * Until then these are visible placeholders so nothing ships with fake data.
+ * Never add personal tax or banking identifiers here. Only information meant
+ * for public display belongs in this object.
  */
 export const legalInfo = {
-  operatorName: "[TODO: Vorname Nachname]" as string,
-  legalForm: "[TODO: Einzelunternehmen / UG / GmbH]" as string,
-  street: "[TODO: Straße Hausnummer]" as string,
-  zipCity: "[TODO: PLZ Ort]" as string,
+  operatorName: "Oskar Kuiper" as string,
+  legalForm: "Einzelunternehmer" as string,
+  street: "Heesestraße 1a" as string,
+  zipCity: "30449 Hannover" as string,
   country: "Deutschland",
-  /** Telefon — optional but expected on a German Impressum. */
-  phone: "[TODO: +49 ...]" as string,
-  email: "[TODO: kontakt@quoska.app]" as string,
+  /** Publish a dedicated business number only if one is intentionally added. */
+  phone: null as string | null,
+  email: "support@quoska.de" as string,
   /** Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG. */
-  vatId: "[TODO: DE123456789]" as string,
-  /** Steuernummer (Finanzamt) — darf im Impressum stehen, muss aber nicht. */
-  taxNumber: "[TODO: optional]" as string,
-  /** Handelsregister / Registernummer (nur bei HR-pflichtigen Firmen). */
-  registry: "[TODO: Amtsgericht …, HRB … — oder streichen]" as string,
+  vatId: null as string | null,
+  /** The personal tax number is deliberately not published. */
+  taxNumber: null as string | null,
+  /** No register entry is currently applicable/confirmed. */
+  registry: null as string | null,
   /** Berufshaftpflichtversicherung — Pflichtangabe nur für freie Berufe. */
   insurance: null as string | null,
   /** Verantwortlich für den Inhalt i.S.d. § 18 Abs. 2 MStV. */
-  responsibleForContent: "[TODO: Vorname Nachname, Anschrift wie oben]" as string,
+  responsibleForContent:
+    "Oskar Kuiper, Heesestraße 1a, 30449 Hannover" as string,
   /**
-   * Streitschlichtung: Verbraucherstreitbeilegung / OS-Plattform der EU.
-   * Pflichtangabe nach § 36 VBSG / Art. 14 OVO.
+   * Verbraucherstreitbeilegung statement for the public imprint.
    */
   disputeResolution:
-    "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: https://ec.europa.eu/consumers/odr/. Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen." as string,
+    "Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen." as string,
   /** Redaktionell Verantwortlicher gemäß § 18 Abs. 2 MStV. */
   supervisoryAuthority: null as string | null,
 } as const;
 
 /**
- * Sub-processor (Auftragsverarbeiter) for DSGVO disclosure.
- * Supabase hosts in Frankfurt (EU). Update if hosting changes.
+ * Service providers for the DSGVO disclosure. Keep this list aligned with the
+ * actual production deployment and the signed provider agreements.
  */
 export const processors = [
   {
     name: "Supabase Inc.",
-    purpose: "Hosting, Authentifizierung und Datenbank (PostgreSQL)",
-    location: "Frankfurt am Main, Deutschland (EU)",
+    purpose: "Authentifizierung, Datenbank (PostgreSQL) und Dateispeicher",
+    location:
+      "Projektregion Frankfurt am Main; weitere Verarbeitung nach DPA und Unterauftragsverarbeiterliste",
     privacyUrl: "https://supabase.com/privacy",
     website: "https://supabase.com",
   },
   {
-    name: "Vercel Inc.",
-    purpose: "Hosting der Web-Anwendung (Edge Network / CDN)",
-    location: "EU-Region (Server in Frankfurt / Amsterdam)",
-    privacyUrl: "https://vercel.com/legal/privacy-policy",
-    website: "https://vercel.com",
+    name: "Hetzner Online GmbH",
+    purpose: "Hosting der Web-Anwendung und Server-Logfiles",
+    location: "Nürnberg, Deutschland",
+    privacyUrl: "https://www.hetzner.com/legal/privacy-policy/",
+    website: "https://www.hetzner.com",
+  },
+  {
+    name: "Stripe Payments Europe, Limited",
+    purpose: "Zahlungsabwicklung, Abonnements und Rechnungsbereitstellung",
+    location:
+      "Irland; weitere Verarbeitung und internationale Übermittlungen nach Stripe-DPA",
+    privacyUrl: "https://stripe.com/de/privacy",
+    website: "https://stripe.com",
   },
 ] as const;
 

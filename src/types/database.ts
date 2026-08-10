@@ -1,12 +1,15 @@
 // Database row types matching the Supabase schema exactly.
 // Reference: supabase/migrations/
 
+import type { WorkSchedule } from "@/types/work-schedule";
+
 export interface Tenant {
   id: string;
   name: string;
   plan: "free" | "team" | "pro";
   stripe_customer_id: string | null;
   bundesland: string | null;
+  default_work_schedule?: WorkSchedule;
   setup_complete: boolean;
   created_at: string;
   updated_at: string;
@@ -21,6 +24,7 @@ export interface Employee {
   email: string;
   role: "admin" | "manager" | "employee";
   target_hours_week: number;
+  work_schedule?: WorkSchedule;
   bundesland: string | null;
   invitation_token: string | null;
   invited_at: string | null;

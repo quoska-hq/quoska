@@ -137,7 +137,7 @@ export function HeaderClockWidget() {
           size="sm"
           onClick={() => wrap(() => {}, "clock-out", clockOutMutation)}
           disabled={isProcessing && !optimistic}
-          className="gap-1.5"
+          className="h-8 gap-1.5"
         >
           <Square className="size-4" />
           <span className="hidden sm:inline">Ausstempeln</span>
@@ -147,7 +147,7 @@ export function HeaderClockWidget() {
           size="sm"
           onClick={() => wrap(() => {}, "clock-in", clockInMutation)}
           disabled={isProcessing && !optimistic}
-          className="gap-1.5"
+          className="h-8 gap-1.5"
         >
           <Play className="size-4" />
           <span className="hidden sm:inline">Stempeln</span>

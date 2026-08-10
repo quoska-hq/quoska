@@ -1,11 +1,14 @@
-/**
- * Auth layout — split-screen layout for login/register.
- * Inspired by Toggl/Clockify's clean auth pages.
- */
-
+import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 import { currentYear } from "@/config/server/site-meta";
+
+const PRODUCT_POINTS = [
+  "Zeiten und Pausen an einem Ort",
+  "Korrekturen mit nachvollziehbarem Verlauf",
+  "Bis drei Personen kostenlos",
+] as const;
 
 export default function AuthLayout({
   children,
@@ -13,76 +16,83 @@ export default function AuthLayout({
   children: ReactNode;
 }>) {
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Brand panel — desktop only */}
-      <div className="hidden lg:flex lg:w-[480px] xl:lg:w-[520px] bg-violet-600 relative overflow-hidden shrink-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-violet-700 to-purple-800" />
-        <div className="relative flex flex-col justify-between w-full p-10 text-white">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center size-9 rounded-lg bg-white">
-              <img src="/icons/logo.png" alt="Quoska" width={26} height={26} />
-            </div>
-            <span className="text-lg font-bold">Quoska</span>
-          </div>
+    <div className="flex min-h-screen bg-[#f5f3ee]">
+      <aside className="relative hidden w-[480px] shrink-0 flex-col justify-between border-r border-slate-900/15 bg-[#dcd8cf] p-10 lg:flex xl:w-[520px]">
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/icons/logo.png"
+            alt="Quoska"
+            width={122}
+            height={125}
+            className="h-7 w-auto"
+          />
+          <span className="text-lg font-bold tracking-[-0.03em] text-slate-950">
+            Quoska
+          </span>
+        </Link>
 
-          {/* Center message */}
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold leading-snug">
-              Zeiterfassung,{" "}
-              <span className="text-violet-200">die dein Team mag.</span>
-            </h2>
-            <p className="text-violet-200 text-sm leading-relaxed">
-              Einfach, compliant und fair bepreist.
-            </p>
-            <ul className="space-y-3 pt-2">
-              {[
-                "Gesetzlich konform (ArbZG, DSGVO)",
-                "39 € Flatrate — egal wie viele Mitarbeiter",
-                "In 2 Minuten eingerichtet",
-              ].map((text) => (
-                <li key={text} className="flex items-center gap-2.5 text-sm text-violet-100">
-                  <div className="flex items-center justify-center size-5 rounded-full bg-white/15 shrink-0">
-                    <Check className="size-3 text-white" />
-                  </div>
-                  {text}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Bottom */}
-          <div className="space-y-1 text-xs text-violet-300">
-            <p>© {currentYear} Quoska</p>
-            <p>
-              <a href="/datenschutz" className="underline-offset-2 hover:underline">Datenschutz</a>
-              {" · "}
-              <a href="/impressum" className="underline-offset-2 hover:underline">Impressum</a>
-              {" · "}
-              <a href="/agb" className="underline-offset-2 hover:underline">AGB</a>
-            </p>
-          </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6658d3]">
+            Der einfache Arbeitstag
+          </p>
+          <h1 className="mt-5 max-w-sm font-serif text-5xl leading-[1.04] tracking-[-0.04em] text-slate-950">
+            Zeiterfassung, die nicht im Weg steht.
+          </h1>
+          <p className="mt-5 max-w-sm leading-7 text-slate-600">
+            Für Mitarbeitende schnell verstanden. Für Verantwortliche sauber
+            nachvollziehbar.
+          </p>
+          <ul className="mt-8 border-t border-slate-900/20">
+            {PRODUCT_POINTS.map((point) => (
+              <li
+                key={point}
+                className="flex items-center gap-3 border-b border-slate-900/20 py-4 text-sm text-slate-700"
+              >
+                <Check className="size-4 shrink-0 text-[#6658d3]" />
+                {point}
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
 
-      {/* Form panel */}
-      <div className="flex flex-1 items-center justify-center px-4 py-12">
+        <div className="flex items-center justify-between text-xs text-slate-500">
+          <p>© {currentYear} Quoska</p>
+          <p>
+            <Link href="/datenschutz" className="hover:text-[#6658d3]">
+              Datenschutz
+            </Link>
+            {" · "}
+            <Link href="/impressum" className="hover:text-[#6658d3]">
+              Impressum
+            </Link>
+          </p>
+        </div>
+      </aside>
+
+      <main className="flex flex-1 items-center justify-center px-5 py-12 sm:px-8">
         <div className="w-full max-w-sm">
-          {/* Mobile-only logo */}
-          <div className="lg:hidden mb-8 text-center">
-            <div className="inline-flex items-center justify-center size-14 rounded-xl bg-violet-600 mb-3">
-              <img src="/icons/logo.png" alt="Quoska" width={32} height={32} className="rounded-md bg-white p-1" />
-            </div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Quoska
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="mb-10 lg:hidden">
+            <Link href="/" className="inline-flex items-center gap-2.5">
+              <Image
+                src="/icons/logo.png"
+                alt="Quoska"
+                width={122}
+                height={125}
+                className="h-[30px] w-auto"
+              />
+              <span className="text-xl font-bold tracking-[-0.03em] text-slate-950">
+                Quoska
+              </span>
+            </Link>
+            <p className="mt-3 text-sm text-slate-500">
               Zeiterfassung für dein Team
             </p>
           </div>
-          {children}
+          <div className="border-t-2 border-slate-950 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:p-8">
+            {children}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

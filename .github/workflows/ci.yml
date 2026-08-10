@@ -19,6 +19,10 @@ jobs:
     timeout-minutes: 10
 
     env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-key
       # Billing tested in no-keys mode (the open-source / self-host path).
       # Striped empty so the zod schema's .optional() allows them through.
       STRIPE_SECRET_KEY: ""
@@ -50,16 +54,46 @@ jobs:
       - name: Unit + integration tests
         run: npm test
 
+      - name: Production build
+        run: npm run build
+
+  # ── Production container ────────────────────────────────────────────────
+  # Validates that the standalone Next.js output can be packaged without
+  # passing any server secret into the image build.
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build production image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: quoska:ci
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=ci-anon-key
+            NEXT_PUBLIC_APP_URL=http://localhost:3000
+            NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED=
+            APP_REVISION=${{ github.sha }}
+
   # ── End-to-end (Playwright) ──────────────────────────────────────────────
   # Boots a local Supabase stack + the app, then runs the Playwright suite.
-  # Allowed to fail without blocking merges (continue-on-error) while the
-  # Supabase service setup is being stabilized.
+  # This is a required merge gate: deployment must not proceed when a real
+  # browser flow or the local database setup fails.
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    continue-on-error: true
 
     env:
+      NEXT_PUBLIC_APP_URL: http://localhost:3100
+      CRON_SECRET: ci-cron-secret-with-at-least-32-characters
       STRIPE_SECRET_KEY: ""
       STRIPE_TEAM_PRICE_ID: ""
       STRIPE_BUSINESS_PRICE_ID: ""
@@ -86,6 +120,15 @@ jobs:
 
       - name: Start local Supabase
         run: supabase start
+
+      - name: Export local Supabase credentials for the app
+        run: |
+          eval "$(supabase status -o env)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
 
       - name: Apply migrations
         run: supabase db push

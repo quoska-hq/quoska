@@ -6,6 +6,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Palmtree } from "lucide-react";
@@ -33,23 +34,23 @@ export function LeaveBalanceWidget({ employeeId }: { employeeId?: string }) {
   });
 
   if (isLoading) {
-    return <Skeleton className="h-24 rounded-xl" />;
+    return <Skeleton className="h-24 rounded-sm" />;
   }
 
   if (!data) return null;
 
   return (
-    <Card className="rounded-xl">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex items-center justify-center size-7 rounded-lg bg-emerald-100 text-emerald-600">
+    <Card className="border-slate-900/15 bg-white">
+      <CardContent className="p-5">
+        <div className="mb-4 flex items-center gap-2.5">
+          <div className="flex size-7 items-center justify-center rounded-sm border border-[#6658d3]/20 bg-[#f5f3ff] text-[#5548ba]">
             <Palmtree className="size-4" />
           </div>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
             Urlaubskontingent
           </h3>
         </div>
-        <div className="grid grid-cols-4 gap-2 text-center">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
           <BalanceItem label="Anspruch" value={data.total} />
           <BalanceItem label="Genehmigt" value={data.used} variant="used" />
           <BalanceItem label="Ausstehend" value={data.pending} variant="pending" />
@@ -62,17 +63,21 @@ export function LeaveBalanceWidget({ employeeId }: { employeeId?: string }) {
 
 function BalanceItem({ label, value, variant }: { label: string; value: number; variant?: string }) {
   const colorMap: Record<string, string> = {
-    used: "text-blue-700 bg-blue-50",
-    pending: "text-amber-700 bg-amber-50",
-    low: "text-red-700 bg-red-50",
-    available: "text-emerald-700 bg-emerald-50",
+    used: "border-[#6658d3]/15 bg-[#f5f3ff] text-[#5548ba]",
+    pending: "border-amber-700/15 bg-amber-50/55 text-amber-700",
+    low: "border-red-700/15 bg-red-50/55 text-red-700",
+    available: "border-emerald-700/15 bg-emerald-50/55 text-emerald-700",
   };
-  const color = colorMap[variant ?? ""] ?? "text-gray-700 bg-gray-50";
+  const color =
+    colorMap[variant ?? ""] ??
+    "border-slate-900/10 bg-[#faf9f6] text-slate-700";
 
   return (
-    <div className={`rounded-lg p-2 ${color}`}>
-      <p className="text-lg font-bold">{value}</p>
-      <p className="text-[10px] font-medium opacity-70">{label}</p>
+    <div className={cn("rounded-sm border px-3 py-3", color)}>
+      <p className="text-xl font-semibold leading-none tabular-nums">{value}</p>
+      <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-slate-500">
+        {label}
+      </p>
     </div>
   );
 }

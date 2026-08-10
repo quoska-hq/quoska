@@ -97,15 +97,11 @@ export async function getAbsencesForPeriod(
 ): Promise<AbsenceEntry[]> {
   const absences: AbsenceEntry[] = [];
 
-  // Get approved leaves
-  const leaves = await getApprovedLeavesForTenant(
-    supabase, tenantId, startDate, endDate,
-  );
-
-  // Get sick entries
-  const sickEntries = await getActiveSickForTenant(
-    supabase, tenantId, startDate, endDate,
-  );
+  // These datasets are independent, so fetch them concurrently.
+  const [leaves, sickEntries] = await Promise.all([
+    getApprovedLeavesForTenant(supabase, tenantId, startDate, endDate),
+    getActiveSickForTenant(supabase, tenantId, startDate, endDate),
+  ]);
 
   // Get holidays to exclude (so we don't report absence on holidays)
   let holidayDates = new Set<string>();

@@ -1,17 +1,23 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/config/supabase/server";
+import { createAdminClient, createClient } from "@/config/supabase/server";
 import { setupCompanySchema } from "@/types/setup";
 import { BUNDESLAENDER } from "@/types";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
+async function getAuthenticatedUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+}
 
-  if (!userId) {
+export async function GET() {
+  const user = await getAuthenticatedUser();
+  if (!user) {
     return NextResponse.json(
-      { data: null, error: "userId ist erforderlich" },
-      { status: 400 },
+      { data: null, error: "Nicht angemeldet" },
+      { status: 401 },
     );
   }
 
@@ -19,8 +25,8 @@ export async function GET(request: Request) {
 
   const { data: employee } = await admin
     .from("employees")
-    .select("tenant_id, tenants(id, setup_complete)")
-    .eq("user_id", userId)
+    .select("id, tenant_id, first_name, last_name, email, target_hours_week, work_schedule, bundesland, tenants(id, name, bundesland, default_work_schedule, setup_complete)")
+    .eq("user_id", user.id)
     .single();
 
   if (!employee) {
@@ -37,6 +43,19 @@ export async function GET(request: Request) {
     data: {
       tenantId: employee.tenant_id,
       setupComplete: tenant?.setup_complete ?? false,
+      profile: {
+        firstName: employee.first_name,
+        lastName: employee.last_name,
+        email: employee.email,
+        targetHoursWeek: employee.target_hours_week,
+        workSchedule: employee.work_schedule,
+        bundesland: employee.bundesland,
+      },
+      company: {
+        name: tenant?.name ?? "",
+        bundesland: tenant?.bundesland ?? "",
+        defaultWorkSchedule: tenant?.default_work_schedule ?? null,
+      },
     },
     error: null,
   });
@@ -44,6 +63,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return NextResponse.json(
+        { data: null, error: "Nicht angemeldet" },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json();
     const input = setupCompanySchema.parse(body);
 
@@ -63,7 +90,7 @@ export async function POST(request: Request) {
     const { data: employee } = await admin
       .from("employees")
       .select("tenant_id")
-      .eq("user_id", body.userId)
+      .eq("user_id", user.id)
       .single();
 
     if (!employee) {
@@ -85,6 +112,20 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json(
         { data: null, error: "Fehler beim Speichern der Firmendaten" },
+        { status: 500 },
+      );
+    }
+
+    // The company state is the default for the founder and future employees.
+    const { error: employeeError } = await admin
+      .from("employees")
+      .update({ bundesland: input.bundesland })
+      .eq("user_id", user.id)
+      .eq("tenant_id", employee.tenant_id);
+
+    if (employeeError) {
+      return NextResponse.json(
+        { data: null, error: "Bundesland konnte nicht für dein Profil übernommen werden" },
         { status: 500 },
       );
     }

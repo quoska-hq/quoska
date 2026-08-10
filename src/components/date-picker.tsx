@@ -74,7 +74,7 @@ export function DatePicker({
               id={id}
               variant="outline"
               className={cn(
-                "w-full justify-start text-left font-normal h-8",
+                "h-10 w-full justify-start border-slate-900/15 bg-white px-3 text-left font-normal shadow-none hover:border-slate-900/30",
                 !value && "text-muted-foreground",
               )}
               disabled={disabled}
@@ -87,10 +87,16 @@ export function DatePicker({
             ? format(new Date(value + "T12:00:00"), "dd.MM.yyyy")
             : placeholder}
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" side="bottom" align="start">
+        <PopoverContent
+          className="w-auto max-w-[calc(100vw-2rem)] border-slate-900/15 p-0 shadow-lg"
+          side="bottom"
+          align="start"
+          sideOffset={6}
+        >
           <Calendar
             mode="single"
             locale={de}
+            defaultMonth={selected}
             selected={selected}
             onSelect={(date: Date | undefined) => {
               if (date) {

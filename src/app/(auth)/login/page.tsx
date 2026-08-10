@@ -25,6 +25,9 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const linkError = searchParams.get("error") === "auth"
+    ? "Der Link ist ungültig oder abgelaufen. Bitte fordere eine neue E-Mail an."
+    : null;
 
   const {
     register,
@@ -67,7 +70,12 @@ function LoginForm() {
 
   return (
     <div>
-      <h2 className="mb-6 text-center text-lg font-semibold text-gray-900">Anmelden</h2>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#6658d3]">
+        Willkommen zurück
+      </p>
+      <h1 className="mb-7 font-serif text-3xl tracking-[-0.035em] text-slate-950">
+        Anmelden
+      </h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
@@ -85,7 +93,15 @@ function LoginForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Passwort</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="password">Passwort</Label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-[#6658d3] hover:text-slate-950"
+            >
+              Passwort vergessen?
+            </Link>
+          </div>
           <Input
             id="password"
             type="password"
@@ -98,13 +114,13 @@ function LoginForm() {
           )}
         </div>
 
-        {serverError && (
+        {(serverError || linkError) && (
           <Alert variant="destructive">
-            <AlertDescription>{serverError}</AlertDescription>
+            <AlertDescription>{serverError || linkError}</AlertDescription>
           </Alert>
         )}
 
-        <Button type="submit" disabled={isSubmitting} className="w-full bg-violet-600 hover:bg-violet-700 text-white">
+        <Button type="submit" disabled={isSubmitting} className="h-10 w-full">
           {isSubmitting ? "Anmeldung…" : "Anmelden"}
         </Button>
       </form>
@@ -114,21 +130,21 @@ function LoginForm() {
         <>
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-200" />
+              <span className="w-full border-t border-slate-900/15" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-gray-400">oder</span>
+              <span className="bg-white px-2 text-slate-400">oder</span>
             </div>
           </div>
           <GoogleSignInButton />
         </>
       )}
 
-      <p className="mt-6 text-center text-sm text-gray-500">
+      <p className="mt-6 text-center text-sm text-slate-500">
         Noch kein Account?{" "}
         <Link
           href="/register"
-          className="font-medium text-violet-600 hover:text-violet-700"
+          className="font-semibold text-[#6658d3] hover:text-slate-950"
         >
           Registrieren
         </Link>
@@ -142,17 +158,17 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div>
-          <h2 className="mb-6 text-center text-lg font-semibold text-gray-900">Anmelden</h2>
+          <h1 className="mb-6 font-serif text-3xl tracking-[-0.035em] text-slate-950">Anmelden</h1>
           <div className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">E-Mail</label>
-              <div className="h-9 rounded-md bg-gray-100 animate-pulse" />
+              <div className="h-9 bg-[#ebe8e0] animate-pulse" />
             </div>
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Passwort</label>
-              <div className="h-9 rounded-md bg-gray-100 animate-pulse" />
+              <div className="h-9 bg-[#ebe8e0] animate-pulse" />
             </div>
-            <div className="h-9 rounded-md bg-gray-100 animate-pulse" />
+            <div className="h-9 bg-[#ebe8e0] animate-pulse" />
           </div>
         </div>
       }

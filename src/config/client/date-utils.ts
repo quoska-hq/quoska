@@ -35,11 +35,30 @@ export function epochToDate(days: number): string {
   return `${y}-${String(mo + 1).padStart(2, "0")}-${String(r + 1).padStart(2, "0")}`;
 }
 
-/** Get current epoch day count from Date.now(). */
-export function getCurrentEpochDays(): number {
+/**
+ * Get the current German calendar date as an epoch-day number.
+ *
+ * Dividing Date.now() by 24 hours uses the UTC date and therefore shows the
+ * previous day/week between German midnight and UTC midnight. Quoska serves
+ * German employers, so navigation boundaries must follow Europe/Berlin.
+ */
+export function getCurrentEpochDays(
   // eslint-disable-next-line @quoska/legal/no-client-timestamps
-  const nowMs = Date.now();
-  return Math.floor(nowMs / 86_400_000);
+  nowMs = Date.now(),
+): number {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(nowMs);
+  const value = (type: "year" | "month" | "day") =>
+    Number(parts.find((part) => part.type === type)?.value);
+  const year = value("year");
+  const month = value("month");
+  const day = value("day");
+
+  return Math.floor(Date.UTC(year, month - 1, day) / 86_400_000);
 }
 
 /** Get day of week (0=Sun, 1=Mon, ... 6=Sat) from epoch days. */

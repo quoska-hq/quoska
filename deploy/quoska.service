@@ -1,0 +1,18 @@
+[Unit]
+Description=Quoska web application and reverse proxy
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/quoska
+ExecStart=/usr/bin/docker compose --env-file .env.production -f compose.prod.yaml up --no-build
+ExecStop=/usr/bin/docker compose --env-file .env.production -f compose.prod.yaml stop -t 30
+Restart=on-failure
+RestartSec=10s
+TimeoutStartSec=120s
+TimeoutStopSec=60s
+
+[Install]
+WantedBy=multi-user.target

@@ -81,8 +81,8 @@ export function ClockMainCard({
   progressFraction,
 }: ClockMainCardProps) {
   return (
-    <Card className="shadow-md border-gray-100/80 overflow-visible">
-      <CardContent className="pt-6 pb-6 flex flex-col items-center gap-4">
+    <Card className="overflow-visible border-slate-900/15 bg-white">
+      <CardContent className="flex flex-col items-center gap-5 px-7 py-8">
 
         {/* Circular progress ring + button */}
         <div className="relative">
@@ -107,29 +107,24 @@ export function ClockMainCard({
                   aria-label={btn.label}
                   className={`
                     stamp-button relative z-10
-                    w-[200px] h-[200px]
+                    size-[184px]
                     rounded-full
+                    border border-white/10
                     flex items-center justify-center
                     text-white
-                    transition-colors duration-300 ease-out
+                    transition-[background-color,transform,box-shadow] duration-300 ease-out
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6658d3]/45 focus-visible:ring-offset-4
                     disabled:cursor-not-allowed
                     ${btn.bgClass} ${!optimisticAction ? btn.hoverClass : ""}
                   `}
                   style={{
                     boxShadow: btnShadow,
-                    margin: (ringSize - 200) / 2,
+                    margin: (ringSize - 184) / 2,
                   }}
                 >
-                  {/* Inner glow */}
-                  <div
-                    className="absolute inset-0 rounded-full opacity-20 pointer-events-none"
-                    style={{
-                      background: "radial-gradient(circle at 35% 35%, rgba(255,255,255,0.5) 0%, transparent 60%)",
-                    }}
-                  />
                   <div className="relative z-10 flex flex-col items-center gap-2">
                     {btn.iconSvg}
-                    <span className="text-[11px] font-semibold tracking-wider uppercase opacity-90">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-90">
                       {btn.label}
                     </span>
                   </div>
@@ -144,7 +139,7 @@ export function ClockMainCard({
           {/* Target reached celebration badge */}
           {hasReachedTarget && !activeEntry && (
             <div className="absolute -top-1 -right-1 z-20 celebrate-badge">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-yellow-500 flex items-center justify-center shadow-lg">
+              <div className="flex size-10 items-center justify-center rounded-full bg-amber-500">
                 <CheckCircle2 className="size-5 text-white" />
               </div>
             </div>
@@ -243,7 +238,7 @@ export function ClockMainCard({
               variant={hasReachedTarget ? "default" : "secondary"}
               className={`text-[10px] px-1.5 py-0 rounded-full ${
                 hasReachedTarget
-                  ? "bg-gradient-to-r from-emerald-500 to-amber-400 text-white border-0"
+                  ? "bg-emerald-600 text-white border-0"
                   : ""
               }`}
             >
