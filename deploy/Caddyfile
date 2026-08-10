@@ -1,17 +1,17 @@
 www.{$QUOSKA_DOMAIN} {
-  redir https://{$QUOSKA_DOMAIN}{uri} permanent
+	redir https://{$QUOSKA_DOMAIN}{uri} permanent
 }
 
 {$QUOSKA_DOMAIN} {
-  encode zstd gzip
+	encode zstd gzip
 
-  header {
-    -Server
-    Strict-Transport-Security "max-age=31536000; includeSubDomains"
-    X-Content-Type-Options "nosniff"
-    X-Frame-Options "SAMEORIGIN"
-    Referrer-Policy "strict-origin-when-cross-origin"
-  }
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
 
-  reverse_proxy app:3000
+	reverse_proxy app:3000
 }

@@ -9,6 +9,7 @@ Type=simple
 WorkingDirectory=/opt/quoska
 ExecStart=/usr/bin/docker compose --env-file .env.production -f compose.prod.yaml up --no-build
 ExecStop=/usr/bin/docker compose --env-file .env.production -f compose.prod.yaml stop -t 30
+SuccessExitStatus=130 143
 Restart=on-failure
 RestartSec=10s
 TimeoutStartSec=120s
