@@ -1,8 +1,24 @@
--- Keep server-side operations portable across hosted Supabase and fresh local
--- CLI stacks. RLS bypass alone does not grant SQL privileges, and newer local
--- stacks no longer guarantee the same implicit grants for migrated objects.
+-- Keep database access portable across hosted Supabase and fresh local CLI
+-- stacks. RLS policies decide which rows an authenticated user may access, but
+-- the role still needs the corresponding SQL privileges first. Newer local
+-- stacks no longer guarantee the implicit grants older projects received.
 
-GRANT USAGE ON SCHEMA public TO service_role;
+GRANT USAGE ON SCHEMA public TO authenticated, service_role;
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+  ON ALL TABLES IN SCHEMA public
+  TO authenticated;
+GRANT USAGE, SELECT
+  ON ALL SEQUENCES IN SCHEMA public
+  TO authenticated;
+
+-- These records are mutated only by server-side handlers after their own
+-- authorization checks. Re-apply the least-privilege exceptions from 019
+-- after the portable table grant above.
+REVOKE INSERT, UPDATE, DELETE ON public.tenants FROM authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.public_holidays FROM authenticated;
+REVOKE INSERT, UPDATE, DELETE ON public.employees FROM authenticated;
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO service_role;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO service_role;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role;
