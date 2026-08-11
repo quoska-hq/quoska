@@ -3,6 +3,15 @@
  */
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import WebSocket from "ws";
+
+type RealtimeTransport = NonNullable<
+  NonNullable<Parameters<typeof createClient>[2]>["realtime"]
+>["transport"];
+
+// `ws` implements Supabase's WebSocket contract, but its broader overloads are
+// not structurally assignable to the narrower constructor type.
+const websocketTransport = WebSocket as unknown as RealtimeTransport;
 
 const SUPABASE_URL = "http://127.0.0.1:54321";
 const SERVICE_ROLE_KEY =
@@ -11,6 +20,7 @@ const SERVICE_ROLE_KEY =
 export const adminClient: SupabaseClient = createClient(
   SUPABASE_URL,
   SERVICE_ROLE_KEY,
+  { realtime: { transport: websocketTransport } },
 );
 
 /** Generate a unique test email. */
