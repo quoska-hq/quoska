@@ -2,6 +2,7 @@
 .github
 .next
 .next-e2e
+.next-marketing
 node_modules
 npm-debug.log*
 .env

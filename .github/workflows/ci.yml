@@ -32,9 +32,9 @@ jobs:
       STRIPE_WEBHOOK_SECRET: ""
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -66,12 +66,12 @@ jobs:
     needs: test
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       - name: Build production image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false
@@ -101,9 +101,9 @@ jobs:
       STRIPE_WEBHOOK_SECRET: ""
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -114,7 +114,7 @@ jobs:
       # Local Supabase stack — the E2E tests use the well-known local demo
       # keys (127.0.0.1:54321). supabase CLI boots the full Docker stack.
       - name: Setup Supabase
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@v3
         with:
           version: latest
 
@@ -131,7 +131,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Apply migrations
-        run: supabase db push
+        run: supabase db push --local
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -141,7 +141,7 @@ jobs:
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report/

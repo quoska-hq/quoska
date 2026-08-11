@@ -8,7 +8,7 @@ import {
   cleanupTestUser,
   createTestUser,
   TEST_PASSWORD,
-} from "../../tests/e2e/helpers";
+} from "../e2e-helpers";
 import { epochToDate, getCurrentEpochDays } from "@/config/client/date-utils";
 
 const EMAIL = "marketing-demo@quoska.test";
