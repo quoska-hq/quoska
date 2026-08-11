@@ -223,11 +223,16 @@ test.describe("Correction Request Flow — Story 4.2", () => {
     await page.goto("/app/my-times");
 
     // Should show the entry date in the list and the unchanged time.
-    // clock_out is stored as UTC; the UI renders it in the host timezone, so
-    // compute the expected display with the same logic as formatTimeLocal
-    // (both run under the host TZ) to keep the assertion timezone-independent.
+    // clock_out is stored as UTC; Playwright renders the UI in Europe/Berlin.
+    // Format the expectation explicitly in that timezone so the Node runner's
+    // host timezone cannot change the assertion.
     const clockOut = new Date(`${entryDate}T16:00:00.000Z`);
-    const expectedClockOut = `${String(clockOut.getHours()).padStart(2, "0")}:${String(clockOut.getMinutes()).padStart(2, "0")}`;
+    const expectedClockOut = new Intl.DateTimeFormat("de-DE", {
+      timeZone: "Europe/Berlin",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).format(clockOut);
     await expect(page.getByText(entryDateDE)).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText(expectedClockOut)).toBeVisible({ timeout: 5_000 });
   });

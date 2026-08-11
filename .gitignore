@@ -5,7 +5,7 @@ node_modules/
 .next/
 .next-e2e/
 .next-marketing/
-out/
+/out/
 
 # env — NEVER commit real secrets. Use .env.example as the template.
 .env
