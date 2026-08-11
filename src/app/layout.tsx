@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { CookieBanner } from "@/components/marketing/cookie-banner";
 import { site } from "@/lib/site";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -19,17 +17,6 @@ export const metadata: Metadata = {
     "Arbeitszeiten, Pausen, Korrekturen und Auswertungen für deutsche Betriebe — übersichtlich und ohne komplizierte Einführung.",
   applicationName: site.name,
   manifest: "/manifest.json",
-  keywords: [
-    "Zeiterfassung",
-    "Arbeitszeiterfassung",
-    "ArbZG",
-    "Stempeluhr",
-    "Zeiterfassung Software",
-    "KMU",
-    "DSGVO",
-    "Pausenerfassung",
-    "Deutschland",
-  ],
   authors: [{ name: site.name }],
   creator: site.name,
   publisher: site.name,
@@ -63,7 +50,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   themeColor: "#f5f3ee",
 };
 
@@ -73,17 +59,17 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="de" className={cn("h-full antialiased", "font-sans", inter.variable)}>
+    <html
+      lang="de"
+      data-scroll-behavior="smooth"
+      className={cn("h-full antialiased", "font-sans", inter.variable)}
+    >
       <head>
         <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
-        {/* DSGVO-honest cookie banner (no tracking). Mounted once globally. */}
-        <CookieBanner />
+        {children}
         {/* Service worker registration */}
         <script
           dangerouslySetInnerHTML={{

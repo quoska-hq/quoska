@@ -13,7 +13,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     { url: base, lastModified, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/register`, lastModified, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/funktionen`, lastModified, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/preise`, lastModified, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/sicherheit`, lastModified, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/digitale-zeiterfassung`, lastModified, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/zeiterfassung-kleinbetriebe`, lastModified, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/agb`, lastModified, changeFrequency: "yearly", priority: 0.4 },
     {
       url: `${base}/datenschutz`,

@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import { MarketingNav } from "@/components/marketing/nav";
 import { MarketingFooter } from "@/components/marketing/footer";
 import { HeroSection } from "@/components/marketing/sections/hero";
+import { ProductTourSection } from "@/components/marketing/sections/product-tour";
 import { FeaturesSection } from "@/components/marketing/sections/features";
+import { WhyQuoskaSection } from "@/components/marketing/sections/why-quoska";
 import { HowItWorksSection } from "@/components/marketing/sections/how-it-works";
+import { TrustSection } from "@/components/marketing/sections/trust";
 import { PricingSection } from "@/components/marketing/sections/pricing";
 import { FaqSection, FAQ } from "@/components/marketing/sections/faq";
 import { FinalCtaSection } from "@/components/marketing/sections/final-cta";
@@ -11,16 +14,16 @@ import { site, legalInfo } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Quoska — Zeiterfassung, die im Betrieb funktioniert",
+    absolute: "Digitale Zeiterfassung für kleine Betriebe | Quoska",
   },
   description:
-    "Arbeitszeiten, Pausen, Korrekturen und Auswertungen für deutsche Betriebe. Klar für Mitarbeitende, übersichtlich für Verantwortliche.",
+    "Digitale Zeiterfassung für kleine Betriebe: Arbeitszeiten, Pausen, Urlaub und nachvollziehbare Korrekturen. Kostenlos bis 3 Personen.",
   alternates: { canonical: "/" },
   category: "Business & Industrial",
   openGraph: {
-    title: "Quoska — Zeiterfassung für deutsche KMU",
+    title: "Digitale Zeiterfassung für kleine Betriebe | Quoska",
     description:
-      "Arbeitszeit erfassen, Pausen dokumentieren und Auswertungen erstellen — ohne komplizierte Einführung.",
+      "Arbeitszeiten, Pausen, Urlaub und Korrekturen an einem Ort — kostenlos bis 3 Personen.",
     locale: "de_DE",
     type: "website",
     siteName: "Quoska",
@@ -28,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Quoska — Zeiterfassung für deutsche KMU",
+    title: "Digitale Zeiterfassung für kleine Betriebe | Quoska",
     description:
-      "Arbeitszeit erfassen, Pausen dokumentieren und Auswertungen erstellen.",
+      "Arbeitszeiten, Pausen, Urlaub und Korrekturen an einem Ort — kostenlos bis 3 Personen.",
   },
 };
 
@@ -64,7 +67,7 @@ const jsonLd = {
       inLanguage: "de-DE",
       url: site.url,
       description:
-        "Zeiterfassung für deutsche KMU mit Pausen, Korrekturen und Auswertungen.",
+        "Digitale Zeiterfassung für kleine Betriebe mit Pausen, Urlaub, Korrekturen und Auswertungen.",
       publisher: { "@id": `${site.url}/#organization` },
       offers: [
         { "@type": "Offer", name: "Free", price: "0", priceCurrency: "EUR" },
@@ -96,8 +99,11 @@ export default function HomePage() {
 
       <main className="flex-1">
         <HeroSection />
+        <ProductTourSection />
         <FeaturesSection />
+        <WhyQuoskaSection />
         <HowItWorksSection />
+        <TrustSection />
         <PricingSection />
         <FaqSection />
         <FinalCtaSection />

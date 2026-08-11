@@ -2,162 +2,146 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="public/banner-dark.png">
     <source media="(prefers-color-scheme: light)" srcset="public/banner-light.png">
-    <img src="public/banner-light.png" height="70" alt="Quoska">
+    <img src="public/banner-light.png" height="82" alt="Quoska">
   </picture>
 </p>
 
-<p align="center">Gesetzlich vorgeschriebene Zeiterfassung für deutsche KMU — als Flatrate.</p>
+<h3 align="center">Digitale Zeiterfassung für kleine Betriebe. Ohne Theater.</h3>
 
 <p align="center">
-  <a href="https://quoska.de">Website</a> ·
-  <a href="#-selbst-hosting">Selbst hosten</a> ·
+  Arbeitszeit, Pausen, Abwesenheiten und nachvollziehbare Korrekturen in einer ruhigen,<br>
+  vollständig offenen Web-Anwendung für deutsche Teams.
+</p>
+
+<p align="center">
+  <a href="https://quoska.de"><img alt="Website" src="https://img.shields.io/badge/Website-quoska.de-6658D3?style=flat-square"></a>
+  <a href="https://github.com/quoska-hq/quoska/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/quoska-hq/quoska/ci.yml?branch=main&style=flat-square&label=CI"></a>
+  <a href="LICENSE"><img alt="AGPL-3.0" src="https://img.shields.io/badge/Lizenz-AGPL--3.0-17181B?style=flat-square"></a>
+  <img alt="Status: Public Beta" src="https://img.shields.io/badge/Status-Public_Beta-0F766E?style=flat-square">
+</p>
+
+<p align="center">
+  <a href="https://quoska.de"><strong>Hosted ausprobieren</strong></a> ·
+  <a href="#schnellstart">Lokal starten</a> ·
   <a href="docs">Dokumentation</a> ·
-  <a href="https://github.com/OskarSync/quoska/blob/main/CONTRIBUTING.md">Mitmachen</a>
+  <a href="CONTRIBUTING.md">Mitmachen</a>
 </p>
+
+<br>
 
 <p align="center">
-  ArbZG-konforme Zeiterfassung mit Pausen nach §4, revisionssicherem Audit-Trail
-  und DSGVO-konformem Hosting (EU). Staffelpreise nach Teamgröße — ab 9 €/Monat,
-  ohne Pro-Kopf-Abrechnung.
+  <a href="https://quoska.de">
+    <img src="public/product/readme-showcase.png" alt="Quoska mit mobilem Stempeln und Aktivitätsverlauf für Verantwortliche" width="1200">
+  </a>
 </p>
 
----
+## Warum Quoska?
 
-Quoska ist die Arbeitzeit-Erfassung, die das Arbeitszeitgesetz (ArbZG) von sich aus fordert: Server-seitige Zeitstempel, unveränderlicher Audit-Trail, harte Pausen- und Ruhezeiten, 2-jährige Aufbewahrung (§16 ArbZG) — als schlanke Flatrate statt Pro-Kopf-Preis wie bei der Konkurrenz.
+Viele Zeiterfassungen sind entweder eine einfache Stoppuhr oder ein großes
+Verwaltungssystem. Quoska konzentriert sich auf den vollständigen Arbeitsalltag
+kleiner Teams: schnell stempeln, Abweichungen früh erkennen und Änderungen
+nachvollziehbar bearbeiten.
 
----
-
-## Zwei Wege, Quoska zu nutzen
-
-| Option | Beschreibung |
+| Für Mitarbeitende | Für Verantwortliche |
 | --- | --- |
-| **[Hosted Service](https://quoska.de)** | Am schnellsten startklar — EU-gehostet, AVV-Vertrag, Updates inklusive. |
-| **Selbst hosten** | Dieser Codebase. Komplett kontrollierbar auf dem eigenen Server. Siehe [Selbst-Hosting](#-selbst-hosting). |
+| Beginn, Pause und Feierabend mit einem Klick | Cockpit mit Arbeitszeit, Aufgaben und Projekten |
+| Eigene Zeiten und Abwesenheiten einsehen | Korrekturanträge prüfen und Verlauf nachvollziehen |
+| Urlaub und Krankheit im selben System | Rollen, Arbeitsmodelle und Team verwalten |
+| Im mobilen Browser nutzbar | Zeitraumbezogene Berichte und CSV-Export |
 
-> **Open Source, nicht Open-Core.** Die gesamte Anwendung ist offen — auch das
-> Stripe-Billing. Ohne konfigurierte Stripe-Schlüssel läuft die App im
-> Kostenlos-Tarif (3 Mitarbeiter); die gleiche Codebasis wird mit Schlüsseln
-> zur kostenpflichtigen Flatrate. Kein Feature-Gating, keine ausgelagerten
-> Module.
+## Was enthalten ist
 
----
+- **Stempeluhr und Pausen** mit serverseitigen Zeitstempeln
+- **Korrekturen mit Begründung** und unveränderlichem Audit-Verlauf
+- **Admin-Cockpit** mit offenen Aufgaben, Teamstatus und Arbeitszeitentwicklung
+- **Urlaub und Krankheit** inklusive Anträgen und Freigaben
+- **Flexible Wochenpläne** für Teilzeit und unterschiedliche Arbeitstage
+- **Feiertage nach Bundesland**, Projekte, Rollen und CSV-Berichte
+- **Mandantentrennung per PostgreSQL RLS** und Soft-Deletes für Zeitdaten
+- **PWA** für Desktop und mobilen Browser
 
-## Preise
+> Quoska unterstützt Betriebe bei der Dokumentation und Prüfung von
+> Arbeitszeiten. Die konkrete betriebliche und rechtliche Umsetzung bleibt in
+> der Verantwortung des Arbeitgebers.
 
-Flatrate nach Teamgröße — kein Pro-Kopf-Preis, keine unliebsamen Überraschungen.
+## Hosted oder selbst hosten
 
-| Plan | Preis | Teamgröße | Für wen |
-| --- | --- | --- | --- |
-| **Free** | €0 | bis 3 | Testen, Solo, Kleinstbetriebe |
-| **Team** | **€9/Monat** | bis 10 | Handwerk, kleine Büros — das Kernmarkt-Segment |
-| **Business** | €59/Monat | bis 50 | Wachsende KMU |
-| **Pro** | €99/Monat | unbegrenzt | Größere Betriebe |
+| | Hosted auf [quoska.de](https://quoska.de) | Selbst gehostet |
+| --- | --- | --- |
+| Einstieg | Account erstellen und direkt beginnen | Infrastruktur und Umgebungsvariablen selbst einrichten |
+| Betrieb | Updates, Hosting und Backups inklusive | Vollständig unter eigener Kontrolle |
+| Billing | Kostenlos bis 3 Personen, danach Flatrates | Ohne Stripe-Schlüssel auf den Free-Tarif begrenzt |
+| Verantwortung | Quoska betreibt die technische Plattform | Betrieb, Datenschutz und Sicherungen liegen beim Hoster |
 
-Zum Vergleich: klassische Pro-Kopf-Tools kosten ~6 €/Mitarbeiter — bei 10 Mitarbeitern also ~60 €, bei 30 ~180 €. Quoska bleibt bei 9 € bzw. 59 € flat.
+Die gehostete Version und die selbst gehostete Variante verwenden dieselbe
+Codebasis. Es gibt keine ausgelagerten Closed-Source-Module.
 
----
+## Preise der gehosteten Version
 
-## Funktionen
+| Tarif | Monatlich | Aktive Mitarbeitende |
+| --- | ---: | ---: |
+| Free | 0 € | bis 3 |
+| Team | 9 € | bis 10 |
+| Business | 59 € | bis 50 |
+| Pro | 99 € | unbegrenzt |
 
-- **Stempeluhr** — Einstempeln, Ausstempeln, Pause mit einem Klick
-- **ArbZG-konform** — Pausen (≥30 min nach 6 h, ≥45 min nach 9 h), max. 10 h/Tag, 11 h Ruhe zwischen Schichten (§3, §4, §5 ArbZG)
-- **Revisionssicher** — jeder Eintrag erzeugt einen Audit-Eintrag (wer, was, wann, alter + neuer Wert); keine harten Löschungen
-- **Mitarbeiter-Verwaltung** — Einladen, Rollen (Admin/Manager/Mitarbeiter), Soll-Stunden, Deaktivieren
-- **Anwesenheits-Board** — live sehen, wer gerade eingestempelt ist
-- **Korrekturen** — Mitarbeiter stellen Korrekturanfragen, Manager genehmigen mit Audit-Trail
-- **Urlaub & Krankmeldung** — Anträge, Genehmigungen, AU-Upload, Abwesenheits-Kalender
-- **Projekte & Kunden** — optionale Zuordnung, Projekt-Reports
-- **Feiertage** — automatisch nach Bundesland (16 Länder)
-- **Exporte** — CSV (DSGVO Art. 20 Datenportabilität), persönlicher Datenexport
-- **DSGVO** — EU-Server (Frankfurt), AVV-Vertrag, 2-jährige Aufbewahrung, Account-Löschung
-- **PWA** — funktioniert im Handy-Browser, installierbar
-- **Komplett auf Deutsch**
+Alle Tarife enthalten dieselben Produktfunktionen. Aktuelle Details stehen auf
+der [Preisseite](https://quoska.de/preise).
 
----
+## Schnellstart
 
-## Tech Stack
-
-- **Next.js 16** (App Router, Turbopack) + **React 19** + **TypeScript** (strict)
-- **TailwindCSS** + **shadcn/ui**
-- **Supabase** (PostgreSQL, Auth, RLS) — EU-Region Frankfurt
-- **Stripe** (optional, für Abonnements)
-- **Vitest** (Unit/Integration) · **Playwright** (E2E)
-
-Architektur-Entscheidungen sind als ADRs in [`docs/decisions/`](docs/decisions) dokumentiert.
-
----
-
-## Schnellstart (Entwicklung)
-
-Voraussetzungen: Node.js 20+, Docker (für lokales Supabase).
+Voraussetzungen: Node.js 20+, Docker und die
+[Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started).
 
 ```bash
-make setup    # Abhängigkeiten installieren, .env aus .env.example anlegen, Dev-DB seeden
-make dev      # Dev-Server starten (http://localhost:3000)
-make test     # Alle Tests (Unit + Legal-Compliance)
-make lint     # ESLint inkl. der eigenen Rechtskonformitäts-Regeln
-make build    # Production-Build
-```
-
-Für End-to-End-Tests läuft eine isolierte Dev-Instanz:
-
-```bash
-npx playwright test
-```
-
-### Umgebungsvariablen
-
-Siehe [`.env.example`](.env.example). Bis auf die Supabase-Zugangsdaten ist alles optional — Stripe etwa nur gesetzt, wenn Abrechnung aktiv sein soll.
-
----
-
-## Rechtliche Konformität (zentral für dieses Projekt)
-
-Dieses Produkt unterliegt deutschem Arbeitsrecht. Vor Änderungen an der Zeiterfassungs-Logik bitte [`docs/legal.md`](docs/legal.md) lesen.
-
-**Unveränderliche Regeln** (teilweise als ESLint-Regeln in [`tools/eslint-rules/`](tools/eslint-rules) erzwungen):
-
-- Alle Zeitstempel werden server-seitig erzeugt (`created_at`/`updated_at` via DB-Default) — nie dem Client vertraut (§16 ArbZG).
-- Zeiteinträge werden nie hart gelöscht — immer Soft-Delete mit Grund (Revisionssicherheit).
-- Jede Mutation an einem Zeiteintrag erzeugt einen Audit-Eintrag.
-- Kein Backdating über den aktuellen Tag hinaus.
-- Pausen-, Maximalstunden- und Ruhezeit-Regeln werden durchgesetzt (§3, §4, §5 ArbZG).
-
-Die Rechtskonformität ist durch eigene Test-Suiten abgesichert: [`tests/legal/`](tests/legal) (ArbZG, Revisionssicherheit, DSGVO).
-
----
-
-## Selbst-Hosting
-
-Die Codebasis ist identisch zur gehosteten Version. Für ein lokales Setup:
-
-```bash
-git clone https://github.com/<your-org>/quoska.git
+git clone https://github.com/quoska-hq/quoska.git
 cd quoska
-make setup   # .env aus .env.example, lokales Supabase via Docker
-make dev
+
+npm install
+cp .env.example .env
+supabase start
+npm run dev
 ```
 
-Für einen öffentlichen Server zusätzlich:
+Die Anwendung läuft anschließend unter <http://localhost:3000>. Das lokale
+Supabase-Projekt wendet die Migrationen aus `supabase/migrations/` an.
 
-1. Eine eigene Supabase-Instanz (EU-Region) einrichten und die Migrations in [`supabase/migrations/`](supabase/migrations) anwenden.
-2. `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` setzen.
-3. Optional Stripe (`STRIPE_SECRET_KEY`, `STRIPE_TEAM_PRICE_ID` / `STRIPE_BUSINESS_PRICE_ID` / `STRIPE_PRO_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`) für Abonnements — ohne diese Schlüssel läuft die App im Kostenlos-Tarif.
+## Entwicklung und Qualität
 
-> **Hinweis zur Haftung:** Beim Selbst-Hosting tragen *Sie* die Verantwortung
-> für ArbZG-/GoBD-/DSGVO-Konformität, EU-Hosting, AVV und Datensicherung. Genau
-> diese Last abzunehmen ist der Wert des gehosteten Angebots.
+```bash
+npm test                 # Unit-, Integrations- und Compliance-Tests
+npm run lint             # ESLint inklusive eigener Schutzregeln
+npm run build            # Produktions-Build
+npx playwright test      # End-to-End-Tests
+```
 
----
+Die eigenen ESLint-Regeln unter [`tools/eslint-rules/`](tools/eslint-rules)
+schützen unter anderem vor Client-Zeitstempeln, Hard Deletes und Änderungen
+ohne Audit-Felder. Architekturentscheidungen liegen unter
+[`docs/decisions/`](docs/decisions).
 
-## Lizenz
+## Technischer Aufbau
 
-[GNU AGPL-3.0](LICENSE). Kurz: Sie dürfen Quoska nutzen, anpassen und selbst
-hosten — wer Quoska aber als Dienst für Dritte betreibt, muss seine
-Änderungen ebenfalls unter AGPL-3.0 offenlegen.
+- **Next.js 16**, React 19 und TypeScript
+- **Tailwind CSS** und shadcn/ui
+- **Supabase** mit PostgreSQL, Auth und Row-Level Security
+- **Stripe** für optionale Abonnements der gehosteten Version
+- **Vitest** und Playwright
+- **Docker** für den Produktionsbetrieb
 
----
+## Sicherheit
+
+Bitte Sicherheitsprobleme nicht als öffentliches Issue melden. Der Ablauf und
+die Kontaktadresse stehen in der [Security Policy](SECURITY.md).
 
 ## Beitragen
 
-Beiträge sind willkommen — siehe [CONTRIBUTING.md](CONTRIBUTING.md). Bitte beachten: Änderungen an der Zeiterfassungs-Logik müssen die Rechtskonformität (ArbZG/DSGVO) wahren und idealerweise von Tests begleitet sein.
+Issues, Diskussionen und Pull Requests sind willkommen. Vor Änderungen an
+Zeitstempeln, Pausen, Korrekturen oder Aufbewahrung bitte zuerst
+[`docs/legal.md`](docs/legal.md) und [CONTRIBUTING.md](CONTRIBUTING.md) lesen.
+
+## Lizenz
+
+Quoska ist unter der [GNU Affero General Public License v3.0](LICENSE)
+veröffentlicht. Wer eine veränderte Version als Netzwerkdienst anbietet, muss
+den Nutzerinnen und Nutzern den entsprechenden Quellcode zugänglich machen.

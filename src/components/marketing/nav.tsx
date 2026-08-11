@@ -1,16 +1,13 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { href: "/#features", label: "Produkt" },
+  { href: "/funktionen", label: "Funktionen" },
   { href: "/#ablauf", label: "Ablauf" },
-  { href: "/#preise", label: "Preise" },
-  { href: "/#faq", label: "Fragen" },
+  { href: "/sicherheit", label: "Sicherheit" },
+  { href: "/preise", label: "Preise" },
 ] as const;
 
 /**
@@ -22,10 +19,8 @@ export function MarketingNav({
 }: {
   variant?: "default" | "legal";
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-[#f5f3ee]/95 backdrop-blur-sm">
+    <header className="relative sticky top-0 z-50 border-b border-slate-900/10 bg-[#f5f3ee]/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6">
         <Link
           href="/"
@@ -51,7 +46,7 @@ export function MarketingNav({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-[#6658d3]"
+                  className="px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-[#5145ad]"
                 >
                   {link.label}
                 </Link>
@@ -63,7 +58,7 @@ export function MarketingNav({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-none text-slate-600 hover:bg-transparent hover:text-[#6658d3]"
+                  className="rounded-none text-slate-600 hover:bg-transparent hover:text-[#5145ad]"
                 >
                   Anmelden
                 </Button>
@@ -71,23 +66,47 @@ export function MarketingNav({
               <Link href="/register">
                 <Button
                   size="sm"
-                  className="rounded-none bg-slate-950 text-white hover:bg-[#6658d3]"
+                  className="rounded-none bg-slate-950 text-white hover:bg-[#5145ad]"
                 >
                   Kostenlos testen
                 </Button>
               </Link>
             </div>
 
-            {/* Mobile toggle */}
-            <button
-              type="button"
-              className="inline-flex size-10 items-center justify-center text-slate-700 hover:text-[#6658d3] md:hidden"
-              aria-label={open ? "Menü schließen" : "Menü öffnen"}
-              aria-expanded={open}
-              onClick={() => setOpen((v) => !v)}
-            >
-              {open ? <X className="size-5" /> : <Menu className="size-5" />}
-            </button>
+            <details className="group md:hidden">
+              <summary
+                className="inline-flex size-10 list-none items-center justify-center text-slate-700 hover:text-[#5145ad] [&::-webkit-details-marker]:hidden"
+                aria-label="Menü öffnen"
+              >
+                <Menu className="size-5 group-open:hidden" />
+                <X className="hidden size-5 group-open:block" />
+              </summary>
+              <div className="fixed inset-x-0 top-16 border-t border-slate-900/10 bg-[#f5f3ee] shadow-[0_18px_40px_rgba(15,23,42,0.10)]">
+                <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-3 sm:px-6">
+                  {NAV_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="border-b border-slate-900/10 px-1 py-3 text-sm font-medium text-slate-700 hover:text-[#5145ad]"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <Link href="/login">
+                      <Button variant="outline" size="sm" className="w-full rounded-none">
+                        Anmelden
+                      </Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button size="sm" className="w-full rounded-none bg-slate-950 text-white hover:bg-[#5145ad]">
+                        Testen
+                      </Button>
+                    </Link>
+                  </div>
+                </nav>
+              </div>
+            </details>
           </>
         )}
 
@@ -100,38 +119,6 @@ export function MarketingNav({
         )}
       </div>
 
-      {/* Mobile menu */}
-      {variant === "default" && open && (
-        <div className="border-t border-slate-900/10 bg-[#f5f3ee] md:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-5 py-3 sm:px-6">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="border-b border-slate-900/10 px-1 py-3 text-sm font-medium text-slate-700 hover:text-[#6658d3]"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <Link href="/login" onClick={() => setOpen(false)}>
-                <Button variant="outline" size="sm" className="w-full rounded-none">
-                  Anmelden
-                </Button>
-              </Link>
-              <Link href="/register" onClick={() => setOpen(false)}>
-                <Button
-                  size="sm"
-                  className="w-full rounded-none bg-slate-950 text-white hover:bg-[#6658d3]"
-                >
-                  Testen
-                </Button>
-              </Link>
-            </div>
-          </nav>
-        </div>
-      )}
     </header>
   );
 }

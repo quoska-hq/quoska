@@ -1,11 +1,11 @@
 # Contributing to Quoska
 
-Thanks for your interest in contributing! 🎉 Quoska is a legally-compliant time-tracking app for German SMEs, so contributions have a few extra considerations around **Arbeitszeitgesetz (ArbZG)** and **DSGVO**.
+Thanks for your interest in contributing! 🎉 Quoska is a time-tracking app for German SMEs, so contributions have a few extra considerations around **Arbeitszeitgesetz (ArbZG)** and **DSGVO**.
 
 ## Before you start
 
-- Questions or ideas → open a [Discussion](https://github.com/<your-org>/quoska/discussions).
-- Bugs → open an [Issue](https://github.com/<your-org>/quoska/issues) with steps to reproduce, expected vs. actual behaviour, and logs.
+- Questions or ideas → open a [Discussion](https://github.com/quoska-hq/quoska/discussions).
+- Bugs → open an [Issue](https://github.com/quoska-hq/quoska/issues) with steps to reproduce, expected vs. actual behaviour, and logs.
 - Keep pull requests focused and scoped to a single change.
 
 ## Legal-compliance guardrails (read this)

@@ -16,6 +16,7 @@ export const site = {
   tagline: "Zeiterfassung für deutsche KMU",
   /** Production origin — set NEXT_PUBLIC_APP_URL in .env */
   url: process.env.NEXT_PUBLIC_APP_URL ?? "https://quoska.de",
+  githubUrl: "https://github.com/quoska-hq/quoska",
   /** Hero / marketing language is German (de-DE). */
   locale: "de-DE",
 } as const;

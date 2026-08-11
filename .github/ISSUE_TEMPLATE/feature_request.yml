@@ -1,0 +1,34 @@
+name: Idee vorschlagen
+description: Schlage eine Verbesserung für Quoska vor.
+title: "[Idee]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Welches Problem soll gelöst werden?
+      description: Beschreibe den Arbeitsablauf oder das Hindernis, nicht nur die gewünschte Funktion.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Gewünschte Lösung
+      description: Wie könnte eine gute Lösung aussehen?
+    validations:
+      required: true
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Für wen ist das wichtig?
+      options:
+        - Mitarbeitende
+        - Verantwortliche / Admins
+        - Selbsthoster
+        - Alle
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen oder zusätzlicher Kontext

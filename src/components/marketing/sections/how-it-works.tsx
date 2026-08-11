@@ -22,7 +22,7 @@ export function HowItWorksSection() {
       <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
         <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6658d3]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5145ad]">
               Der Einstieg
             </p>
             <h2 className="mt-4 font-serif text-4xl leading-tight tracking-[-0.035em] text-slate-950 sm:text-5xl">
@@ -36,7 +36,7 @@ export function HowItWorksSection() {
                 key={step.number}
                 className="grid gap-2 border-b border-slate-900/20 py-6 sm:grid-cols-[3rem_0.8fr_1.2fr] sm:gap-6 sm:py-8"
               >
-                <span className="font-mono text-xs text-[#6658d3]">
+                <span className="font-mono text-xs text-[#5145ad]">
                   {step.number}
                 </span>
                 <h3 className="font-semibold text-slate-950">{step.title}</h3>

@@ -2,7 +2,15 @@
   "name": "quoska",
   "version": "0.1.0",
   "private": true,
-  "description": "Flatrate Zeiterfassung für deutsche KMU — gesetzlich compliant",
+  "description": "Open-Source-Zeiterfassung für kleine deutsche Betriebe",
+  "homepage": "https://quoska.de",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quoska-hq/quoska.git"
+  },
+  "bugs": {
+    "url": "https://github.com/quoska-hq/quoska/issues"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -13,6 +21,7 @@
     "test:legal": "vitest run tests/legal/",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "screenshots:marketing": "playwright test -c playwright.marketing.config.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
   },

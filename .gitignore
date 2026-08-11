@@ -4,6 +4,7 @@ node_modules/
 # next.js build output
 .next/
 .next-e2e/
+.next-marketing/
 out/
 
 # env — NEVER commit real secrets. Use .env.example as the template.

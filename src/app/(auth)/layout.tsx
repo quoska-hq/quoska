@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import { currentYear } from "@/config/server/site-meta";
 
@@ -9,6 +10,10 @@ const PRODUCT_POINTS = [
   "Korrekturen mit nachvollziehbarem Verlauf",
   "Bis drei Personen kostenlos",
 ] as const;
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AuthLayout({
   children,

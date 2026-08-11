@@ -73,6 +73,7 @@ ignores: [
       "build/**",
       ".next/**",
       ".next-e2e/**",
+      ".next-marketing/**",
       "out/**",
       "next-env.d.ts",
       "tools/eslint-rules/**",

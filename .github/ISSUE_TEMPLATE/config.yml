@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Sicherheitsproblem melden
+    url: https://github.com/quoska-hq/quoska/security/policy
+    about: Bitte Sicherheitslücken nach der Security Policy vertraulich melden.
+  - name: Frage oder Austausch
+    url: https://github.com/quoska-hq/quoska/discussions
+    about: Für Fragen, Ideen im Frühstadium und allgemeinen Austausch.

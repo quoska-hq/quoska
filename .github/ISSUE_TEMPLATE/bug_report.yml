@@ -1,0 +1,41 @@
+name: Fehler melden
+description: Melde einen reproduzierbaren Fehler in Quoska.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke für deine Meldung. Bitte veröffentliche hier keine personenbezogenen Daten, Zugangsdaten oder Sicherheitslücken. Sicherheitsprobleme gehören an security@quoska.de.
+  - type: textarea
+    id: description
+    attributes:
+      label: Beschreibung
+      description: Was ist passiert und was hättest du erwartet?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Schritte zum Nachstellen
+      placeholder: |
+        1. Öffne …
+        2. Klicke …
+        3. Siehe Fehler …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version oder Commit
+      placeholder: main, v0.1.0 oder Commit-SHA
+  - type: input
+    id: environment
+    attributes:
+      label: Browser und Betriebssystem
+      placeholder: Firefox 142, Windows 11
+  - type: textarea
+    id: context
+    attributes:
+      label: Zusätzlicher Kontext
+      description: Anonymisierte Logs oder Screenshots, falls hilfreich.

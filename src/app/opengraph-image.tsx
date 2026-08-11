@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/lib/site";
 
-export const alt = "Quoska — Zeiterfassung für deutsche KMU";
+export const alt = "Quoska — Digitale Zeiterfassung für kleine Betriebe";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -59,7 +59,7 @@ export default function OpengraphImage() {
               textTransform: "uppercase",
             }}
           >
-            Zeiterfassung für deutsche Betriebe
+            Für kleine Betriebe und Teams
           </div>
         </div>
 
@@ -73,10 +73,10 @@ export default function OpengraphImage() {
               letterSpacing: -3,
             }}
           >
-            Arbeitszeit erfassen. Ohne Theater.
+            Digitale Zeiterfassung. Ohne Theater.
           </div>
           <div style={{ maxWidth: 850, color: "#526078", fontSize: 27 }}>
-            Stempeluhr, Pausen, Korrekturen und Auswertungen an einem Ort.
+            Arbeitszeit, Pausen, Urlaub und nachvollziehbare Korrekturen an einem Ort.
           </div>
         </div>
 

@@ -30,7 +30,7 @@ export function FaqSection() {
     <section id="faq" className="border-t border-slate-900/10 bg-[#f5f3ee]">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20 lg:py-28">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6658d3]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5145ad]">
             Fragen und Antworten
           </p>
           <h2 className="mt-4 font-serif text-4xl leading-tight tracking-[-0.035em] text-slate-950 sm:text-5xl">
@@ -48,7 +48,7 @@ export function FaqSection() {
                 <span className="font-semibold text-slate-950">{item.q}</span>
                 <span
                   aria-hidden
-                  className="text-xl font-light text-[#6658d3] transition-transform group-open:rotate-45"
+                  className="text-xl font-light text-[#5145ad] transition-transform group-open:rotate-45"
                 >
                   +
                 </span>

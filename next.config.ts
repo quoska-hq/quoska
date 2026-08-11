@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Avoid advertising implementation details in public responses.
+  poweredByHeader: false,
+  // Keep product captures and local demos visually identical to production.
+  devIndicators: false,
   // Produce the minimal self-contained server copied into the production
   // Docker image. Static assets are added by the Dockerfile.
   output: "standalone",
