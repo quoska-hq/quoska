@@ -34,6 +34,12 @@ const serverEnvSchema = publicEnvSchema.extend({
     (value) => (value === "" ? undefined : value),
     z.string().min(32).optional(),
   ),
+  ANALYTICS_DB_PATH: z.string().min(1).optional(),
+  ANALYTICS_HASH_SECRET: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().min(32).optional(),
+  ),
+  ANALYTICS_ADMIN_EMAILS: z.string().optional(),
 });
 
 type PublicEnv = z.infer<typeof publicEnvSchema>;
@@ -74,6 +80,9 @@ export const serverEnv: ServerEnv = new Proxy({} as ServerEnv, {
       STRIPE_PRO_PRICE_ID: process.env.STRIPE_PRO_PRICE_ID,
       RESEND_API_KEY: process.env.RESEND_API_KEY,
       CRON_SECRET: process.env.CRON_SECRET,
+      ANALYTICS_DB_PATH: process.env.ANALYTICS_DB_PATH,
+      ANALYTICS_HASH_SECRET: process.env.ANALYTICS_HASH_SECRET,
+      ANALYTICS_ADMIN_EMAILS: process.env.ANALYTICS_ADMIN_EMAILS,
     });
     return parsed[prop as keyof ServerEnv];
   },

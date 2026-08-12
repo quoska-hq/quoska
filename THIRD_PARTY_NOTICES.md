@@ -26,3 +26,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## GeoLite2 location data
+
+The country and region labels used by the private website analytics dashboard
+include GeoLite2 data created by MaxMind, available from
+[MaxMind](https://www.maxmind.com). The data is distributed under the
+[Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/).
+
+The `geoip-lite` software library used to read that data is licensed under the
+Apache License 2.0. Location lookup is performed locally; no visitor address is
+sent to MaxMind.

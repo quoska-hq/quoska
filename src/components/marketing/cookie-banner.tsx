@@ -8,15 +8,11 @@ import { X, Cookie } from "lucide-react";
 const STORAGE_KEY = "quoska:cookie-consent:v1";
 
 /**
- * Minimal, DSGVO-honest consent banner.
+ * Minimal, transparent cookie notice.
  *
  * Quoska uses ONLY technically necessary cookies (Supabase session cookie on
- * the login/register area). There is no tracking, no analytics, no advertising
- * on the public site. This banner makes that explicit and is therefore not a
- * "fake" consent wall — it documents that nothing tracks the visitor.
- *
- * If tracking/analytics is added later, extend this to a real consent
- * management (opt-in per purpose) before going live.
+ * the login/register area). Public reach measurement is first-party,
+ * cookie-free and documented in the privacy notice.
  *
  * Visibility is driven by an external store (localStorage + an in-memory
  * listeners set) via useSyncExternalStore, so:
@@ -94,8 +90,10 @@ export function CookieBanner() {
             <strong className="font-semibold text-slate-900">
               Nur technisch notwendige Cookies.
             </strong>{" "}
-            Wir setzen kein Tracking und keine Werbung ein. Die Sitzungs-Cookies
-            für die Anmeldung sind technisch erforderlich. Details in der{" "}
+            Wir setzen keine Analyse- oder Werbe-Cookies ein. Die
+            Reichweitenmessung erfolgt cookie-frei auf unserem eigenen Server;
+            Sitzungs-Cookies für die Anmeldung sind technisch erforderlich.
+            Details in der{" "}
             <Link
               href="/datenschutz"
               className="font-medium text-[#6658d3] underline-offset-2 hover:underline"

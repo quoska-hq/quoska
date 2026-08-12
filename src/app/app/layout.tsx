@@ -3,6 +3,7 @@ import { createClient } from "@/config/supabase/server";
 import { SupabaseProvider } from "@/providers/supabase-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { AppShell } from "@/components/app-shell";
+import { isSiteAnalyticsAdmin } from "@/config/server/site-analytics-access";
 import type { Role } from "@/types";
 import type { Metadata } from "next";
 
@@ -31,6 +32,7 @@ export default async function AppLayout({
   // right after registration), try using admin client as fallback.
   let role: Role = "employee";
   let userName = "Benutzer";
+  const isAnalyticsAdmin = isSiteAnalyticsAdmin(user.email);
 
   const { data: employee } = await supabase
     .from("employees")
@@ -69,7 +71,7 @@ export default async function AppLayout({
   return (
     <SupabaseProvider>
       <QueryProvider>
-        <AppShell role={role} userName={userName}>
+        <AppShell role={role} userName={userName} isAnalyticsAdmin={isAnalyticsAdmin}>
           {children}
         </AppShell>
       </QueryProvider>

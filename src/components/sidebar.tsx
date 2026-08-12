@@ -19,6 +19,7 @@ import {
   Thermometer,
   Briefcase,
   LayoutDashboard,
+  Globe2,
 } from "lucide-react";
 
 interface NavItem {
@@ -27,6 +28,7 @@ interface NavItem {
   icon: React.ReactNode;
   roles: Role[];
   group: "main" | "manage";
+  siteAdminOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -94,6 +96,14 @@ const NAV_ITEMS: NavItem[] = [
     group: "manage",
   },
   {
+    href: "/app/site-analytics",
+    label: "Website-Analytics",
+    icon: <Globe2 className="size-[18px]" />,
+    roles: ["admin"],
+    group: "manage",
+    siteAdminOnly: true,
+  },
+  {
     href: "/app/settings",
     label: "Einstellungen",
     icon: <Settings className="size-[18px]" />,
@@ -105,13 +115,16 @@ const NAV_ITEMS: NavItem[] = [
 interface SidebarProps {
   role: Role;
   userName: string;
+  isAnalyticsAdmin: boolean;
   onSignOut: () => void;
 }
 
-export function Sidebar({ role, userName, onSignOut }: SidebarProps) {
+export function Sidebar({ role, userName, isAnalyticsAdmin, onSignOut }: SidebarProps) {
   const pathname = usePathname();
 
-  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => item.roles.includes(role) && (!item.siteAdminOnly || isAnalyticsAdmin),
+  );
   const mainItems = visibleItems.filter((i) => i.group === "main");
   const manageItems = visibleItems.filter((i) => i.group === "manage");
 

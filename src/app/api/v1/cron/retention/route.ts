@@ -12,6 +12,7 @@ import { createAdminClient } from "@/config/supabase/server";
 import { runRetentionForTenant } from "@/services/retentionService";
 import { getNowIso } from "@/config/server/timestamps";
 import { isAuthorizedCronRequest } from "@/lib/cron-auth";
+import { pruneExpiredSiteAnalytics } from "@/services/siteAnalyticsService";
 import type { ApiResponse } from "@/types/api";
 
 export async function POST(request: Request) {
@@ -32,18 +33,9 @@ export async function POST(request: Request) {
       .from("tenants")
       .select("id");
 
-    if (!tenants || tenants.length === 0) {
-      return NextResponse.json<
-        ApiResponse<{ tenantsProcessed: number; totalDeleted: number }>
-      >(
-        { data: { tenantsProcessed: 0, totalDeleted: 0 }, error: null },
-        { status: 200 },
-      );
-    }
-
     let totalDeleted = 0;
 
-    for (const tenant of tenants) {
+    for (const tenant of tenants ?? []) {
       const deleted = await runRetentionForTenant(
         supabase,
         tenant.id,
@@ -51,18 +43,21 @@ export async function POST(request: Request) {
       );
       totalDeleted += deleted;
     }
+    const analyticsDeleted = pruneExpiredSiteAnalytics(nowIso);
 
     return NextResponse.json<
       ApiResponse<{
         tenantsProcessed: number;
         totalDeleted: number;
+        analyticsDeleted: number;
         cutoffDate: string;
       }>
     >(
       {
         data: {
-          tenantsProcessed: tenants.length,
+          tenantsProcessed: tenants?.length ?? 0,
           totalDeleted,
+          analyticsDeleted,
           cutoffDate: nowIso.slice(0, 10),
         },
         error: null,

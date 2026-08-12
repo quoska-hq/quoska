@@ -4,6 +4,7 @@ import { site } from "@/lib/site";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { SiteAnalyticsTracker } from "@/components/site-analytics-tracker";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -70,6 +71,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}
+        <SiteAnalyticsTracker />
         {/* Service worker registration */}
         <script
           dangerouslySetInnerHTML={{

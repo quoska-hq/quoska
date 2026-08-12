@@ -19,6 +19,7 @@ services:
       - /tmp:rw,nosuid,nodev,size=64m,mode=1777
     volumes:
       - next_cache:/app/.next/cache
+      - analytics_data:/app/data
     security_opt:
       - no-new-privileges:true
     healthcheck:
@@ -53,5 +54,6 @@ services:
 
 volumes:
   next_cache:
+  analytics_data:
   caddy_data:
   caddy_config:

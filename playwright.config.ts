@@ -5,9 +5,10 @@ import { defineConfig } from "@playwright/test";
 // boots an isolated server on this port with its own distDir so it never
 // clashes with a dev server you're running.
 const TEST_URL = process.env.E2E_BASE_URL || "http://localhost:3100";
+const ANALYTICS_TEST_ENV = "ANALYTICS_HASH_SECRET=ci-analytics-secret-with-at-least-32-characters ANALYTICS_ADMIN_EMAILS=analytics-owner@quoska.test ANALYTICS_DB_PATH=/tmp/quoska-e2e-site-analytics.sqlite";
 const TEST_SERVER_COMMAND = process.env.CI
-  ? "export E2E_DIST_DIR=.next-e2e STRIPE_SECRET_KEY= STRIPE_PRO_PRICE_ID= STRIPE_WEBHOOK_SECRET=; npm run build && npm run start -- -p 3100"
-  : "E2E_DIST_DIR=.next-e2e STRIPE_SECRET_KEY= STRIPE_PRO_PRICE_ID= STRIPE_WEBHOOK_SECRET= npx next dev -p 3100 --turbopack";
+  ? `export E2E_DIST_DIR=.next-e2e STRIPE_SECRET_KEY= STRIPE_PRO_PRICE_ID= STRIPE_WEBHOOK_SECRET= ${ANALYTICS_TEST_ENV}; npm run build && npm run start -- -p 3100`
+  : `E2E_DIST_DIR=.next-e2e STRIPE_SECRET_KEY= STRIPE_PRO_PRICE_ID= STRIPE_WEBHOOK_SECRET= ${ANALYTICS_TEST_ENV} npx next dev -p 3100 --turbopack`;
 
 export default defineConfig({
   testDir: "./tests/e2e",

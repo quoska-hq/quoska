@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["better-sqlite3", "geoip-lite"],
   // Avoid advertising implementation details in public responses.
   poweredByHeader: false,
   // Keep product captures and local demos visually identical to production.

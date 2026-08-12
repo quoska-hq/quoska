@@ -1,11 +1,14 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:20-bookworm-slim AS dependencies
+FROM node:24-bookworm-slim AS dependencies
 WORKDIR /app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential python3 \
+    && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:20-bookworm-slim AS builder
+FROM node:24-bookworm-slim AS builder
 WORKDIR /app
 
 ARG NEXT_PUBLIC_SUPABASE_URL
@@ -23,7 +26,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:20-bookworm-slim AS runner
+FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 
 ARG APP_REVISION="unknown"
@@ -40,7 +43,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next/cache
+RUN mkdir -p /app/.next/cache /app/data \
+    && chown -R nextjs:nodejs /app/.next/cache /app/data
 
 USER nextjs
 EXPOSE 3000

@@ -7,6 +7,8 @@ deployment_dir="/opt/quoska"
 environment_file="${deployment_dir}/.env.production"
 aws_secret_file="${deployment_dir}/secrets/aws-backup.env"
 export_script="${deployment_dir}/deploy/export-supabase-backup.mjs"
+analytics_export_script="${deployment_dir}/deploy/export-site-analytics.mjs"
+analytics_volume="quoska_analytics_data"
 aws_cli_image="public.ecr.aws/aws-cli/aws-cli:2.36.20@sha256:8af59c0d96b104000cce4f11e211c06385240d72c515198159041f13ebe459fa"
 work_dir=""
 
@@ -21,7 +23,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-for required_file in "$environment_file" "$aws_secret_file" "$export_script"; do
+for required_file in "$environment_file" "$aws_secret_file" "$export_script" "$analytics_export_script"; do
   if [[ ! -r "$required_file" ]]; then
     echo "Cannot read ${required_file}" >&2
     exit 1
@@ -83,6 +85,39 @@ docker run --rm \
   --entrypoint node \
   "$QUOSKA_IMAGE" \
   /quoska-export.mjs
+
+volume_project="$(docker volume inspect "$analytics_volume" --format '{{ index .Labels "com.docker.compose.project" }}')"
+volume_name="$(docker volume inspect "$analytics_volume" --format '{{ index .Labels "com.docker.compose.volume" }}')"
+if [[ "$volume_project" != "quoska" || "$volume_name" != "analytics_data" ]]; then
+  echo "Refusing unexpected analytics volume: ${analytics_volume}" >&2
+  exit 1
+fi
+
+export ANALYTICS_BACKUP_SOURCE="/analytics/site-analytics.sqlite"
+export ANALYTICS_BACKUP_OUTPUT_DIR="/backup/analytics"
+docker run --rm \
+  --user 0:0 \
+  --read-only \
+  --network none \
+  --cap-drop ALL \
+  --security-opt no-new-privileges:true \
+  --tmpfs /tmp:rw,nosuid,nodev,size=16m,mode=1777 \
+  --env ANALYTICS_BACKUP_SOURCE \
+  --env ANALYTICS_BACKUP_OUTPUT_DIR \
+  --volume "${analytics_export_script}:/app/quoska-analytics-export.mjs:ro" \
+  --volume "${analytics_volume}:/analytics" \
+  --volume "${export_dir}:/backup" \
+  --entrypoint node \
+  "$QUOSKA_IMAGE" \
+  /app/quoska-analytics-export.mjs
+
+if [[ -f "${export_dir}/analytics/site-analytics.sqlite" ]]; then
+  (
+    cd "$export_dir"
+    sha256sum analytics/site-analytics.sqlite analytics/manifest.json >> SHA256SUMS
+    sort -o SHA256SUMS SHA256SUMS
+  )
+fi
 
 (
   cd "$export_dir"

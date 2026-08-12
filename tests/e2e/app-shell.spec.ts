@@ -38,6 +38,7 @@ test.describe("App Shell — Admin Navigation", () => {
     await expect(page.getByRole("link", { name: /mitarbeiter/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /berichte/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /einstellungen/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /website-analytics/i })).not.toBeVisible();
     await expect(page.getByRole("button", { name: /abmelden/i })).toBeVisible();
     await expect(page.getByText("Anna Admin")).toBeVisible();
   });

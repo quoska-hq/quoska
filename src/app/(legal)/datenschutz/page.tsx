@@ -151,13 +151,34 @@ export default function DatenschutzPage() {
         Vereinbarungen und Datenschutzhinweisen der oben genannten Anbieter.
       </p>
 
-      <h2>9. Kein Tracking, keine Werbung</h2>
+      <h2>9. Cookie-freie Reichweitenmessung</h2>
       <p>
-        Wir setzen auf den öffentlichen Seiten kein Tracking, keine
-        Reichweitenmessung (z.&nbsp;B. Google Analytics), kein Remarketing und
-        keine Werbe-Cookies ein. Es werden ausschließlich technisch notwendige
-        Cookies verwendet (Sitzungs-Cookie nach Login). Daher ist auch keine
-        Einwilligung im Sinne des §&nbsp;25 Abs.&nbsp;2 TDDDG erforderlich.
+        Auf den öffentlichen Seiten führen wir eine eigene, datensparsame
+        Reichweitenmessung durch. Dabei verarbeiten wir den aufgerufenen Pfad,
+        Zeitpunkt, Referrer-Domain, grobe Region (Land/Bundesland), Geräteklasse
+        sowie vorhandene UTM-Kampagnenparameter. Die IP-Adresse wird nur
+        kurzfristig auf unserem Server zur groben Regionsbestimmung und zur
+        Bildung eines täglich wechselnden pseudonymen Prüfwerts verarbeitet;
+        Besuche können dadurch nicht über verschiedene Tage verknüpft werden.
+        Die vollständige
+        IP-Adresse und der vollständige User-Agent werden nicht gespeichert.
+      </p>
+      <p>
+        Die Auswertung läuft ausschließlich auf unserem Hetzner-Server. Wir
+        setzen dafür keine Analyse-Cookies, kein Local Storage, keine
+        Werbeprofile und keinen externen Analysedienst ein. „Do Not Track“ und
+        „Global Privacy Control“ werden berücksichtigt. Die Messdaten werden
+        nach 180 Tagen automatisch gelöscht.
+      </p>
+      <p>
+        Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO. Unser
+        berechtigtes Interesse besteht darin, Reichweite und Herkunft der
+        Besuche zu verstehen und die öffentliche Website zu verbessern. Dem
+        stehen die Datenminimierung, die ausschließlich interne Verarbeitung,
+        der Verzicht auf geräteübergreifende Werbeprofile und die begrenzte
+        Speicherdauer gegenüber. Der Verarbeitung kann gemäß Art.&nbsp;21 DSGVO
+        widersprochen werden. Für die Anmeldung werden weiterhin ausschließlich
+        technisch notwendige Sitzungs-Cookies verwendet.
       </p>
 
       <h2>10. Deine Rechte als betroffene Person</h2>

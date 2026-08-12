@@ -14,10 +14,11 @@ import type { Role } from "@/types";
 interface AppShellProps {
   role: Role;
   userName: string;
+  isAnalyticsAdmin: boolean;
   children: ReactNode;
 }
 
-export function AppShell({ role, userName, children }: AppShellProps) {
+export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShellProps) {
   const { supabase } = useSupabase();
   const [presenceOpen, setPresenceOpen] = useState(false);
   const pathname = usePathname();
@@ -51,7 +52,12 @@ export function AppShell({ role, userName, children }: AppShellProps) {
 
   return (
     <div className="min-h-screen max-w-[100vw] overflow-x-hidden bg-canvas">
-      <Sidebar role={role} userName={userName} onSignOut={handleSignOut} />
+      <Sidebar
+        role={role}
+        userName={userName}
+        isAnalyticsAdmin={isAnalyticsAdmin}
+        onSignOut={handleSignOut}
+      />
 
       {/* Main content — offset for sidebar on desktop, padding for bottom nav on mobile */}
       <main className="pb-20 md:pl-[260px] md:pb-0">
