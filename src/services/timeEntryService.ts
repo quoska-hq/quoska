@@ -23,6 +23,8 @@ import {
   getWeekEntries,
   getTodayEntries,
 } from "@/repos/timeEntryRepo";
+import { allocateBreakMinutes } from "@/types/break";
+import { createNotification } from "@/repos/notificationRepo";
 
 /**
  * Extract employee info from JWT claims.
@@ -166,12 +168,26 @@ export async function clockOut(
     return failure("Du bist nicht eingestempelt");
   }
 
-  // 4. Update: clock_out = nowIso, status = completed
+  const grossMinutes = Math.round((Date.parse(nowIso) - Date.parse(entry.clock_in)) / 60_000);
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("automatic_breaks_enabled")
+    .eq("id", tenantId)
+    .single();
+  const allocation = allocateBreakMinutes(
+    grossMinutes,
+    entry.break_minutes,
+    tenant?.automatic_breaks_enabled ?? false,
+  );
+
+  // 4. Complete the entry and transparently add any missing statutory break.
   const { data: updated, error: updateError } = await supabase
     .from("time_entries")
     .update({
       clock_out: nowIso,
       status: "completed",
+      break_minutes: allocation.totalMinutes,
+      automatic_break_minutes: allocation.automaticMinutes,
     })
     .eq("id", timeEntryId)
     .eq("tenant_id", tenantId)
@@ -194,6 +210,26 @@ export async function clockOut(
     new_value: updated.clock_out,
     reason: "Clock out",
   });
+
+  if (allocation.automaticMinutes > 0) {
+    await supabase.from("time_entry_audit").insert({
+      time_entry_id: timeEntryId,
+      tenant_id: tenantId,
+      changed_by: employeeId,
+      action: "update",
+      field_name: "break_minutes",
+      old_value: String(entry.break_minutes),
+      new_value: String(allocation.totalMinutes),
+      reason: `Automatische Mindestpause ergänzt (${allocation.automaticMinutes} Min)`,
+    });
+    await createNotification(supabase, {
+      tenant_id: tenantId,
+      employee_id: employeeId,
+      type: "automatic_break_added",
+      title: "Pause automatisch ergänzt",
+      message: `Quoska hat ${allocation.automaticMinutes} Minuten Pause ergänzt, damit der Eintrag die konfigurierte Mindestpause erreicht. Bitte prüfe deine Zeiten.`,
+    });
+  }
 
   return success(updated);
 }

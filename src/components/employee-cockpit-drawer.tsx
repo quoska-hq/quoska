@@ -7,6 +7,7 @@ import { formatCockpitMinutes, formatCockpitTimestamp } from "@/components/cockp
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Activity, Briefcase, CalendarOff, Clock3 } from "lucide-react";
+import { formatDateFullDE } from "@/config/client/date-utils";
 
 export function EmployeeCockpitDrawer({
   employeeId,
@@ -118,7 +119,7 @@ function EmptyText({ children }: { children: React.ReactNode }) {
 
 function MiniTrend({ data }: { data: CockpitData }) {
   const max = Math.max(60, ...data.daily.map((day) => Math.max(day.workedMinutes, day.targetMinutes)));
-  return <div className="mt-3 flex h-20 items-end gap-1">{data.daily.map((day) => <div key={day.date} className="relative h-full flex-1 bg-slate-100" title={day.date}><div className="absolute inset-x-0 bottom-0 bg-[#6658d3]" style={{ height: `${Math.round((day.workedMinutes / max) * 100)}%` }} /></div>)}</div>;
+  return <div className="mt-3 flex h-20 items-end gap-1">{data.daily.map((day) => <div key={day.date} className="relative h-full flex-1 bg-slate-100" title={formatDateFullDE(day.date)}><div className="absolute inset-x-0 bottom-0 bg-[#6658d3]" style={{ height: `${Math.round((day.workedMinutes / max) * 100)}%` }} /></div>)}</div>;
 }
 
 function statusLabel(status: "running" | "paused" | "off", project: string | null): string {

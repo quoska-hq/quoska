@@ -6,7 +6,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { createClient } from "@/config/supabase/server";
+import { createAdminClient, createClient } from "@/config/supabase/server";
 import { getNowIso } from "@/config/server/timestamps";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getTimeEntriesByDateRange } from "@/repos/timeEntryRepo";
@@ -14,6 +14,8 @@ import { netMinutesForEntry, netMinutesForRunningEntry } from "@/services/overti
 import type { ApiResponse } from "@/types/api";
 import type { TimeEntry } from "@/types/database";
 import { z } from "zod";
+import { manualTimeEntrySchema } from "@/types/time-entry";
+import { createManualTimeEntry } from "@/services/manualTimeEntryService";
 
 export interface TimeEntryWithNet extends TimeEntry {
   netMinutes: number;
@@ -91,6 +93,49 @@ export async function GET(request: Request) {
     console.error("Employee time entries error:", error);
     return NextResponse.json<ApiResponse<EmployeeEntriesResponse>>(
       { data: null, error: "Ein unerwartender Fehler ist aufgetreten." },
+      { status: 500 },
+    );
+  }
+}
+
+/** Add a completed entry manually for yourself or, as a manager, an employee. */
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+    const authResult = await getEmployeeFromAuth(supabase);
+    if (!authResult.data) {
+      return NextResponse.json({ data: null, error: authResult.error }, { status: 401 });
+    }
+
+    const parsed = manualTimeEntrySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { data: null, error: parsed.error.issues[0]?.message ?? "Ungültige Eingabe" },
+        { status: 400 },
+      );
+    }
+
+    const { tenantId, employeeId, role } = authResult.data;
+    if (!["admin", "manager"].includes(role)) {
+      return NextResponse.json(
+        { data: null, error: "Nur Administratoren und Führungskräfte können Zeiten direkt hinzufügen" },
+        { status: 403 },
+      );
+    }
+    const targetEmployeeId = parsed.data.employee_id ?? employeeId;
+
+    const result = await createManualTimeEntry(
+      createAdminClient(), tenantId, employeeId, targetEmployeeId, parsed.data,
+    );
+    if (!result.data) {
+      return NextResponse.json({ data: null, error: result.error }, { status: 400 });
+    }
+
+    return NextResponse.json({ data: result.data, error: null }, { status: 201 });
+  } catch (error) {
+    console.error("Manual time entry error:", error);
+    return NextResponse.json(
+      { data: null, error: "Ein unerwarteter Fehler ist aufgetreten." },
       { status: 500 },
     );
   }

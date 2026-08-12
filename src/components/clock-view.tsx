@@ -192,7 +192,7 @@ export function ClockView() {
 
   const isActive = activeEntry?.status === "running" || !!activeBreak || !!optimisticAction;
   const activePulse = isActive && pulsePhase;
-  const btnShadow = `0 1px 0 rgba(255,255,255,0.12) inset, 0 16px 34px ${btn.shadowColor}`;
+  const btnShadow = `0 1px 0 rgba(255,255,255,0.16) inset, 0 11px 24px ${btn.shadowColor}`;
 
   if (isLoading) {
     return (
@@ -203,7 +203,7 @@ export function ClockView() {
   }
 
   const ringSize = 216;
-  const ringStroke = 6;
+  const ringStroke = 8;
   const ringProgress = Math.min(progressFraction, 1);
 
   return (

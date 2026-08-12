@@ -29,6 +29,8 @@ import {
 const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
   forgot_clockout: AlarmClock,
   break_reminder: Clock,
+  automatic_break_added: Clock,
+  manual_time_added: CheckCircle,
   correction_request: AlertTriangle,
   correction_approved: CheckCircle,
   correction_rejected: XCircle,

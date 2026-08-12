@@ -92,18 +92,94 @@ export function getWeekBoundsForOffset(
  * Uses the browser's timezone automatically.
  */
 export function formatTimeLocal(iso: string): string {
-  // eslint-disable-next-line @quoska/legal/no-client-timestamps
-  const d = new Date(iso);
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return new Intl.DateTimeFormat("de-DE", {
+    timeZone: "Europe/Berlin",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(Date.parse(iso));
 }
 
 /**
  * Get today's date as YYYY-MM-DD in the user's local timezone.
  */
 export function getLocalToday(): string {
-  // eslint-disable-next-line @quoska/legal/no-client-timestamps
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  // eslint-disable-next-line @quoska/legal/no-client-timestamps -- display/input default only; server timestamps remain authoritative
+  }).formatToParts(Date.now());
+  const value = (type: "year" | "month" | "day") =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${value("year")}-${value("month")}-${value("day")}`;
+}
+
+/** Format an ISO timestamp as DD.MM.YYYY, HH:mm in the German app timezone. */
+export function formatDateTimeDE(iso: string): string {
+  return new Intl.DateTimeFormat("de-DE", {
+    timeZone: "Europe/Berlin",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(Date.parse(iso));
+}
+
+/** Validate a German 24-hour clock value (HH:mm). */
+export function isGermanTime(value: string): boolean {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+/** Split a stored UTC timestamp into German wall-date and 24-hour time. */
+export function isoToBerlinDateTime(iso: string): { date: string; time: string } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(Date.parse(iso));
+  const value = (type: "year" | "month" | "day" | "hour" | "minute") =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    date: `${value("year")}-${value("month")}-${value("day")}`,
+    time: `${value("hour")}:${value("minute")}`,
+  };
+}
+
+/** Convert a German wall-date/time to the UTC ISO representation used by the database. */
+export function berlinDateTimeToIso(date: string, time: string): string {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const desiredUtc = Date.UTC(year, month - 1, day, hour, minute);
+  let candidate = desiredUtc;
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const parts = formatter.formatToParts(candidate);
+    const value = (type: Intl.DateTimeFormatPartTypes) =>
+      Number(parts.find((part) => part.type === type)?.value);
+    const observedUtc = Date.UTC(
+      value("year"), value("month") - 1, value("day"), value("hour"), value("minute"),
+    );
+    candidate += desiredUtc - observedUtc;
+  }
+  // eslint-disable-next-line @quoska/legal/no-client-timestamps -- converts explicit user input; it does not generate a timestamp
+  return new Date(candidate).toISOString();
 }
 
 /**

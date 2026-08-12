@@ -202,7 +202,7 @@ async function login(page: Page) {
 }
 
 test("captures the real product for the marketing site", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 960 });
+  await page.setViewportSize({ width: 1440, height: 900 });
   await login(page);
   await expect(page.getByTestId("cockpit-overview")).toBeVisible();
   await page.screenshot({ path: resolve(OUTPUT_DIR, "cockpit.png"), animations: "disabled" });
@@ -213,6 +213,17 @@ test("captures the real product for the marketing site", async ({ page }) => {
   await page.screenshot({ path: resolve(OUTPUT_DIR, "activity-log.png"), animations: "disabled" });
 
   await page.setViewportSize({ width: 430, height: 932 });
+  await page.goto("/app/dashboard");
+  await expect(page.getByTestId("cockpit-overview")).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: resolve(OUTPUT_DIR, "mobile-cockpit.png"), animations: "disabled" });
+
+  await page.getByRole("tab", { name: /aktivitäten/i }).click();
+  await expect(page.getByTestId("cockpit-activity")).toBeVisible();
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: resolve(OUTPUT_DIR, "mobile-activity.png"), animations: "disabled" });
+
   await page.goto("/app/clock");
   await expect(page.getByRole("heading", { name: "Stempeln" })).toBeVisible();
   // Let the product's balance and progress animations reach their final state.

@@ -24,6 +24,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { GermanDateTimeFields } from "@/components/german-date-time-fields";
+import {
+  berlinDateTimeToIso,
+  isGermanTime,
+  isoToBerlinDateTime,
+} from "@/config/client/date-utils";
 
 interface TimeEntryEditDialogProps {
   entry: TimeEntry;
@@ -32,23 +38,18 @@ interface TimeEntryEditDialogProps {
   onSaved: () => void;
 }
 
-/** Format ISO timestamp to datetime-local input value using Date.parse only. */
-function toDatetimeLocal(iso: string | null): string {
-  if (!iso) return "";
-  // Extract parts from ISO string directly
-  const datePart = iso.slice(0, 10);
-  const timePart = iso.slice(11, 16); // HH:MM
-  return `${datePart}T${timePart}`;
-}
-
 export function TimeEntryEditDialog({
   entry,
   open,
   onClose,
   onSaved,
 }: TimeEntryEditDialogProps) {
-  const [clockIn, setClockIn] = useState(toDatetimeLocal(entry.clock_in));
-  const [clockOut, setClockOut] = useState(toDatetimeLocal(entry.clock_out));
+  const originalClockIn = isoToBerlinDateTime(entry.clock_in);
+  const originalClockOut = entry.clock_out ? isoToBerlinDateTime(entry.clock_out) : null;
+  const [clockInDate, setClockInDate] = useState(originalClockIn.date);
+  const [clockInTime, setClockInTime] = useState(originalClockIn.time);
+  const [clockOutDate, setClockOutDate] = useState(originalClockOut?.date ?? entry.date);
+  const [clockOutTime, setClockOutTime] = useState(originalClockOut?.time ?? "");
   const [breakMinutes, setBreakMinutes] = useState(String(entry.break_minutes));
   const [notes, setNotes] = useState(entry.notes ?? "");
   const [reason, setReason] = useState("");
@@ -63,18 +64,26 @@ export function TimeEntryEditDialog({
       setError("Ein Grund ist erforderlich (mindestens 5 Zeichen)");
       return;
     }
+    if (!isGermanTime(clockInTime) || (clockOutTime && !isGermanTime(clockOutTime))) {
+      setError("Bitte gib Uhrzeiten im Format HH:MM ein, zum Beispiel 08:30");
+      return;
+    }
 
     setIsSaving(true);
 
     try {
       const changes: Record<string, unknown> = {};
 
-      if (clockIn !== toDatetimeLocal(entry.clock_in)) {
-        // Convert datetime-local (YYYY-MM-DDTHH:MM) to ISO format
-        changes.clock_in = `${clockIn}:00.000Z`;
+      if (clockInDate !== originalClockIn.date || clockInTime !== originalClockIn.time) {
+        changes.clock_in = berlinDateTimeToIso(clockInDate, clockInTime);
       }
-      if (clockOut !== toDatetimeLocal(entry.clock_out)) {
-        changes.clock_out = clockOut ? `${clockOut}:00.000Z` : null;
+      if (
+        clockOutDate !== (originalClockOut?.date ?? entry.date) ||
+        clockOutTime !== (originalClockOut?.time ?? "")
+      ) {
+        changes.clock_out = clockOutTime
+          ? berlinDateTimeToIso(clockOutDate, clockOutTime)
+          : null;
       }
       if (parseInt(breakMinutes) !== entry.break_minutes) {
         changes.break_minutes = parseInt(breakMinutes) || 0;
@@ -130,23 +139,23 @@ export function TimeEntryEditDialog({
               </Alert>
             )}
 
-            <div className="space-y-2">
-              <Label>Einstempeln</Label>
-              <Input
-                type="datetime-local"
-                value={clockIn}
-                onChange={(e) => setClockIn(e.target.value)}
-              />
-            </div>
+            <GermanDateTimeFields
+              id="edit-clock-in"
+              label="Einstempeln"
+              date={clockInDate}
+              time={clockInTime}
+              onDateChange={setClockInDate}
+              onTimeChange={setClockInTime}
+            />
 
-            <div className="space-y-2">
-              <Label>Ausstempeln</Label>
-              <Input
-                type="datetime-local"
-                value={clockOut}
-                onChange={(e) => setClockOut(e.target.value)}
-              />
-            </div>
+            <GermanDateTimeFields
+              id="edit-clock-out"
+              label="Ausstempeln"
+              date={clockOutDate}
+              time={clockOutTime}
+              onDateChange={setClockOutDate}
+              onTimeChange={setClockOutTime}
+            />
 
             <div className="space-y-2">
               <Label>Pause (Minuten)</Label>
@@ -156,6 +165,12 @@ export function TimeEntryEditDialog({
                 value={breakMinutes}
                 onChange={(e) => setBreakMinutes(e.target.value)}
               />
+              {(entry.automatic_break_minutes ?? 0) > 0 && (
+                <p className="text-xs text-violet-700">
+                  Davon wurden {entry.automatic_break_minutes} Minuten automatisch ergänzt.
+                  Beim manuellen Speichern wird diese Kennzeichnung zurückgesetzt.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

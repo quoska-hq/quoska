@@ -21,6 +21,7 @@ import {
   createTestUser,
   adminClient,
 } from "./helpers";
+import { berlinLocalDateTimeToIso } from "@/config/server/timestamps";
 
 /** Format a Date as YYYY-MM-DD using local timezone. */
 function toLocalISO(d: Date): string {
@@ -101,8 +102,8 @@ test.describe("Manager Time Entry Edit — Story 4.1", () => {
         tenant_id: tenantId,
         employee_id: employeeEmpId,
         date: entryDate,
-        clock_in: `${entryDate}T08:02:00.000Z`,
-        clock_out: `${entryDate}T17:00:00.000Z`,
+        clock_in: berlinLocalDateTimeToIso(entryDate, "08:02"),
+        clock_out: berlinLocalDateTimeToIso(entryDate, "17:00"),
         break_minutes: 30,
         status: "completed",
       })
@@ -175,9 +176,8 @@ test.describe("Manager Time Entry Edit — Story 4.1", () => {
       page.getByRole("heading", { name: /zeiteintrag bearbeiten/i }),
     ).toBeVisible({ timeout: 5_000 });
 
-    // Should have fields for clock_in, clock_out, break_minutes
-    // Labels are not linked via htmlFor, so use input locators
-    await expect(page.locator('input[type="datetime-local"]').first()).toBeVisible();
+    // Should have German date/time fields and break_minutes
+    await expect(page.locator("#edit-clock-in-time")).toBeVisible();
     await expect(page.locator('input[type="number"]')).toBeVisible();
     // Reason textarea
     await expect(page.locator("textarea").last()).toBeVisible();
@@ -214,8 +214,8 @@ test.describe("Manager Time Entry Edit — Story 4.1", () => {
     ).toBeVisible({ timeout: 5_000 });
 
     // Change clock_in from 08:02 to 08:00
-    const clockInInput = page.locator('input[type="datetime-local"]').first();
-    await clockInInput.fill(`${entryDate}T08:00`);
+    const clockInInput = page.locator("#edit-clock-in-time");
+    await clockInInput.fill("08:00");
 
     // Enter a reason (last textarea is the reason field)
     const textareas = page.locator("textarea");

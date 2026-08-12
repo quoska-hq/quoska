@@ -23,11 +23,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
-
-/** Format ISO time part to HH:MM for display. */
-function formatTime(iso: string): string {
-  return iso.slice(11, 16);
-}
+import { GermanDateTimeFields } from "@/components/german-date-time-fields";
+import {
+  berlinDateTimeToIso,
+  formatDateFullDE,
+  formatTimeLocal,
+  isGermanTime,
+  isoToBerlinDateTime,
+} from "@/config/client/date-utils";
 
 interface CorrectionRequestDialogProps {
   entry: TimeEntry;
@@ -42,8 +45,14 @@ export function CorrectionRequestDialog({
   onClose,
   onSubmitted,
 }: CorrectionRequestDialogProps) {
-  const [proposedClockOut, setProposedClockOut] = useState("");
-  const [proposedClockIn, setProposedClockIn] = useState("");
+  const originalClockIn = isoToBerlinDateTime(entry.clock_in);
+  const originalClockOut = entry.clock_out ? isoToBerlinDateTime(entry.clock_out) : null;
+  const [proposedClockInDate, setProposedClockInDate] = useState(originalClockIn.date);
+  const [proposedClockInTime, setProposedClockInTime] = useState("");
+  const [proposedClockOutDate, setProposedClockOutDate] = useState(
+    originalClockOut?.date ?? entry.date,
+  );
+  const [proposedClockOutTime, setProposedClockOutTime] = useState("");
   const [proposedBreak, setProposedBreak] = useState("");
   const [reason, setReason] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -60,11 +69,31 @@ export function CorrectionRequestDialog({
     // Build proposed change object (only include changed fields)
     const proposedChange: Record<string, unknown> = {};
 
-    if (proposedClockIn) {
-      proposedChange.clock_in = `${proposedClockIn}:00.000Z`;
+    if (
+      (proposedClockInTime && !isGermanTime(proposedClockInTime)) ||
+      (proposedClockOutTime && !isGermanTime(proposedClockOutTime))
+    ) {
+      setError("Bitte gib Uhrzeiten im Format HH:MM ein, zum Beispiel 08:30");
+      return;
     }
-    if (proposedClockOut) {
-      proposedChange.clock_out = `${proposedClockOut}:00.000Z`;
+
+    if (proposedClockInTime) {
+      if (!proposedClockInDate) {
+        setError("Bitte wähle ein Datum für den neuen Beginn");
+        return;
+      }
+      proposedChange.clock_in = berlinDateTimeToIso(
+        proposedClockInDate, proposedClockInTime,
+      );
+    }
+    if (proposedClockOutTime) {
+      if (!proposedClockOutDate) {
+        setError("Bitte wähle ein Datum für das neue Ende");
+        return;
+      }
+      proposedChange.clock_out = berlinDateTimeToIso(
+        proposedClockOutDate, proposedClockOutTime,
+      );
     }
     if (proposedBreak !== "") {
       proposedChange.break_minutes = parseInt(proposedBreak) || 0;
@@ -120,10 +149,10 @@ export function CorrectionRequestDialog({
           <Card size="sm">
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Aktueller Eintrag:{" "}
-                {entry.clock_in ? formatTime(entry.clock_in) : "–"}
+                Aktueller Eintrag am {formatDateFullDE(entry.date)}:{" "}
+                {entry.clock_in ? formatTimeLocal(entry.clock_in) : "–"}
                 {" – "}
-                {entry.clock_out ? formatTime(entry.clock_out) : "laufend"}
+                {entry.clock_out ? formatTimeLocal(entry.clock_out) : "laufend"}
                 {entry.break_minutes > 0 && ` · Pause: ${entry.break_minutes} Min`}
               </p>
             </CardContent>
@@ -133,23 +162,23 @@ export function CorrectionRequestDialog({
             Welche Werte sollen korrigiert werden?
           </p>
 
-          <div className="space-y-2">
-            <Label>Neuer Beginn (optional)</Label>
-            <Input
-              type="datetime-local"
-              value={proposedClockIn}
-              onChange={(e) => setProposedClockIn(e.target.value)}
-            />
-          </div>
+          <GermanDateTimeFields
+            id="correction-clock-in"
+            label="Neuer Beginn (optional)"
+            date={proposedClockInDate}
+            time={proposedClockInTime}
+            onDateChange={setProposedClockInDate}
+            onTimeChange={setProposedClockInTime}
+          />
 
-          <div className="space-y-2">
-            <Label>Neues Ende (optional)</Label>
-            <Input
-              type="datetime-local"
-              value={proposedClockOut}
-              onChange={(e) => setProposedClockOut(e.target.value)}
-            />
-          </div>
+          <GermanDateTimeFields
+            id="correction-clock-out"
+            label="Neues Ende (optional)"
+            date={proposedClockOutDate}
+            time={proposedClockOutTime}
+            onDateChange={setProposedClockOutDate}
+            onTimeChange={setProposedClockOutTime}
+          />
 
           <div className="space-y-2">
             <Label>Neue Pause in Minuten (optional)</Label>

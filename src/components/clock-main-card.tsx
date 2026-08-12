@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { formatTimeLocal } from "@/config/client/date-utils";
 import { ProgressRing } from "@/components/progress-ring";
-import { formatBalance, formatDurationCompact } from "@/components/clock-format";
+import { formatBalance, formatDuration, formatDurationCompact } from "@/components/clock-format";
 import type { ClockButtonConfig, OptimisticAction } from "@/components/clock-button-config";
 
 interface ClockMainCardProps {
@@ -80,12 +80,50 @@ export function ClockMainCard({
   dailyTargetMinutes,
   progressFraction,
 }: ClockMainCardProps) {
+  const buttonHint = btn.label === "Ausstempeln"
+    ? "Arbeitszeit beenden"
+    : btn.label === "Pause beenden"
+      ? "Zurück an die Arbeit"
+      : "Arbeitszeit starten";
+
   return (
-    <Card className="overflow-visible border-slate-900/15 bg-white">
-      <CardContent className="flex flex-col items-center gap-5 px-7 py-8">
+    <Card className="overflow-visible border-slate-900/15 bg-[linear-gradient(180deg,#ffffff_0%,#fbfaf7_100%)] !shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
+      <CardContent className="flex flex-col items-center gap-5 px-6 py-6 sm:px-7 sm:py-7">
+
+        <div className="flex w-full items-center justify-between border-b border-slate-900/10 pb-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-[#5145ad]">
+              Heute
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-slate-900">
+              Dein Arbeitstag
+            </p>
+          </div>
+
+          {isActive ? (
+            <Badge
+              variant="secondary"
+              className="gap-1.5 rounded-full border border-emerald-900/10 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800"
+            >
+              <span className={`size-2 rounded-full ${activeBreak ? "bg-amber-400" : "bg-emerald-500"} ${activePulse ? "animate-pulse" : ""}`} />
+              {activeBreak
+                ? `Pause seit ${formatTimeLocal(activeBreak.break_start)}`
+                : activeEntry
+                  ? `Seit ${formatTimeLocal(activeEntry.clock_in)}`
+                  : "Aktiv"
+              }
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
+              <Clock className="size-3" />
+              Startklar
+            </Badge>
+          )}
+        </div>
 
         {/* Circular progress ring + button */}
-        <div className="relative">
+        <div className="relative mt-1">
+          <div className="pointer-events-none absolute inset-[13px] rounded-full border border-slate-900/10 bg-[#f2efe7] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]" />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <ProgressRing
               progress={ringProgress}
@@ -107,9 +145,10 @@ export function ClockMainCard({
                   aria-label={btn.label}
                   className={`
                     stamp-button relative z-10
-                    size-[184px]
+                    size-[176px]
                     rounded-full
-                    border border-white/10
+                    overflow-hidden
+                    border border-black/10
                     flex items-center justify-center
                     text-white
                     transition-[background-color,transform,box-shadow] duration-300 ease-out
@@ -119,13 +158,19 @@ export function ClockMainCard({
                   `}
                   style={{
                     boxShadow: btnShadow,
-                    margin: (ringSize - 184) / 2,
+                    margin: (ringSize - 176) / 2,
                   }}
                 >
-                  <div className="relative z-10 flex flex-col items-center gap-2">
-                    {btn.iconSvg}
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-90">
+                  <div className="pointer-events-none absolute inset-[7px] rounded-full border border-white/12" />
+                  <div className="relative z-10 flex flex-col items-center gap-2.5">
+                    <span className="flex size-10 items-center justify-center rounded-full border border-white/15 bg-black/10">
+                      {btn.iconSvg}
+                    </span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">
                       {btn.label}
+                    </span>
+                    <span className="text-[9px] font-medium tracking-wide text-white/70">
+                      {buttonHint}
                     </span>
                   </div>
                 </button>
@@ -146,38 +191,19 @@ export function ClockMainCard({
           )}
         </div>
 
-        {/* Status badge */}
-        {isActive ? (
-          <Badge
-            variant="secondary"
-            className="gap-1.5 text-xs font-medium px-3 py-1 rounded-full"
-          >
-            <span className={`size-2 rounded-full ${activeBreak ? "bg-amber-400" : "bg-emerald-400"} ${activePulse ? "animate-pulse" : ""}`} />
-            {activeBreak
-              ? `Pause seit ${formatTimeLocal(activeBreak.break_start)}`
-              : activeEntry
-                ? `Seit ${formatTimeLocal(activeEntry.clock_in)}`
-                : "…"
-            }
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="gap-1.5 text-xs font-medium px-3 py-1 rounded-full text-muted-foreground">
-            <Clock className="size-3" />
-            Bereit zum Einstempeln
-          </Badge>
-        )}
-
         {/* ---- Animated balance display ---- */}
         {(activeEntry || (todaySummary && todaySummary.netMinutes > 0)) && !activeBreak ? (
           <div className="text-center">
-            <p className={`text-4xl font-mono font-bold tracking-tight tabular-nums ${
+            <p className={`text-[2.15rem] font-mono font-bold tracking-[-0.04em] tabular-nums ${
               animatedBalance < 0
                 ? "text-foreground"
                 : animatedBalance === 0
                   ? "text-foreground"
                   : "text-emerald-600"
             }`}>
-              {formatBalance(animatedBalance)}
+              {animatedBalance < 0
+                ? formatDuration(Math.abs(animatedBalance))
+                : formatBalance(animatedBalance)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {animatedBalance < 0

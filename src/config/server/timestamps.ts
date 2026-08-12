@@ -34,6 +34,41 @@ export function getNowIso(): string {
   return new Date().toISOString();
 }
 
+/** Convert an explicitly entered Europe/Berlin wall time to UTC. */
+export function berlinLocalDateTimeToIso(date: string, time: string): string {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const desiredUtc = Date.UTC(year, month - 1, day, hour, minute);
+  let candidate = desiredUtc;
+
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  });
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const parts = formatter.formatToParts(candidate);
+    const value = (type: Intl.DateTimeFormatPartTypes) =>
+      Number(parts.find((part) => part.type === type)?.value);
+    const observedUtc = Date.UTC(
+      value("year"), value("month") - 1, value("day"), value("hour"), value("minute"),
+    );
+    candidate += desiredUtc - observedUtc;
+  }
+
+  return new Date(candidate).toISOString();
+}
+
+export function addCalendarDay(date: string): string {
+  const [year, month, day] = date.split("-").map(Number);
+  return toDateStr(new Date(Date.UTC(year, month - 1, day + 1)));
+}
+
 /**
  * Calculate ISO week boundaries (Monday to Sunday) for the current date
  * in the app timezone (Europe/Berlin).

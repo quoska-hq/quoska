@@ -18,6 +18,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ManualTimeEntryDialog } from "@/components/manual-time-entry-dialog";
+import { formatTimeLocal } from "@/config/client/date-utils";
+import { Plus, Sparkles } from "lucide-react";
 
 interface TimeEntryWithNet extends TimeEntry {
   netMinutes: number;
@@ -41,11 +44,6 @@ function formatDate(iso: string): string {
   return `${d}.${m}.${y}`;
 }
 
-/** Format ISO time to HH:MM. */
-function formatTime(iso: string): string {
-  return iso.slice(11, 16);
-}
-
 /** Format minutes to "X Std Y Min". */
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
@@ -65,6 +63,7 @@ export function EmployeeEntryList({
   const queryClient = useQueryClient();
   const [editEntry, setEditEntry] = useState<TimeEntry | null>(null);
   const [auditEntryId, setAuditEntryId] = useState<string | null>(null);
+  const [manualEntryOpen, setManualEntryOpen] = useState(false);
 
   const { data } = useQuery<EmployeeEntriesData>({
     queryKey: ["employeeEntries", employeeId, startDate, endDate],
@@ -80,7 +79,7 @@ export function EmployeeEntryList({
   return (
     <div>
       {/* Header with back button */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="mb-4 flex items-center gap-3">
         <Button variant="outline" size="sm" onClick={onBack}>
           ← Zurück
         </Button>
@@ -90,7 +89,17 @@ export function EmployeeEntryList({
             {formatDate(startDate)} – {formatDate(endDate)}
           </p>
         </div>
+        <Button size="sm" className="ml-auto gap-1.5" onClick={() => setManualEntryOpen(true)}>
+          <Plus className="size-3.5" />
+          Zeit hinzufügen
+        </Button>
       </div>
+
+      <ManualTimeEntryDialog
+        open={manualEntryOpen}
+        onClose={() => setManualEntryOpen(false)}
+        targetEmployee={{ id: employeeId, name: employeeName }}
+      />
 
       {/* Loading */}
       {!data && (
@@ -132,17 +141,26 @@ export function EmployeeEntryList({
                         Pause
                       </Badge>
                     )}
+                    {entry.entry_source === "manual" && (
+                      <Badge variant="outline">Manuell</Badge>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {formatTime(entry.clock_in)}
+                    {formatTimeLocal(entry.clock_in)}
                     {entry.clock_out
-                      ? ` – ${formatTime(entry.clock_out)}`
+                      ? ` – ${formatTimeLocal(entry.clock_out)}`
                       : " – …"}
                     {entry.break_minutes > 0 &&
                       ` · Pause: ${entry.break_minutes} Min`}
                     {" · Netto: "}
                     {formatDuration(entry.netMinutes)}
                   </p>
+                  {(entry.automatic_break_minutes ?? 0) > 0 && (
+                    <p className="mt-1 flex items-center gap-1 text-xs text-violet-700">
+                      <Sparkles className="size-3" />
+                      Davon {entry.automatic_break_minutes} Min automatisch ergänzt
+                    </p>
+                  )}
                   {entry.notes && (
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {entry.notes}

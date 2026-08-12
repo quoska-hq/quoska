@@ -27,9 +27,9 @@ export function getButtonConfig(
   if (optimisticAction === "clock-in") {
     return {
       label: "Ausstempeln",
-      bgClass: "bg-[#b84b4b]",
+      bgClass: "bg-[#a6535b]",
       hoverClass: "",
-      shadowColor: "rgba(184,75,75,0.22)",
+      shadowColor: "rgba(114,52,60,0.2)",
       iconSvg: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="6" width="12" height="12" rx="1.5" />
@@ -40,9 +40,9 @@ export function getButtonConfig(
   if (optimisticAction === "clock-out") {
     return {
       label: "Stempeln",
-      bgClass: "bg-[#202126]",
+      bgClass: "bg-[#5548ba]",
       hoverClass: "",
-      shadowColor: "rgba(15,23,42,0.18)",
+      shadowColor: "rgba(81,69,173,0.2)",
       iconSvg: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.14-6.86a1 1 0 0 0 0-1.72L9.5 4.28a1 1 0 0 0-1.5.86z" />
@@ -53,9 +53,9 @@ export function getButtonConfig(
   if (optimisticAction === "pause") {
     return {
       label: "Pause beenden",
-      bgClass: "bg-[#b7791f]",
+      bgClass: "bg-[#a96f2d]",
       hoverClass: "",
-      shadowColor: "rgba(183,121,31,0.20)",
+      shadowColor: "rgba(125,78,24,0.2)",
       iconSvg: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.14-6.86a1 1 0 0 0 0-1.72L9.5 4.28a1 1 0 0 0-1.5.86z" />
@@ -66,9 +66,9 @@ export function getButtonConfig(
   if (optimisticAction === "resume") {
     return {
       label: "Ausstempeln",
-      bgClass: "bg-[#b84b4b]",
+      bgClass: "bg-[#a6535b]",
       hoverClass: "",
-      shadowColor: "rgba(184,75,75,0.22)",
+      shadowColor: "rgba(114,52,60,0.2)",
       iconSvg: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="6" width="12" height="12" rx="1.5" />
@@ -81,9 +81,9 @@ export function getButtonConfig(
   if (activeBreak) {
     return {
       label: "Pause beenden",
-      bgClass: "bg-[#b7791f]",
-      hoverClass: "hover:bg-[#9f6819]",
-      shadowColor: "rgba(183,121,31,0.20)",
+      bgClass: "bg-[#a96f2d]",
+      hoverClass: "hover:bg-[#996326]",
+      shadowColor: "rgba(125,78,24,0.2)",
       iconSvg: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.14-6.86a1 1 0 0 0 0-1.72L9.5 4.28a1 1 0 0 0-1.5.86z" />
@@ -94,9 +94,9 @@ export function getButtonConfig(
   if (activeEntry?.status === "running") {
     return {
       label: "Ausstempeln",
-      bgClass: "bg-[#b84b4b]",
-      hoverClass: "hover:bg-[#9f3f3f]",
-      shadowColor: "rgba(184,75,75,0.22)",
+      bgClass: "bg-[#a6535b]",
+      hoverClass: "hover:bg-[#98474f]",
+      shadowColor: "rgba(114,52,60,0.2)",
       iconSvg: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="6" width="12" height="12" rx="1.5" />
@@ -106,9 +106,9 @@ export function getButtonConfig(
   }
   return {
     label: "Stempeln",
-    bgClass: "bg-[#202126]",
-    hoverClass: "hover:bg-[#2d2f35]",
-    shadowColor: "rgba(15,23,42,0.18)",
+    bgClass: "bg-[#5548ba]",
+    hoverClass: "hover:bg-[#493da7]",
+    shadowColor: "rgba(81,69,173,0.2)",
     iconSvg: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
         <path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11.14-6.86a1 1 0 0 0 0-1.72L9.5 4.28a1 1 0 0 0-1.5.86z" />

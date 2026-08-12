@@ -4,6 +4,8 @@ import { z } from "zod";
 export type NotificationType =
   | "forgot_clockout"
   | "break_reminder"
+  | "automatic_break_added"
+  | "manual_time_added"
   | "correction_request"
   | "correction_approved"
   | "correction_rejected"
@@ -15,6 +17,8 @@ export type NotificationType =
 export const NOTIFICATION_ICON: Record<NotificationType, string> = {
   forgot_clockout: "⏰",
   break_reminder: "☕",
+  automatic_break_added: "☕",
+  manual_time_added: "➕",
   correction_request: "📝",
   correction_approved: "✅",
   correction_rejected: "❌",

@@ -20,24 +20,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDateTimeDE } from "@/config/client/date-utils";
 
 interface AuditTrailDialogProps {
   timeEntryId: string;
   open: boolean;
   onClose: () => void;
-}
-
-/** Format ISO timestamp to German date + time using Date.parse only. */
-function formatTimestamp(iso: string): string {
-  const ms = Date.parse(iso);
-  const totalMinutes = Math.floor(ms / 60000);
-  const dayMinutes = totalMinutes % 1440;
-  const hours = Math.floor(dayMinutes / 60);
-  const mins = dayMinutes % 60;
-  // Extract date part from ISO string directly
-  const datePart = iso.slice(0, 10);
-  const [y, m, d] = datePart.split("-");
-  return `${d}.${m}.${y}, ${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 }
 
 /** Human-readable action labels. */
@@ -54,6 +42,8 @@ const FIELD_LABELS: Record<string, string> = {
   clock_in: "Einstempeln",
   clock_out: "Ausstempeln",
   break_minutes: "Pause (Min)",
+  automatic_break_minutes: "Automatische Pause (Min)",
+  manual_entry: "Manueller Eintrag",
   notes: "Notizen",
   status: "Status",
 };
@@ -130,7 +120,7 @@ export function AuditTrailDialog({
                     )}
 
                     <p className="text-xs text-muted-foreground mt-1">
-                      {formatTimestamp(record.changed_at)}
+                      {formatDateTimeDE(record.changed_at)} Uhr
                     </p>
                   </div>
                 </div>

@@ -13,7 +13,9 @@ export function formatCockpitTimestamp(iso: string): string {
     timeZone: "Europe/Berlin",
     day: "2-digit",
     month: "2-digit",
+    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    hourCycle: "h23",
   }).format(Date.parse(iso));
 }

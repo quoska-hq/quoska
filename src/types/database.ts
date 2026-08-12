@@ -10,6 +10,7 @@ export interface Tenant {
   stripe_customer_id: string | null;
   bundesland: string | null;
   default_work_schedule?: WorkSchedule;
+  automatic_breaks_enabled?: boolean;
   setup_complete: boolean;
   created_at: string;
   updated_at: string;
@@ -41,6 +42,8 @@ export interface TimeEntry {
   clock_in: string;
   clock_out: string | null;
   break_minutes: number;
+  automatic_break_minutes?: number;
+  entry_source?: "clock" | "manual";
   status: "running" | "paused" | "completed";
   notes: string | null;
   // Optional: a time entry may have no project assigned (DB column defaults to NULL).

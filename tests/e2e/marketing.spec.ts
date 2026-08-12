@@ -38,7 +38,7 @@ test.describe("Marketing and SEO", () => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1, name: /digitale zeiterfassung\. ohne theater/i })).toBeVisible();
     await expect(page.getByRole("img", { name: /quoska cockpit/i }).first()).toBeVisible();
-    await expect(page.getByRole("img", { name: /mobile stempeluhr/i })).toBeVisible();
+    await expect(page.getByRole("img", { name: /mobile stempeluhr/i }).first()).toBeVisible();
     await expect(page.getByText("Datenbank in Frankfurt").first()).toBeVisible();
     await expect(page.getByRole("link", { name: "Open Source auf GitHub" })).toHaveAttribute(
       "href",

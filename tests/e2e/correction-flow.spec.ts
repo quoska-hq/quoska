@@ -188,11 +188,8 @@ test.describe("Correction Request Flow — Story 4.2", () => {
       page.getByRole("heading", { name: /korrektur anfordern/i }),
     ).toBeVisible({ timeout: 5_000 });
 
-    // Enter a proposed new clock_out (was 16:00, should be 17:00)
-    // Labels not linked via htmlFor — use input[type=datetime-local], 2nd one is "Neues Ende"
-    const datetimeInputs = page.locator('input[type="datetime-local"]');
-    const clockOutInput = datetimeInputs.nth(1); // Neues Ende
-    await clockOutInput.fill(`${entryDate}T17:00`);
+    // The date is preselected; enter the new end using a German 24-hour clock.
+    await page.locator("#correction-clock-out-time").fill("17:00");
 
     // Enter a reason
     await page.locator("textarea").fill("Ausstempeln war 17:00, nicht 16:00");

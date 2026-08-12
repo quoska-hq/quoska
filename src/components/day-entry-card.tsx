@@ -13,7 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Pause, Briefcase, FilePenLine } from "lucide-react";
+import { Pause, Briefcase, FilePenLine, Sparkles } from "lucide-react";
 import { formatTimeLocal, getLocalToday } from "@/config/client/date-utils";
 import {
   DAYS_DE_FULL,
@@ -119,6 +119,17 @@ export function DayEntryCard({
                         <Pause className="size-2.5" />
                         {entry.break_minutes} Min
                       </span>
+                    )}
+                    {(entry.automatic_break_minutes ?? 0) > 0 && (
+                      <Badge variant="secondary" className="rounded-full bg-violet-50 px-1.5 py-0 text-[9px] text-violet-700">
+                        <Sparkles className="mr-0.5 size-2.5" />
+                        {entry.automatic_break_minutes} Min automatisch
+                      </Badge>
+                    )}
+                    {entry.entry_source === "manual" && (
+                      <Badge variant="outline" className="rounded-full px-1.5 py-0 text-[9px] text-muted-foreground">
+                        Manuell
+                      </Badge>
                     )}
                     {entry.project_id && (
                       <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">

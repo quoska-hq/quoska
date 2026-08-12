@@ -190,10 +190,11 @@ export async function endBreak(
     tenantId,
     breakSession.time_entry_id,
   );
-  const totalBreakMinutes = completedBreaks.reduce(
+  const recordedBreakMinutes = completedBreaks.reduce(
     (sum, b) => sum + (b.duration_minutes ?? 0),
     0,
   );
+  const totalBreakMinutes = recordedBreakMinutes + (entry.automatic_break_minutes ?? 0);
 
   // 6. Update time entry: break_minutes + status = running
   const { error: entryUpdateError } = await supabase

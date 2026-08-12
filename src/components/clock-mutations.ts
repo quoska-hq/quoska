@@ -52,7 +52,13 @@ function useClockMutations(
       if (!res.ok) throw new Error(json.error ?? "Fehler beim Ausstempeln");
       return json;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["clockStatus"] }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["clockStatus"] }),
+        queryClient.invalidateQueries({ queryKey: ["notificationUnreadCount"] }),
+        queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+      ]);
+    },
   });
 
   const pauseMutation = useMutation({

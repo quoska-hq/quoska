@@ -51,6 +51,7 @@ function formatValue(field: string | null, value: string | null): string {
       timeZone: "Europe/Berlin",
       hour: "2-digit",
       minute: "2-digit",
+      hourCycle: "h23",
     }).format(Date.parse(value));
   }
   if (field === "break_minutes") return `${value} Min.`;

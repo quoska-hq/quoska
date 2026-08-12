@@ -98,6 +98,17 @@ export async function editTimeEntry(
     }
   }
 
+  // A manager changing the total pause confirms it manually. Clear the
+  // previous automatic attribution while preserving the immutable history.
+  if ("break_minutes" in updatePayload && (currentEntry.automatic_break_minutes ?? 0) > 0) {
+    updatePayload.automatic_break_minutes = 0;
+    auditRecords.push({
+      field_name: "automatic_break_minutes",
+      old_value: String(currentEntry.automatic_break_minutes),
+      new_value: "0",
+    });
+  }
+
   // Nothing to update
   if (Object.keys(updatePayload).length === 0) {
     return success(currentEntry);

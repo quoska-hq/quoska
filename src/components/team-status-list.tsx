@@ -7,6 +7,7 @@
 
 import type { ComplianceWarning } from "@/types/compliance";
 import { Separator } from "@/components/ui/separator";
+import { formatTimeLocal } from "@/config/client/date-utils";
 
 interface TeamMemberStatus {
   employeeId: string;
@@ -77,7 +78,7 @@ export function TeamStatusList({ members }: TeamStatusListProps) {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {member.status === "running" && member.since && (
-                      <>Eingestempelt seit {member.since.slice(11, 16)} · </>
+                      <>Eingestempelt seit {formatTimeLocal(member.since)} Uhr · </>
                     )}
                     {member.status === "paused" && "In Pause · "}
                     Heute: {formatDuration(member.todayNetMinutes)}

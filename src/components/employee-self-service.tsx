@@ -17,6 +17,7 @@ import type { CorrectionRequest } from "@/types/database";
 import { CorrectionRequestDialog } from "@/components/correction-request-dialog";
 import { ActivityGrid, type DayActivity } from "@/components/activity-grid";
 import { DayEntryCard } from "@/components/day-entry-card";
+import { ManualTimeEntryDialog } from "@/components/manual-time-entry-dialog";
 import { getWeekBoundsForOffset } from "@/config/client/date-utils";
 import {
   getWeekDays,
@@ -37,13 +38,25 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Plus,
 } from "lucide-react";
 
 export function EmployeeSelfService() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [correctionEntry, setCorrectionEntry] = useState<TimeEntryWithNet | null>(null);
+  const [manualEntryOpen, setManualEntryOpen] = useState(false);
 
   const { start, end } = getWeekBoundsForOffset(weekOffset);
+
+  const { data: authInfo } = useQuery<{ role: string }>({
+    queryKey: ["auth-info"],
+    queryFn: async () => {
+      const response = await fetch("/api/v1/employees/me");
+      const json: ApiResponse<{ role: string }> = await response.json();
+      return { role: json.data?.role ?? "employee" };
+    },
+  });
+  const canAddTime = authInfo?.role === "admin" || authInfo?.role === "manager";
 
   const { data, isLoading, refetch } = useQuery<MyTimesData>({
     queryKey: ["myTimes", start, end],
@@ -131,7 +144,7 @@ export function EmployeeSelfService() {
     <TooltipProvider>
       <div>
         {/* ---- Header with week navigation ---- */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Meine Zeiten
@@ -140,7 +153,14 @@ export function EmployeeSelfService() {
               Übersicht deiner Arbeitszeiten
             </p>
           </div>
-          <div className="flex items-center gap-1 bg-muted/60 rounded-lg p-1">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {canAddTime && (
+              <Button onClick={() => setManualEntryOpen(true)} size="sm" className="gap-1.5">
+                <Plus className="size-3.5" />
+                Zeit nachtragen
+              </Button>
+            )}
+            <div className="flex items-center gap-1 rounded-lg bg-muted/60 p-1">
             <Button
               variant="ghost"
               size="icon-xs"
@@ -161,8 +181,17 @@ export function EmployeeSelfService() {
             >
               <ChevronRight className="size-4" />
             </Button>
+            </div>
           </div>
         </div>
+
+        {canAddTime && (
+          <ManualTimeEntryDialog
+            open={manualEntryOpen}
+            onClose={() => setManualEntryOpen(false)}
+            onSaved={() => refetch()}
+          />
+        )}
 
         {/* ---- Week Summary Cards ---- */}
         {data && (
