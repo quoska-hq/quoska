@@ -49,6 +49,7 @@ const jsonLd = {
       name: site.name,
       url: site.url,
       logo: `${site.url}/icons/icon-512.png`,
+      sameAs: [site.githubUrl],
       ...(orgEmail ? { email: orgEmail } : {}),
     },
     {

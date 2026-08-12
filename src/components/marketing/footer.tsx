@@ -15,6 +15,13 @@ const FOOTER_LINKS = [
     ],
   },
   {
+    title: "Ratgeber",
+    links: [
+      { href: "/digitale-zeiterfassung", label: "Digitale Zeiterfassung" },
+      { href: "/zeiterfassung-kleinbetriebe", label: "Für Kleinbetriebe" },
+    ],
+  },
+  {
     title: "Rechtliches",
     links: [
       { href: "/impressum", label: "Impressum" },
@@ -39,9 +46,9 @@ export function MarketingFooter() {
   return (
     <footer className="border-t border-slate-900/10 bg-[#f5f3ee]">
       <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 sm:py-16">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 lg:grid-cols-5">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/icons/logo.png"

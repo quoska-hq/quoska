@@ -23,7 +23,6 @@
 <p align="center">
   <a href="https://github.com/quoska-hq/quoska/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/quoska-hq/quoska/ci.yml?branch=main&style=flat-square&label=CI"></a>
   <a href="LICENSE"><img alt="AGPL-3.0" src="https://img.shields.io/badge/Lizenz-AGPL--3.0-17181B?style=flat-square"></a>
-  <img alt="Status: Public Beta" src="https://img.shields.io/badge/Status-Public_Beta-0F766E?style=flat-square">
 </p>
 
 <br>
@@ -64,26 +63,21 @@ sehen offene Aufgaben, Arbeitszeitentwicklungen und Änderungen an einer Stelle.
 Die Bilder zeigen echte, mit reproduzierbaren Demo-Daten erzeugte
 Produktansichten — keine separaten Marketing-Mock-ups.
 
-<table>
-  <tr>
-    <td width="67%" valign="top">
-      <img src="public/product/activity-log.png" alt="Filterbarer Aktivitätsverlauf in Quoska">
-    </td>
-    <td width="33%" valign="top" align="center">
-      <img src="public/product/mobile-clock.png" alt="Mobile Stempeluhr in Quoska" width="300">
-    </td>
-  </tr>
-  <tr>
-    <td valign="top">
-      <strong>Aktivitätsverlauf</strong><br>
-      Zeitereignisse und Korrekturen nach Zeitraum, Person und Ereignistyp filtern.
-    </td>
-    <td valign="top">
-      <strong>Mobile Stempeluhr</strong><br>
-      Arbeitszeit, Pausen und Wochenfortschritt direkt im Browser erfassen.
-    </td>
-  </tr>
-</table>
+### Aktivitätsverlauf
+
+Zeitereignisse und Korrekturen nach Zeitraum, Person und Ereignistyp filtern.
+
+<p align="center">
+  <img src="public/product/activity-log.png" alt="Filterbarer Aktivitätsverlauf in Quoska" width="1200">
+</p>
+
+### Mobile Stempeluhr
+
+Arbeitszeit, Pausen und Wochenfortschritt direkt im Browser erfassen.
+
+<p align="center">
+  <img src="public/product/mobile-clock.png" alt="Mobile Stempeluhr in Quoska" width="360">
+</p>
 
 ## Grundsätze
 
