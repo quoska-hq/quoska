@@ -88,6 +88,7 @@ function ProductPreview() {
             alt="Quoska Cockpit mit Arbeitszeitverlauf, offenen Aufgaben und Projektauswertung"
             width={1440}
             height={960}
+            unoptimized
             priority
             sizes="(max-width: 1024px) 100vw, 760px"
             className="h-auto w-full"

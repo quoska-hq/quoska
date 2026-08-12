@@ -79,6 +79,7 @@ export default function FunctionsPage() {
               alt="Quoska Cockpit mit Arbeitszeit, Aufgaben, Team und Projekten"
               width={1440}
               height={960}
+              unoptimized
               sizes="(max-width: 1024px) 100vw, 760px"
               className="h-auto w-full border border-slate-900/10"
             />

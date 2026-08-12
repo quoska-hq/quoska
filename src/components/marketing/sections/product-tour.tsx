@@ -62,6 +62,7 @@ export function ProductTourSection() {
                   alt="Quoska Aktivitätsverlauf mit Filter und unveränderlich protokollierten Zeitereignissen"
                   width={1440}
                   height={960}
+                  unoptimized
                   sizes="(max-width: 1024px) 100vw, 1050px"
                   className="h-auto w-full"
                 />
@@ -83,6 +84,7 @@ export function ProductTourSection() {
                     alt="Mobile Stempeluhr in Quoska mit Tagesfortschritt, Pause und Wochensumme"
                     width={430}
                     height={932}
+                    unoptimized
                     sizes="(max-width: 1024px) 288px, 288px"
                     className="h-auto w-full"
                   />
