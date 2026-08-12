@@ -95,8 +95,11 @@ fi
 
 export ANALYTICS_BACKUP_SOURCE="/analytics/site-analytics.sqlite"
 export ANALYTICS_BACKUP_OUTPUT_DIR="/backup/analytics"
+analytics_export_dir="${export_dir}/analytics"
+mkdir -m 0700 "$analytics_export_dir"
+chown 1001:1001 "$analytics_export_dir"
 docker run --rm \
-  --user 0:0 \
+  --user 1001:1001 \
   --read-only \
   --network none \
   --cap-drop ALL \
@@ -106,7 +109,7 @@ docker run --rm \
   --env ANALYTICS_BACKUP_OUTPUT_DIR \
   --volume "${analytics_export_script}:/app/quoska-analytics-export.mjs:ro" \
   --volume "${analytics_volume}:/analytics" \
-  --volume "${export_dir}:/backup" \
+  --volume "${analytics_export_dir}:/backup/analytics" \
   --entrypoint node \
   "$QUOSKA_IMAGE" \
   /app/quoska-analytics-export.mjs
