@@ -56,6 +56,10 @@ export function TrustSection() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+          <Link href="/open-source-zeiterfassung" className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-[#b8afff]">
+            Open-Source-Zeiterfassung
+            <ArrowUpRight className="size-4" />
+          </Link>
           <Link href="/sicherheit" className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-[#b8afff]">
             Sicherheit und Datenschutz
             <ArrowUpRight className="size-4" />

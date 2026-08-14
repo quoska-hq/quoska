@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { ArrowUpRight, Check, Laptop, Smartphone, Tablet } from "lucide-react";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
 
 export const metadata: Metadata = {
-  title: "Digitale Zeiterfassung einfach einführen",
+  title: "Digitale Zeiterfassung im Browser – ohne App-Zwang",
   description:
-    "Was eine digitale Zeiterfassung im Betrieb leisten sollte und wie Teams sie ohne unnötiges Einführungsprojekt in den Arbeitsalltag bringen.",
+    "Digitale Zeiterfassung im Browser: Arbeitszeiten auf Computer, Tablet und Smartphone ohne verpflichtende App erfassen und einfach im Betrieb einführen.",
   alternates: { canonical: "/digitale-zeiterfassung" },
 };
 
@@ -21,9 +21,9 @@ const CHECKLIST = [
 export default function DigitalTimeTrackingPage() {
   return (
     <MarketingPageShell
-      eyebrow="Ratgeber"
-      title="Digitale Zeiterfassung, die im Alltag angenommen wird."
-      intro="Eine gute Einführung beginnt nicht mit möglichst vielen Funktionen. Sie beginnt mit einem klaren Ablauf, den Mitarbeitende in wenigen Minuten verstehen und Verantwortliche verlässlich prüfen können."
+      eyebrow="Im Browser"
+      title="Digitale Zeiterfassung ohne App-Zwang."
+      intro="Quoska läuft direkt im Browser auf Computer, Tablet und Smartphone. Eine gute Einführung beginnt deshalb nicht mit einer Installationsrunde, sondern mit einem klaren Ablauf, den Mitarbeitende schnell verstehen und Verantwortliche verlässlich prüfen können."
     >
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
@@ -35,9 +35,56 @@ export default function DigitalTimeTrackingPage() {
             </p>
           </SectionHeading>
           <div className="grid border-l border-t border-slate-900/15 sm:grid-cols-3">
-            <Step number="01" title="Erfassen">Mitarbeitende stempeln Beginn, Pause und Ende direkt im Browser.</Step>
-            <Step number="02" title="Prüfen">Verantwortliche sehen fehlende Einträge und offene Anfragen.</Step>
-            <Step number="03" title="Dokumentieren">Freigegebene Korrekturen bleiben mit Begründung im Verlauf.</Step>
+            <Step number="01" title="Erfassen">
+              Mitarbeitende stempeln Beginn, Pause und Ende direkt im Browser.
+            </Step>
+            <Step number="02" title="Prüfen">
+              Verantwortliche sehen fehlende Einträge und offene Anfragen.
+            </Step>
+            <Step number="03" title="Dokumentieren">
+              Freigegebene Korrekturen bleiben mit Begründung im Verlauf.
+            </Step>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-slate-900/10 bg-[#f5f3ee]">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
+          <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+            <SectionHeading
+              eyebrow="Geräte"
+              title="Ein Zugang, drei typische Arbeitsplätze."
+            >
+              <p>
+                Der Browser ist der gemeinsame Zugang. Dadurch bleibt der
+                Ablauf über verschiedene Geräte hinweg gleich, ohne dass eine
+                native App aus einem App Store verpflichtend ist.
+              </p>
+            </SectionHeading>
+            <div className="grid border-l border-t border-slate-900/15 bg-white sm:grid-cols-3">
+              <Device
+                icon={Laptop}
+                title="Computer"
+                body="Für Büro, Verwaltung und den täglichen Arbeitsplatz."
+              />
+              <Device
+                icon={Tablet}
+                title="Tablet"
+                body="Für gemeinsam genutzte oder flexibel platzierte Geräte."
+              />
+              <Device
+                icon={Smartphone}
+                title="Smartphone"
+                body="Für die mobile Zeiterfassung im vorhandenen Browser."
+              />
+            </div>
+          </div>
+          <div className="mt-10 border-t-2 border-slate-950 pt-6 text-sm leading-7 text-slate-700">
+            <p className="max-w-3xl">
+              Auf unterstützten Geräten lässt sich Quoska als Progressive Web
+              App zusätzlich zum Startbildschirm hinzufügen. Das ist optional:
+              Der direkte Aufruf im Browser bleibt verfügbar.
+            </p>
           </div>
         </div>
       </section>
@@ -81,6 +128,56 @@ export default function DigitalTimeTrackingPage() {
           </div>
         </div>
       </section>
+
+      <section className="bg-white">
+        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+          <SectionHeading
+            eyebrow="Einordnung"
+            title="Browserbasiert heißt nicht unkontrolliert."
+          >
+            <p>
+              Mitarbeitende sehen ihre eigenen Daten. Verantwortliche erhalten
+              die Ansichten, die sie für Team, Freigaben und Berichte benötigen.
+              Rollen und Mandantentrennung gelten unabhängig vom verwendeten Gerät.
+            </p>
+          </SectionHeading>
+          <div className="space-y-7 border-t border-slate-900/15 pt-6 text-sm leading-7 text-slate-700">
+            <p>
+              Zeitstempel entstehen serverseitig. Vergessene oder fehlerhafte
+              Buchungen werden nicht still überschrieben, sondern über einen
+              begründeten Korrekturprozess bearbeitet. So bleibt die digitale
+              Erfassung auch dann nachvollziehbar, wenn im Alltag etwas
+              nachgetragen werden muss.
+            </p>
+            <div className="flex flex-wrap gap-6 font-semibold text-slate-950">
+              <Link
+                href="/zeiterfassung-kleinbetriebe"
+                className="inline-flex items-center gap-2 hover:text-[#5145ad]"
+              >
+                Für Kleinbetriebe <ArrowUpRight className="size-4" />
+              </Link>
+              <Link
+                href="/open-source-zeiterfassung"
+                className="inline-flex items-center gap-2 hover:text-[#5145ad]"
+              >
+                Open-Source-Zeiterfassung <ArrowUpRight className="size-4" />
+              </Link>
+              <Link
+                href="/sicherheit"
+                className="inline-flex items-center gap-2 hover:text-[#5145ad]"
+              >
+                Sicherheit und Datenschutz <ArrowUpRight className="size-4" />
+              </Link>
+              <Link
+                href="/arbeitszeiterfassung-pflicht-kleinbetriebe"
+                className="inline-flex items-center gap-2 hover:text-[#5145ad]"
+              >
+                Aktuelle Rechtslage <ArrowUpRight className="size-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </MarketingPageShell>
   );
 }
@@ -91,6 +188,24 @@ function Step({ number, title, children }: { number: string; title: string; chil
       <span className="font-mono text-xs text-[#5145ad]">{number}</span>
       <h2 className="mt-8 font-semibold text-slate-950">{title}</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">{children}</p>
+    </article>
+  );
+}
+
+function Device({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: typeof Laptop;
+  title: string;
+  body: string;
+}) {
+  return (
+    <article className="border-b border-r border-slate-900/15 p-6">
+      <Icon className="size-5 text-[#5145ad]" />
+      <h2 className="mt-8 font-semibold text-slate-950">{title}</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
     </article>
   );
 }

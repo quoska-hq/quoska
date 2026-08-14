@@ -7,6 +7,7 @@ import { FeaturesSection } from "@/components/marketing/sections/features";
 import { WhyQuoskaSection } from "@/components/marketing/sections/why-quoska";
 import { HowItWorksSection } from "@/components/marketing/sections/how-it-works";
 import { TrustSection } from "@/components/marketing/sections/trust";
+import { GuidesSection } from "@/components/marketing/sections/guides";
 import { PricingSection } from "@/components/marketing/sections/pricing";
 import { FaqSection, FAQ } from "@/components/marketing/sections/faq";
 import { FinalCtaSection } from "@/components/marketing/sections/final-cta";
@@ -104,8 +105,9 @@ export default function HomePage() {
         <FeaturesSection />
         <WhyQuoskaSection />
         <HowItWorksSection />
-        <TrustSection />
-        <PricingSection />
+      <TrustSection />
+      <GuidesSection />
+      <PricingSection />
         <FaqSection />
         <FinalCtaSection />
       </main>

@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   authors: [{ name: site.name }],
   creator: site.name,
   publisher: site.name,
+  verification: site.googleSiteVerification
+    ? { google: site.googleSiteVerification }
+    : undefined,
   openGraph: {
     type: "website",
     locale: "de_DE",

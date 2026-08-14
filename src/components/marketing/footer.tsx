@@ -19,6 +19,11 @@ const FOOTER_LINKS = [
     links: [
       { href: "/digitale-zeiterfassung", label: "Digitale Zeiterfassung" },
       { href: "/zeiterfassung-kleinbetriebe", label: "Für Kleinbetriebe" },
+      {
+        href: "/arbeitszeiterfassung-pflicht-kleinbetriebe",
+        label: "Rechtslage 2026",
+      },
+      { href: "/open-source-zeiterfassung", label: "Open Source" },
     ],
   },
   {

@@ -17,6 +17,9 @@ export const site = {
   /** Production origin — set NEXT_PUBLIC_APP_URL in .env */
   url: process.env.NEXT_PUBLIC_APP_URL ?? "https://quoska.de",
   githubUrl: "https://github.com/quoska-hq/quoska",
+  /** Public token for optional Google Search Console HTML-tag verification. */
+  googleSiteVerification:
+    process.env.GOOGLE_SITE_VERIFICATION?.trim() || undefined,
   /** Hero / marketing language is German (de-DE). */
   locale: "de-DE",
 } as const;
