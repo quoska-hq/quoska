@@ -124,7 +124,7 @@ test.describe("Absence calendar indicators", () => {
     const gridcell = page.getByRole("gridcell", { name: new RegExp(`.*20\\.`) }).first();
     await expect(gridcell).toBeVisible({ timeout: 5_000 });
 
-    const indicator = gridcell.locator("span.absolute");
+    const indicator = gridcell.locator("span.bg-rose-400");
     await expect(indicator).toBeVisible({ timeout: 5_000 });
     const classes = await indicator.getAttribute("class") ?? "";
     expect(classes).toContain("bg-rose-400");
@@ -164,7 +164,7 @@ test.describe("Absence calendar indicators", () => {
     const gridcell = page.getByRole("gridcell", { name: new RegExp(`.*25\\.`) }).first();
     await expect(gridcell).toBeVisible({ timeout: 5_000 });
 
-    const indicator = gridcell.locator("span.absolute");
+    const indicator = gridcell.locator("span.from-emerald-400");
     await expect(indicator).toBeVisible({ timeout: 5_000 });
     const classes = await indicator.getAttribute("class") ?? "";
     expect(classes).toContain("from-emerald-400");
@@ -181,7 +181,7 @@ test.describe("Absence calendar indicators", () => {
     const gridcell = page.getByRole("gridcell", { name: /1\./ }).first();
     await expect(gridcell).toBeVisible({ timeout: 5_000 });
 
-    const indicator = gridcell.locator("span.absolute");
+    const indicator = gridcell.locator("span.absolute.inset-x-2");
     await expect(indicator).not.toBeVisible({ timeout: 2_000 });
   });
 
