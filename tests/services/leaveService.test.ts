@@ -2,9 +2,25 @@
  * Leave Service Tests (Epic 9)
  * Covers: submit, review, cancel, balance, list, overlap warnings, validation
  */
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 import type { LeaveRequest, LeaveEntitlement } from "@/types/database";
 import { createMockSupabase, createTableMock } from "../legal/helpers/supabase-mock";
+
+const createAdminClient = vi.hoisted(() => vi.fn());
+
+vi.mock("@/config/supabase/server", () => ({ createAdminClient }));
+
+createAdminClient.mockReturnValue(createNotificationAdminMock());
+
+function createNotificationAdminMock() {
+  return createMockSupabase({
+    employees: createTableMock({ selectResolver: async () => ({ data: [] }) }),
+    notifications: createTableMock({
+      selectResolver: async () => ({ data: [] }),
+      insertResolver: async () => ({ data: { id: "notification-1" }, error: null }),
+    }),
+  });
+}
 
 const baseLeave: LeaveRequest = {
   id: "lr-1", tenant_id: "t-1", employee_id: "e-1",

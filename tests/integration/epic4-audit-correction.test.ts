@@ -16,6 +16,22 @@ import { describe, test, expect, vi } from "vitest";
 import type { TimeEntry, CorrectionRequest } from "@/types/database";
 import { createMockSupabase, createTableMock, createChain } from "../legal/helpers/supabase-mock";
 
+const createAdminClient = vi.hoisted(() => vi.fn());
+
+vi.mock("@/config/supabase/server", () => ({ createAdminClient }));
+
+createAdminClient.mockReturnValue(createNotificationAdminMock());
+
+function createNotificationAdminMock() {
+  return createMockSupabase({
+    employees: createTableMock({ selectResolver: async () => ({ data: [] }) }),
+    notifications: createTableMock({
+      selectResolver: async () => ({ data: [] }),
+      insertResolver: async () => ({ data: { id: "notification-1" }, error: null }),
+    }),
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Full Audit Trail Lifecycle
 // ---------------------------------------------------------------------------

@@ -9,9 +9,20 @@
  * - Entgeltfortzahlung check
  */
 
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, vi } from "vitest";
 import type { SickEntry } from "@/types/database";
 import { createMockSupabase, createTableMock } from "../legal/helpers/supabase-mock";
+
+const createAdminClient = vi.hoisted(() => vi.fn());
+
+vi.mock("@/config/supabase/server", () => ({ createAdminClient }));
+
+createAdminClient.mockReturnValue(createMockSupabase({
+  notifications: createTableMock({
+    selectResolver: async () => ({ data: [] }),
+    insertResolver: async () => ({ data: { id: "notification-1" }, error: null }),
+  }),
+}));
 
 const baseSick: SickEntry = {
   id: "se-1", tenant_id: "t-1", employee_id: "e-1",
