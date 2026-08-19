@@ -31,7 +31,10 @@ test.describe("Admin Cockpit", () => {
     const joinedDate = epochToDate(getCurrentEpochDays() - 30);
     await adminClient
       .from("employees")
-      .update({ created_at: `${joinedDate}T08:00:00.000Z` })
+      .update({
+        created_at: `${joinedDate}T08:00:00.000Z`,
+        employment_start_date: joinedDate,
+      })
       .eq("id", employee?.id);
     const { data: project } = await adminClient
       .from("projects")

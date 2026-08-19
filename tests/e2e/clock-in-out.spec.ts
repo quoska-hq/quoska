@@ -109,7 +109,7 @@ test.describe("Clock In / Out — Story 2.1", () => {
     await expect(page.getByRole("button", { name: /^stempeln$/i })).toBeVisible({ timeout: 5_000 });
 
     // Should show today's summary (last completed entry)
-    await expect(page.getByText(/heute/i)).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("Heute", { exact: true })).toBeVisible({ timeout: 5_000 });
   });
 
   test("cannot clock in twice (concurrent prevention)", async ({ page }) => {

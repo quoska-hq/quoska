@@ -94,6 +94,7 @@ jobs:
 
     env:
       NEXT_PUBLIC_APP_URL: http://localhost:3100
+      BROWSER_EXTENSION_IDS: abcdefghijklmnopabcdefghijklmnop
       CRON_SECRET: ci-cron-secret-with-at-least-32-characters
       STRIPE_SECRET_KEY: ""
       STRIPE_TEAM_PRICE_ID: ""
