@@ -96,7 +96,7 @@ Arbeitszeit, Pausen und Wochenfortschritt direkt im Browser erfassen.
 
 ## Schnellstart
 
-Voraussetzungen: Node.js 20+, Docker und die
+Voraussetzungen: Node.js 24+, Docker und die
 [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started).
 
 ```bash

@@ -86,7 +86,15 @@ export function EmployeeCockpitDrawer({
                 <div className="mt-2 divide-y divide-slate-900/10">
                   {data.activity.length === 0 ? <EmptyText>Keine Aktivitäten.</EmptyText> : data.activity.slice(0, 6).map((item) => (
                     <div key={item.id} className="flex items-start justify-between gap-3 py-3 text-xs">
-                      <div><p className="font-medium text-slate-900">{item.title}</p><p className="mt-0.5 text-slate-500">{item.projectName ?? "Ohne Projekt"}</p></div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-900">{item.title}</p>
+                        <p className="mt-0.5 text-slate-500">{item.projectName ?? "Ohne Projekt"}</p>
+                        {(item.detail || item.reason) && (
+                          <p className="mt-1 text-slate-700">
+                            {item.detail}{item.detail && item.reason ? " · " : ""}{item.reason}
+                          </p>
+                        )}
+                      </div>
                       <time className="shrink-0 text-slate-500">{formatCockpitTimestamp(item.occurredAt)}</time>
                     </div>
                   ))}

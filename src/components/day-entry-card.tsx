@@ -29,6 +29,7 @@ interface DayEntryCardProps {
   entries: TimeEntryWithNet[];
   corrections: CorrectionRequest[] | undefined;
   dailyTarget: number;
+  canEditDirectly: boolean;
   onRequestCorrection: (entry: TimeEntryWithNet) => void;
 }
 
@@ -37,6 +38,7 @@ export function DayEntryCard({
   entries,
   corrections,
   dailyTarget,
+  canEditDirectly,
   onRequestCorrection,
 }: DayEntryCardProps) {
   const dayIdx = getDayIndex(date);
@@ -158,12 +160,14 @@ export function DayEntryCard({
                       variant="ghost"
                       size="xs"
                       className="text-muted-foreground hover:text-foreground"
-                      aria-label="Korrektur anfordern"
-                      title="Korrektur anfordern"
+                      aria-label={canEditDirectly ? "Zeiteintrag bearbeiten" : "Korrektur anfordern"}
+                      title={canEditDirectly ? "Zeiteintrag bearbeiten" : "Korrektur anfordern"}
                       onClick={() => onRequestCorrection(entry)}
                     >
                       <FilePenLine className="size-3" />
-                      <span className="sr-only">Korrektur anfordern</span>
+                      <span className="sr-only">
+                        {canEditDirectly ? "Zeiteintrag bearbeiten" : "Korrektur anfordern"}
+                      </span>
                     </Button>
                   )}
                 </div>

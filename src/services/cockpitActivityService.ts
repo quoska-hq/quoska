@@ -1,9 +1,11 @@
 import type { Employee, Project } from "@/types/database";
+import type { CorrectionRequestWithEntry } from "@/types/correction";
 import type {
   CockpitActivityCategory,
   CockpitActivityRow,
 } from "@/types/cockpit";
 import type { CockpitAuditRecord } from "@/repos/cockpitRepo";
+import { correctionChangeSummary } from "@/lib/correction-format";
 
 const FIELD_LABELS: Record<string, string> = {
   clock_in: "Startzeit",
@@ -74,6 +76,7 @@ export function buildCockpitActivity(
   records: CockpitAuditRecord[],
   employees: Employee[],
   projects: Project[],
+  corrections: CorrectionRequestWithEntry[] = [],
 ): CockpitActivityRow[] {
   const employeeNames = new Map(
     employees.map((employee) => [
@@ -83,7 +86,7 @@ export function buildCockpitActivity(
   );
   const projectNames = new Map(projects.map((project) => [project.id, project.name]));
 
-  return records.map((record) => {
+  const auditRows = records.map((record) => {
     const targetId = record.timeEntry.employee_id;
     return {
       id: record.id,
@@ -105,4 +108,38 @@ export function buildCockpitActivity(
       entryDate: record.timeEntry.date,
     };
   });
+
+  const correctionRows: CockpitActivityRow[] = corrections.map((request) => {
+    const targetId = request.employee_id;
+    const actorId = request.status === "pending"
+      ? request.employee_id
+      : request.reviewed_by ?? request.employee_id;
+    return {
+      id: `correction-request-${request.id}`,
+      occurredAt: request.status === "pending" ? request.created_at : request.updated_at,
+      category: "correction",
+      title: request.status === "approved"
+        ? "Korrekturanfrage genehmigt"
+        : request.status === "rejected"
+          ? "Korrekturanfrage abgelehnt"
+          : "Korrektur angefragt",
+      detail: correctionChangeSummary({
+        proposed_change: request.proposed_change,
+        // Once approved, the related entry already contains the new value;
+        // the immutable audit row below owns the true old/new comparison.
+        timeEntry: request.status === "approved" ? null : request.timeEntry,
+      }),
+      reason: request.reason,
+      employeeId: targetId,
+      employeeName: employeeNames.get(targetId) ?? "Unbekannt",
+      actorName: employeeNames.get(actorId) ?? "Unbekannt",
+      projectName: request.timeEntry?.project_id
+        ? projectNames.get(request.timeEntry.project_id) ?? "Unbekanntes Projekt"
+        : null,
+      entryDate: request.timeEntry?.date ?? request.created_at.slice(0, 10),
+    };
+  });
+
+  return [...auditRows, ...correctionRows]
+    .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
 }

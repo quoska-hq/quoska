@@ -37,6 +37,8 @@ export type {
 } from "./employee";
 export {
   FREE_PLAN_EMPLOYEE_LIMIT,
+  ROLE_LABELS,
+  ROLE_OPTIONS,
   inviteEmployeeSchema,
   updateEmployeeSchema,
 } from "./employee";

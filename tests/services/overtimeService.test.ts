@@ -9,6 +9,8 @@ import {
   netMinutesForRunningEntry,
   totalNetMinutes,
   calculateOvertime,
+  calculateRunningOvertimeBalance,
+  employmentStartDate,
   formatOvertime,
   formatDuration,
 } from "@/services/overtimeService";
@@ -137,6 +139,39 @@ describe("calculateOvertime", () => {
     const result = calculateOvertime(2430, 2400); // +30 min
     expect(result.overtimeMinutes).toBe(30);
     expect(result.overtimeDisplay).toBe("+30 Min");
+  });
+});
+
+describe("running overtime balance", () => {
+  test("adds an imported opening balance to tracked overtime", () => {
+    expect(calculateRunningOvertimeBalance(
+      [makeEntry()],
+      480,
+      120,
+      "2026-06-01T17:00:00.000Z",
+    )).toBe(120);
+  });
+
+  test("allows an opening balance to offset an initial deficit", () => {
+    const sixHourEntry = makeEntry({
+      clock_out: "2026-06-01T14:30:00.000Z",
+    });
+    expect(calculateRunningOvertimeBalance(
+      [sixHourEntry],
+      480,
+      120,
+      "2026-06-01T17:00:00.000Z",
+    )).toBe(0);
+  });
+
+  test("uses the explicit employment date with a legacy fallback", () => {
+    expect(employmentStartDate({
+      employment_start_date: "2026-05-15",
+      created_at: "2026-06-01T08:00:00.000Z",
+    })).toBe("2026-05-15");
+    expect(employmentStartDate({
+      created_at: "2026-06-01T08:00:00.000Z",
+    })).toBe("2026-06-01");
   });
 });
 

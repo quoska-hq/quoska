@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildCockpitData } from "@/services/cockpitService";
 import type { Employee, Project, TimeEntry } from "@/types/database";
 import type { CockpitAuditRecord } from "@/repos/cockpitRepo";
+import type { CorrectionRequestWithEntry } from "@/types/correction";
 
 const employee: Employee = {
   id: "11111111-1111-4111-8111-111111111111",
@@ -67,6 +68,32 @@ const audit: CockpitAuditRecord = {
     employee_id: employee.id,
     date: completedEntry.date,
     project_id: project.id,
+  },
+};
+
+const correction: CorrectionRequestWithEntry = {
+  id: "55555555-5555-4555-8555-555555555555",
+  tenant_id: "tenant-1",
+  employee_id: employee.id,
+  time_entry_id: completedEntry.id,
+  proposed_change: {
+    clock_out: "2026-08-10T16:00:00.000Z",
+    break_minutes: 45,
+  },
+  reason: "Ausstempeln und Pause berichtigen",
+  status: "pending",
+  reviewed_by: null,
+  review_note: null,
+  created_at: "2026-08-10T16:00:00.000Z",
+  updated_at: "2026-08-10T16:00:00.000Z",
+  timeEntry: {
+    employee_id: employee.id,
+    date: completedEntry.date,
+    project_id: completedEntry.project_id,
+    clock_in: completedEntry.clock_in,
+    clock_out: completedEntry.clock_out,
+    break_minutes: completedEntry.break_minutes,
+    notes: completedEntry.notes,
   },
 };
 
@@ -154,6 +181,31 @@ describe("CockpitService", () => {
     });
   });
 
+  it("shows requested correction values in actions and activity", () => {
+    const data = build({
+      corrections: [correction],
+    });
+
+    const action = data.actions.find((item) => item.kind === "pending_correction");
+    expect(action).toMatchObject({
+      title: "Korrekturanfrage offen",
+      employeeName: "Anna Admin",
+    });
+    expect(action?.detail).toContain("Ende:");
+    expect(action?.detail).toContain("17:30");
+    expect(action?.detail).toContain("18:00");
+    expect(action?.detail).toContain("Pause: 30 Min. → 45 Min.");
+
+    const activity = data.activity.find((item) => item.id === `correction-request-${correction.id}`);
+    expect(activity).toMatchObject({
+      title: "Korrektur angefragt",
+      reason: correction.reason,
+      employeeName: "Anna Admin",
+    });
+    expect(activity?.detail).toContain("17:30");
+    expect(activity?.detail).toContain("18:00");
+  });
+
   it("prioritizes compliance exceptions in the Action Center", () => {
     const longEntry: TimeEntry = {
       ...completedEntry,
@@ -165,5 +217,18 @@ describe("CockpitService", () => {
     expect(data.actions.map((item) => item.kind)).toEqual(
       expect.arrayContaining(["long_shift", "break_violation"]),
     );
+  });
+
+  it("does not treat time without a project as an Action Center issue", () => {
+    const data = build({
+      entries: [{ ...completedEntry, project_id: null }],
+    });
+
+    expect(data.actions).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ title: "Zeit ohne Projekt" }),
+      ]),
+    );
+    expect(data.projects[0]).toMatchObject({ name: "Ohne Projekt", minutes: 480 });
   });
 });

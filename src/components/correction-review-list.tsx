@@ -9,7 +9,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
-import type { CorrectionRequest } from "@/types/database";
+import type { CorrectionRequestWithEntry } from "@/types/correction";
+import { correctionChangeSummary } from "@/lib/correction-format";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,7 @@ export function CorrectionReviewList() {
     queryKey: ["corrections", "pending"],
     queryFn: async () => {
       const res = await fetch("/api/v1/corrections");
-      const json: ApiResponse<CorrectionRequest[]> = await res.json();
+      const json: ApiResponse<CorrectionRequestWithEntry[]> = await res.json();
       return json.data ?? [];
     },
   });
@@ -59,6 +60,7 @@ export function CorrectionReviewList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["corrections"] });
+      queryClient.invalidateQueries({ queryKey: ["adminCockpit"] });
       setExpandedId(null);
       setRejectNote("");
     },
@@ -97,10 +99,13 @@ export function CorrectionReviewList() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">
                   Eintrag vom{" "}
-                  {formatDate(req.created_at)}
+                  {formatDate(req.timeEntry?.date ?? req.created_at)}
+                </p>
+                <p className="mt-1.5 text-sm text-foreground">
+                  {correctionChangeSummary(req)}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  &quot;{req.reason}&quot;
+                  Grund: &quot;{req.reason}&quot;
                 </p>
 
                 {expandedId === req.id ? (

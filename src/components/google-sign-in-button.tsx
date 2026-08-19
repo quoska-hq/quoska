@@ -23,7 +23,13 @@ export function isGoogleOAuthEnabled(): boolean {
   return process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED === "true";
 }
 
-export function GoogleSignInButton({ label = "Mit Google anmelden" }: { label?: string }) {
+export function GoogleSignInButton({
+  label = "Mit Google anmelden",
+  next,
+}: {
+  label?: string;
+  next?: string;
+}) {
   const [loading, setLoading] = useState(false);
 
   async function handleGoogle() {
@@ -31,10 +37,14 @@ export function GoogleSignInButton({ label = "Mit Google anmelden" }: { label?: 
     const supabase = createClient();
     // redirectTo is where Supabase sends the browser after the Google flow;
     // our /auth/callback route then exchanges the code and routes onward.
+    const callback = new URL("/auth/callback", window.location.origin);
+    if (next?.startsWith("/") && !next.startsWith("//")) {
+      callback.searchParams.set("next", next);
+    }
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callback.toString(),
       },
     });
     // Supabase navigates the browser away; loading state stays for UX.

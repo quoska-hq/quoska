@@ -6,6 +6,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CorrectionRequest } from "@/types/database";
+import type { CorrectionRequestWithEntry } from "@/types/correction";
 
 /**
  * Create a new correction request.
@@ -60,15 +61,17 @@ export async function getCorrectionRequestById(
 export async function getPendingCorrectionRequests(
   supabase: SupabaseClient,
   tenantId: string,
-): Promise<CorrectionRequest[]> {
+): Promise<CorrectionRequestWithEntry[]> {
   const { data } = await supabase
     .from("correction_requests")
-    .select("*")
+    .select(
+      "*, timeEntry:time_entries(employee_id, date, project_id, clock_in, clock_out, break_minutes, notes)",
+    )
     .eq("tenant_id", tenantId)
     .eq("status", "pending")
     .order("created_at", { ascending: true });
 
-  return data ?? [];
+  return (data as unknown as CorrectionRequestWithEntry[] | null) ?? [];
 }
 
 /**

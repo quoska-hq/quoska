@@ -35,6 +35,8 @@ test.describe("Setup Wizard", () => {
     await expect(page.getByLabel("Vorname")).toHaveValue("");
     await page.getByLabel("Vorname").fill("Erika");
     await page.getByLabel("Nachname").fill("Gründerin");
+    await page.getByLabel("Eintrittsdatum").fill("2026-01-15");
+    await page.getByLabel("Überstunden-Startsaldo").fill("2.5");
     await page.getByRole("button", { name: "Weiter" }).click();
 
     // Company state becomes the founder and future employee default.
@@ -57,6 +59,8 @@ test.describe("Setup Wizard", () => {
     // Review makes the important defaults visible before persisting setup_complete.
     await expect(page.getByRole("heading", { name: "Alles richtig?" })).toBeVisible();
     await expect(page.getByText("Erika Gründerin")).toBeVisible();
+    await expect(page.getByText("15.01.2026")).toBeVisible();
+    await expect(page.getByText("+2,5 Std.")).toBeVisible();
     await expect(page.getByText("Nordrhein-Westfalen")).toBeVisible();
     await expect(page.getByText("32 Std./Woche")).toBeVisible();
     await expect(page.getByText(/keine.*kann später erfolgen/i)).toBeVisible();
@@ -68,7 +72,7 @@ test.describe("Setup Wizard", () => {
 
     const { data: employee, error } = await adminClient
       .from("employees")
-      .select("first_name, last_name, bundesland, target_hours_week, work_schedule, tenant_id, tenants(setup_complete, bundesland, default_work_schedule)")
+      .select("first_name, last_name, bundesland, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, tenant_id, tenants(setup_complete, bundesland, default_work_schedule)")
       .eq("email", email)
       .is("deleted_at", null)
       .single();
@@ -80,6 +84,8 @@ test.describe("Setup Wizard", () => {
       bundesland: "nordrhein-westfalen",
       target_hours_week: 32,
       work_schedule: { friday: 0, monday: 480 },
+      employment_start_date: "2026-01-15",
+      initial_overtime_minutes: 150,
     });
     const tenant = employee!.tenants as unknown as {
       setup_complete: boolean;

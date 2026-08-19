@@ -62,8 +62,7 @@ export type CockpitActionKind =
   | "long_shift"
   | "break_violation"
   | "missing_entry"
-  | "pending_correction"
-  | "unassigned_time";
+  | "pending_correction";
 
 export interface CockpitActionItem {
   id: string;
@@ -71,6 +70,7 @@ export interface CockpitActionItem {
   severity: "critical" | "warning" | "info";
   title: string;
   description: string;
+  detail?: string | null;
   employeeId: string;
   employeeName: string;
   date: string;

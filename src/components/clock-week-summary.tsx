@@ -22,7 +22,7 @@ export function WeekSummaryCard({ weekSummary }: { weekSummary: WeekSummary }) {
           <div className="flex items-center gap-2">
             <CalendarRange className="size-3.5 text-muted-foreground" />
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Diese Woche
+              Diese Woche bis heute
             </span>
           </div>
           <Badge variant="outline" className="text-[10px] rounded-full px-2">
@@ -40,7 +40,9 @@ export function WeekSummaryCard({ weekSummary }: { weekSummary: WeekSummary }) {
           <div
             className="h-full rounded-full transition-all duration-1000 ease-out"
             style={{
-              width: `${Math.min((weekSummary.totalMinutes / weekSummary.targetMinutes) * 100, 100)}%`,
+              width: `${weekSummary.targetMinutes > 0
+                ? Math.min((weekSummary.totalMinutes / weekSummary.targetMinutes) * 100, 100)
+                : weekSummary.totalMinutes > 0 ? 100 : 0}%`,
               background: weekSummary.totalMinutes >= weekSummary.targetMinutes
                 ? "#059669"
                 : "#6658d3",

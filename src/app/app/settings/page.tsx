@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getWeekBoundsForOffset } from "@/config/client/date-utils";
 import { BillingCard } from "@/components/billing-card";
+import { BrowserExtensionConnectionsCard } from "@/components/browser-extension-connections-card";
 import { TimeTrackingSettingsCard } from "@/components/time-tracking-settings-card";
 import type { ApiResponse } from "@/types/api";
 import { Button } from "@/components/ui/button";
@@ -122,6 +123,8 @@ export default function SettingsPage() {
         <BillingCard />
 
         {isAdmin && <TimeTrackingSettingsCard />}
+
+        <BrowserExtensionConnectionsCard />
 
         {/* Export Section */}
         <Card>

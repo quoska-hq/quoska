@@ -27,7 +27,7 @@ export async function GET() {
 
     const { data: employee } = await supabase
       .from("employees")
-      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, bundesland")
+      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, bundesland")
       .eq("id", employeeId)
       .single();
 
@@ -57,6 +57,8 @@ const setupEmployeeSchema = setupProfileSchema.partial().merge(
   (value) =>
     value.firstName !== undefined ||
     value.lastName !== undefined ||
+    value.employmentStartDate !== undefined ||
+    value.initialOvertimeHours !== undefined ||
     value.workSchedule !== undefined,
   "Keine Änderungen angegeben",
 );
@@ -98,6 +100,12 @@ export async function PATCH(request: Request) {
     const updates: Record<string, unknown> = {};
     if (parsed.firstName !== undefined) updates.first_name = parsed.firstName;
     if (parsed.lastName !== undefined) updates.last_name = parsed.lastName;
+    if (parsed.employmentStartDate !== undefined) {
+      updates.employment_start_date = parsed.employmentStartDate;
+    }
+    if (parsed.initialOvertimeHours !== undefined) {
+      updates.initial_overtime_minutes = Math.round(parsed.initialOvertimeHours * 60);
+    }
     if (parsed.workSchedule !== undefined) updates.work_schedule = parsed.workSchedule;
 
     if (parsed.workSchedule !== undefined) {
@@ -118,7 +126,7 @@ export async function PATCH(request: Request) {
       .update(updates)
       .eq("id", authResult.data.employeeId)
       .eq("tenant_id", authResult.data.tenantId)
-      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, bundesland")
+      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, bundesland")
       .single();
 
     if (error || !employee) {

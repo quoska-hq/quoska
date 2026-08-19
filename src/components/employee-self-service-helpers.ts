@@ -32,6 +32,8 @@ export interface MyTimesData {
   entries: TimeEntryWithNet[];
   weeklySummaries: WeekOvertimeSummary[];
   cumulativeOvertimeMinutes: number;
+  dailyTargets: Record<string, number>;
+  initialOvertimeMinutes: number;
 }
 
 // ---------------------------------------------------------------------------

@@ -107,7 +107,7 @@ export async function middleware(request: NextRequest) {
   // Redirect unauthenticated users trying to access protected routes
   if (isAppRoute) {
     const redirectUrl = new URL("/login", request.url);
-    redirectUrl.searchParams.set("redirect", pathname);
+    redirectUrl.searchParams.set("redirect", `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(redirectUrl);
   }
 

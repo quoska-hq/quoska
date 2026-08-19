@@ -51,7 +51,7 @@ export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShel
   }
 
   return (
-    <div className="min-h-screen max-w-[100vw] overflow-x-hidden bg-canvas">
+    <div className="min-h-dvh w-full min-w-0 overflow-x-clip bg-canvas">
       <Sidebar
         role={role}
         userName={userName}
@@ -60,14 +60,14 @@ export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShel
       />
 
       {/* Main content — offset for sidebar on desktop, padding for bottom nav on mobile */}
-      <main className="pb-20 md:pl-[260px] md:pb-0">
+      <main className="min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pl-[260px] md:pb-0">
         <AppHeader
           presenceOpen={presenceOpen}
           onTogglePresence={() => setPresenceOpen((o) => !o)}
         />
         <div
           data-app-content
-          className="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-9 lg:px-10"
+          className="mx-auto w-full min-w-0 max-w-6xl px-4 py-7 sm:px-6 sm:py-9 lg:px-10"
         >
           {children}
         </div>
@@ -78,7 +78,12 @@ export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShel
       {/* Live clock timer in the browser tab title (display only) */}
       <ClockTabTitle />
 
-      <BottomNav role={role} />
+      <BottomNav
+        role={role}
+        userName={userName}
+        isAnalyticsAdmin={isAnalyticsAdmin}
+        onSignOut={handleSignOut}
+      />
     </div>
   );
 }

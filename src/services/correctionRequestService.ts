@@ -28,6 +28,8 @@ import { editTimeEntry } from "@/services/timeEntryEditService";
 import { getNowIso } from "@/config/server/timestamps";
 import { notifyManagers, sendNotification } from "@/services/notificationService";
 import { createAdminClient } from "@/config/supabase/server";
+import { correctionChangeSummary } from "@/lib/correction-format";
+import type { CorrectionRequestWithEntry } from "@/types/correction";
 
 /**
  * Submit a correction request for a time entry.
@@ -75,12 +77,16 @@ export async function submitCorrectionRequest(
   try {
     const nowIso = getNowIso();
     const admin = createAdminClient();
+    const changeSummary = correctionChangeSummary({
+      proposed_change: proposedChange,
+      timeEntry: entry,
+    });
     await notifyManagers(
       supabase,
       tenantId,
       "correction_request",
       "Neue Korrekturanfrage",
-      `Mitarbeiter hat eine Korrektur angefordert: ${reason.trim()}`,
+      `${changeSummary} · Grund: ${reason.trim()}`,
       nowIso,
       admin,
     );
@@ -216,7 +222,7 @@ export async function rejectCorrectionRequest(
 export async function listPendingCorrections(
   supabase: SupabaseClient,
   tenantId: string,
-): Promise<ApiResponse<CorrectionRequest[]>> {
+): Promise<ApiResponse<CorrectionRequestWithEntry[]>> {
   const requests = await getPendingCorrectionRequests(supabase, tenantId);
   return success(requests);
 }

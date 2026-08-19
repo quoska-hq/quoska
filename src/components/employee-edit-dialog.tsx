@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { WorkScheduleEditor } from "@/components/work-schedule-editor";
+import { ROLE_LABELS, ROLE_OPTIONS } from "@/types/employee";
 import {
   normalizeWorkSchedule,
   scheduleHours,
@@ -58,6 +59,12 @@ export function EmployeeEditDialog({
   const [bundesland, setBundesland] = useState<string>(
     employee.bundesland ?? "",
   );
+  const [employmentStartDate, setEmploymentStartDate] = useState(
+    employee.employment_start_date ?? employee.created_at.slice(0, 10),
+  );
+  const [initialOvertimeHours, setInitialOvertimeHours] = useState(
+    String((employee.initial_overtime_minutes ?? 0) / 60),
+  );
   const [workScheduleValid, setWorkScheduleValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,6 +76,8 @@ export function EmployeeEditDialog({
         role,
         target_hours_week: scheduleHours(workSchedule),
         work_schedule: workSchedule,
+        employment_start_date: employmentStartDate,
+        initial_overtime_minutes: Math.round((Number(initialOvertimeHours) || 0) * 60),
         bundesland: bundesland || null,
       };
 
@@ -128,17 +137,44 @@ export function EmployeeEditDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Rolle</Label>
+            <Label htmlFor="edit-role">Rolle</Label>
             <Select value={role} onValueChange={(v) => { if (v !== null) setRole(v as Employee["role"]); }}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
+              <SelectTrigger id="edit-role" className="w-full">
+                <SelectValue>{ROLE_LABELS[role]}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="employee">Mitarbeiter</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
+                {ROLE_OPTIONS.map((roleOption) => (
+                  <SelectItem key={roleOption} value={roleOption}>
+                    {ROLE_LABELS[roleOption]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-employment-start">Eintrittsdatum</Label>
+              <Input
+                id="edit-employment-start"
+                type="date"
+                value={employmentStartDate}
+                onChange={(event) => setEmploymentStartDate(event.target.value)}
+                required
+              />
+              <p className="text-xs text-muted-foreground">Ab diesem Tag wird Sollzeit berechnet.</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-overtime-balance">Überstunden-Startsaldo</Label>
+              <Input
+                id="edit-overtime-balance"
+                type="number"
+                step="0.25"
+                value={initialOvertimeHours}
+                onChange={(event) => setInitialOvertimeHours(event.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">In Stunden; wird zum erfassten Saldo addiert.</p>
+            </div>
           </div>
 
           <div className="space-y-2">

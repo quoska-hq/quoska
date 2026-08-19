@@ -6,6 +6,7 @@ node_modules/
 .next-e2e/
 .next-marketing/
 /out/
+/browser-extension/dist/
 
 # env — NEVER commit real secrets. Use .env.example as the template.
 .env
@@ -46,3 +47,4 @@ playwright/.cache/
 
 # agent / planning tooling (internal, not published)
 .rpi/
+docs/free-tools-seo-plan.private.md

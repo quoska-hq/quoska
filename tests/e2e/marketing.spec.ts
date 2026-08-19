@@ -3,15 +3,18 @@ import { test, expect } from "@playwright/test";
 const PUBLIC_PAGES = [
   ["/", "Digitale Zeiterfassung für kleine Betriebe"],
   ["/funktionen", "Funktionen der digitalen Zeiterfassung"],
-  ["/preise", "Preise der Zeiterfassung"],
+  ["/preise", "Kostenlose Zeiterfassung bis 3 Personen"],
   ["/sicherheit", "Sicherheit und Datenschutz"],
-  ["/digitale-zeiterfassung", "Digitale Zeiterfassung im Browser"],
+  ["/digitale-zeiterfassung", "Digitale Zeiterfassung einführen"],
   ["/zeiterfassung-kleinbetriebe", "Zeiterfassung für Kleinbetriebe"],
   ["/open-source-zeiterfassung", "Open-Source-Zeiterfassung"],
   [
     "/arbeitszeiterfassung-pflicht-kleinbetriebe",
     "Arbeitszeiterfassung: Pflicht für Kleinbetriebe 2026",
   ],
+  ["/arbeitszeitnachweis", "Arbeitszeitnachweis 2026"],
+  ["/pausenregelung-arbeitszeit", "Pausenregelung Arbeitszeit"],
+  ["/projektzeiterfassung", "Projektzeiterfassung für kleine Teams"],
 ] as const;
 
 test.describe("Marketing and SEO", () => {
@@ -79,6 +82,25 @@ test.describe("Marketing and SEO", () => {
     await expect(page.getByRole("link", { name: /BAG, 1 ABR 22\/21/i }).first()).toHaveAttribute(
       "href",
       "https://www.bundesarbeitsgericht.de/entscheidung/1-abr-22-21/",
+    );
+    await expect
+      .poll(() => page.locator('script[type="application/ld+json"]').textContent())
+      .toContain("FAQPage");
+  });
+
+  test("supporting guides cite primary sources and explain their limits", async ({ page }) => {
+    await page.goto("/arbeitszeitnachweis");
+    await expect(page.getByText(/keine rechtsberatung für den einzelfall/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /§ 16 ArbZG/i })).toHaveAttribute(
+      "href",
+      "https://www.gesetze-im-internet.de/arbzg/__16.html",
+    );
+
+    await page.goto("/pausenregelung-arbeitszeit");
+    await expect(page.getByText(/ist keine rechtsberatung/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /§ 4 Arbeitszeitgesetz/i })).toHaveAttribute(
+      "href",
+      "https://www.gesetze-im-internet.de/arbzg/__4.html",
     );
     await expect
       .poll(() => page.locator('script[type="application/ld+json"]').textContent())

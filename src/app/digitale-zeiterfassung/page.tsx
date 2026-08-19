@@ -4,9 +4,9 @@ import { ArrowUpRight, Check, Laptop, Smartphone, Tablet } from "lucide-react";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
 
 export const metadata: Metadata = {
-  title: "Digitale Zeiterfassung im Browser – ohne App-Zwang",
+  title: "Digitale Zeiterfassung einführen – Ablauf und Checkliste",
   description:
-    "Digitale Zeiterfassung im Browser: Arbeitszeiten auf Computer, Tablet und Smartphone ohne verpflichtende App erfassen und einfach im Betrieb einführen.",
+    "Digitale Zeiterfassung im Betrieb einführen: Rollen, Arbeitsmodelle, Korrekturen und monatliche Prüfung mit einer praktischen Checkliste planen.",
   alternates: { canonical: "/digitale-zeiterfassung" },
 };
 
@@ -21,9 +21,9 @@ const CHECKLIST = [
 export default function DigitalTimeTrackingPage() {
   return (
     <MarketingPageShell
-      eyebrow="Im Browser"
-      title="Digitale Zeiterfassung ohne App-Zwang."
-      intro="Quoska läuft direkt im Browser auf Computer, Tablet und Smartphone. Eine gute Einführung beginnt deshalb nicht mit einer Installationsrunde, sondern mit einem klaren Ablauf, den Mitarbeitende schnell verstehen und Verantwortliche verlässlich prüfen können."
+      eyebrow="Einführungsleitfaden"
+      title="Digitale Zeiterfassung im Betrieb einführen."
+      intro="Eine gute Einführung klärt Rollen, Arbeitsmodelle, Pausen und den Umgang mit vergessenen Buchungen, bevor der erste Monat abgeschlossen wird. Quoska bildet diesen Ablauf direkt im Browser auf Computer, Tablet und Smartphone ab."
     >
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
@@ -173,6 +173,12 @@ export default function DigitalTimeTrackingPage() {
                 className="inline-flex items-center gap-2 hover:text-[#5145ad]"
               >
                 Aktuelle Rechtslage <ArrowUpRight className="size-4" />
+              </Link>
+              <Link
+                href="/arbeitszeitnachweis"
+                className="inline-flex items-center gap-2 hover:text-[#5145ad]"
+              >
+                Arbeitszeitnachweis <ArrowUpRight className="size-4" />
               </Link>
             </div>
           </div>

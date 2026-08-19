@@ -113,7 +113,7 @@ export function ActivityGrid({ activities, dailyTargetMinutes }: ActivityGridPro
   ];
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto [contain:inline-size]">
       {/* Month labels — aligned with cell columns */}
       <div className="relative" style={{ height: 20, marginLeft: LABEL_W }}>
         {months.map(({ label, col }) => (

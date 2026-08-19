@@ -94,9 +94,9 @@ function WorkTrend({ data }: { data: CockpitData }) {
           <Legend color="bg-slate-200" label="Soll" />
         </div>
       </CardHeader>
-      <CardContent className="overflow-x-auto pt-2">
+      <CardContent className="overflow-x-auto pt-2 [contain:inline-size]">
         <div
-          className={`flex h-52 items-end gap-1.5 ${data.period.days === 30 ? "min-w-[760px]" : "min-w-[420px]"}`}
+          className={`flex h-52 items-end gap-1.5 ${data.period.days === 30 ? "min-w-[760px]" : "min-w-0"}`}
           role="img"
           aria-label="Arbeitszeit und Sollzeit pro Tag"
         >
@@ -171,19 +171,19 @@ function EmployeeWorkload({
   return (
     <Card className="bg-white">
       <CardHeader className="border-b"><CardTitle>Team &amp; Aufgaben</CardTitle></CardHeader>
-      <CardContent className="overflow-x-auto p-0!">
-        <table className="w-full min-w-[620px] text-left text-sm">
+      <CardContent className="overflow-x-auto p-0! [contain:inline-size]">
+        <table className="w-full text-left text-sm sm:min-w-[620px]">
           <thead className="border-b border-slate-900/10 bg-[#faf9f6] text-[10px] uppercase tracking-[0.12em] text-slate-500">
-            <tr><th className="px-4 py-3 font-semibold">Mitarbeiter</th><th className="px-4 py-3 font-semibold">Projekt</th><th className="px-4 py-3 text-right font-semibold">Ist</th><th className="px-4 py-3 text-right font-semibold">Soll</th><th className="px-4 py-3 text-right font-semibold">Differenz</th><th className="w-12"><span className="sr-only">Details</span></th></tr>
+            <tr><th className="px-3 py-3 font-semibold sm:px-4">Mitarbeiter</th><th className="hidden px-4 py-3 font-semibold sm:table-cell">Projekt</th><th className="px-2 py-3 text-right font-semibold sm:px-4">Ist</th><th className="hidden px-4 py-3 text-right font-semibold sm:table-cell">Soll</th><th className="px-2 py-3 text-right font-semibold sm:px-4">Differenz</th><th className="w-10 sm:w-12"><span className="sr-only">Details</span></th></tr>
           </thead>
           <tbody className="divide-y divide-slate-900/10">
             {rows.map((row) => (
               <tr key={row.id}>
-                <td className="px-4 py-3 font-medium text-slate-900"><StatusDot status={row.status} />{row.name}</td>
-                <td className="px-4 py-3 text-slate-500">{row.projectName ?? "–"}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{formatCockpitMinutes(row.workedMinutes)}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-500">{formatCockpitMinutes(row.targetMinutes)}</td>
-                <td className={`px-4 py-3 text-right font-medium tabular-nums ${row.deltaMinutes < 0 ? "text-amber-700" : "text-emerald-700"}`}>{formatCockpitMinutes(row.deltaMinutes)}</td>
+                <td className="px-3 py-3 font-medium text-slate-900 sm:px-4"><StatusDot status={row.status} />{row.name}</td>
+                <td className="hidden px-4 py-3 text-slate-500 sm:table-cell">{row.projectName ?? "–"}</td>
+                <td className="px-2 py-3 text-right tabular-nums sm:px-4">{formatCockpitMinutes(row.workedMinutes)}</td>
+                <td className="hidden px-4 py-3 text-right tabular-nums text-slate-500 sm:table-cell">{formatCockpitMinutes(row.targetMinutes)}</td>
+                <td className={`px-2 py-3 text-right font-medium tabular-nums sm:px-4 ${row.deltaMinutes < 0 ? "text-amber-700" : "text-emerald-700"}`}>{formatCockpitMinutes(row.deltaMinutes)}</td>
                 <td className="pr-2 text-right">
                   <button
                     type="button"

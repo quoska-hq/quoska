@@ -1,4 +1,19 @@
 import { z } from "zod";
+import type { CorrectionRequest, TimeEntry } from "@/types/database";
+
+/** Correction request enriched with the time entry values needed for review. */
+export type CorrectionRequestWithEntry = CorrectionRequest & {
+  timeEntry?: Pick<
+    TimeEntry,
+    | "employee_id"
+    | "date"
+    | "project_id"
+    | "clock_in"
+    | "clock_out"
+    | "break_minutes"
+    | "notes"
+  > | null;
+};
 
 /** Schema for manager time entry edit input. */
 export const editTimeEntrySchema = z.object({

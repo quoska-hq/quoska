@@ -24,7 +24,7 @@ import {
   countActiveEmployees,
   getTenantPlan,
 } from "@/repos/employeeRepo";
-import { getNowIso } from "@/config/server/timestamps";
+import { getNowIso, getTodayDate } from "@/config/server/timestamps";
 import type { WorkSchedule } from "@/types/work-schedule";
 
 /**
@@ -42,6 +42,8 @@ export async function inviteEmployee(
     role: string;
     targetHoursWeek?: number;
     workSchedule?: WorkSchedule;
+    employmentStartDate?: string;
+    initialOvertimeMinutes?: number;
     bundesland?: string | null;
   },
 ): Promise<ApiResponse<Employee>> {
@@ -103,6 +105,8 @@ export async function inviteEmployee(
       role: input.role,
       target_hours_week: input.targetHoursWeek ?? 40,
       ...(input.workSchedule ? { work_schedule: input.workSchedule } : {}),
+      employment_start_date: input.employmentStartDate ?? getTodayDate(),
+      initial_overtime_minutes: input.initialOvertimeMinutes ?? 0,
       bundesland: input.bundesland ?? null,
       invitation_token: invitationToken,
       invited_at: getNowIso(),
@@ -140,6 +144,8 @@ export async function updateEmployee(
     role?: string;
     target_hours_week?: number;
     work_schedule?: WorkSchedule;
+    employment_start_date?: string;
+    initial_overtime_minutes?: number;
     bundesland?: string | null;
   },
 ): Promise<ApiResponse<Employee>> {

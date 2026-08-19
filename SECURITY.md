@@ -18,6 +18,14 @@ Quoska handles employee time data, which is personal data under the DSGVO and le
 - **Soft deletes only** — time entries are never hard-deleted, preserving the audit trail (Revisionssicherheit / GoBD).
 - **Row-Level Security** in PostgreSQL for tenant isolation — every query is tenant-scoped.
 - **Audit trail** — every mutation on a time entry records who changed what, when, and the old/new values.
+- **Scoped browser-extension credentials** — the optional extension uses PKCE,
+  stores only hashed server-side tokens, expires access after 90 days, and can
+  access only extension clock endpoints. Production callback IDs are allowlisted.
+- **Minimal browser permissions** — the extension has access only to the Quoska
+  origin and does not request tabs, history, scripting, idle, or all-sites access.
+
+The browser-extension threat model and residual risks are documented in
+[`docs/browser-extension-threat-model.md`](docs/browser-extension-threat-model.md).
 
 ## Disclosure
 

@@ -1,13 +1,15 @@
 import type {
-  CorrectionRequest,
   Employee,
   LeaveRequest,
   SickEntry,
   TimeEntry,
 } from "@/types/database";
+import type { CorrectionRequestWithEntry } from "@/types/correction";
 import type { CockpitActionItem } from "@/types/cockpit";
 import { addDays } from "@/services/holidayService";
 import { scheduledMinutesForDate } from "@/services/workScheduleService";
+import { correctionChangeSummary } from "@/lib/correction-format";
+import { employmentStartDate } from "@/services/overtimeService";
 
 export interface CockpitAbsences {
   leaves: LeaveRequest[];
@@ -70,7 +72,7 @@ function missingEntryActions(input: CockpitActionInput): CockpitActionItem[] {
         date,
         employee.target_hours_week,
       );
-      const joined = employee.created_at.slice(0, 10) <= date;
+      const joined = employmentStartDate(employee) <= date;
       const absent = absenceTypeOnDate(employee.id, date, input.absences);
       const hasEntry = input.entries.some(
         (entry) => entry.employee_id === employee.id && entry.date === date,
@@ -96,7 +98,6 @@ function missingEntryActions(input: CockpitActionInput): CockpitActionItem[] {
 function entryActions(input: CockpitActionInput): CockpitActionItem[] {
   const employeeMap = new Map(input.employees.map((employee) => [employee.id, employee]));
   const actions: CockpitActionItem[] = [];
-  const unassigned = new Map<string, number>();
   for (const entry of input.entries) {
     const employee = employeeMap.get(entry.employee_id);
     if (!employee) continue;
@@ -111,24 +112,6 @@ function entryActions(input: CockpitActionInput): CockpitActionItem[] {
     if (entry.status === "completed" && requiredBreak > entry.break_minutes) {
       actions.push(action(entry, name, "break_violation", "critical", "Pause unterschritten", `${formatDate(entry.date)} · ${entry.break_minutes} statt ${requiredBreak} Minuten`));
     }
-    if (!entry.project_id && minutes > 0) {
-      unassigned.set(employee.id, (unassigned.get(employee.id) ?? 0) + minutes);
-    }
-  }
-  for (const [employeeId, minutes] of unassigned) {
-    const employee = employeeMap.get(employeeId);
-    if (!employee) continue;
-    actions.push({
-      id: `unassigned-${employeeId}`,
-      kind: "unassigned_time",
-      severity: "info",
-      title: "Zeit ohne Projekt",
-      description: `${employeeName(employee)} · ${formatDuration(minutes)}`,
-      employeeId,
-      employeeName: employeeName(employee),
-      date: input.endDate,
-      href: null,
-    });
   }
   return actions;
 }
@@ -136,16 +119,18 @@ function entryActions(input: CockpitActionInput): CockpitActionItem[] {
 function correctionActions(input: CockpitActionInput): CockpitActionItem[] {
   const names = new Map(input.employees.map((employee) => [employee.id, employeeName(employee)]));
   return input.corrections
+    .filter((request) => request.status === "pending")
     .filter((request) => input.employees.some((employee) => employee.id === request.employee_id))
     .map((request) => ({
       id: `correction-${request.id}`,
       kind: "pending_correction" as const,
       severity: "warning" as const,
       title: "Korrekturanfrage offen",
-      description: `${names.get(request.employee_id) ?? "Unbekannt"} · ${request.reason}`,
+      description: `${names.get(request.employee_id) ?? "Unbekannt"} · ${formatDate(request.timeEntry?.date ?? request.created_at.slice(0, 10))} · Grund: ${request.reason}`,
+      detail: correctionChangeSummary(request),
       employeeId: request.employee_id,
       employeeName: names.get(request.employee_id) ?? "Unbekannt",
-      date: request.created_at.slice(0, 10),
+      date: request.timeEntry?.date ?? request.created_at.slice(0, 10),
       href: "/app/reports?tab=corrections",
     }));
 }
@@ -153,7 +138,7 @@ function correctionActions(input: CockpitActionInput): CockpitActionItem[] {
 interface CockpitActionInput {
   employees: Employee[];
   entries: TimeEntry[];
-  corrections: CorrectionRequest[];
+  corrections: CorrectionRequestWithEntry[];
   absences: CockpitAbsences;
   holidaysByState: Map<string, ReadonlyMap<string, string>>;
   tenantState: string;

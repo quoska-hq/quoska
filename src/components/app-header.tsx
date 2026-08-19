@@ -73,11 +73,11 @@ export function AppHeader({
       data-testid="app-header"
       className="sticky top-0 z-30 h-16 border-b border-slate-900/15 bg-[#f8f7f3]"
     >
-      <div className="flex h-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
+      <div className="flex h-full min-w-0 items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
         {/* Left: current tab name (contextual label, not a heading — each page
             has its own <h1> as the primary document heading). */}
         <p
-          className="max-w-[45vw] truncate text-sm font-semibold uppercase tracking-[0.12em] text-slate-700 sm:max-w-xs"
+          className="min-w-0 flex-1 truncate text-sm font-semibold uppercase tracking-[0.12em] text-slate-700 sm:max-w-xs sm:flex-none"
           title={label}
           data-testid="app-header-tab"
         >
@@ -85,7 +85,7 @@ export function AppHeader({
         </p>
 
         {/* Right: clock widget + presence toggle */}
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 shrink-0 items-center gap-2">
           {showClockWidget && <HeaderClockWidget />}
 
           <Button

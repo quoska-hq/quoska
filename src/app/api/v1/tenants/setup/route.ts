@@ -25,7 +25,7 @@ export async function GET() {
 
   const { data: employee } = await admin
     .from("employees")
-    .select("id, tenant_id, first_name, last_name, email, target_hours_week, work_schedule, bundesland, tenants(id, name, bundesland, default_work_schedule, setup_complete)")
+    .select("id, tenant_id, first_name, last_name, email, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, bundesland, tenants(id, name, bundesland, default_work_schedule, setup_complete)")
     .eq("user_id", user.id)
     .single();
 
@@ -49,6 +49,8 @@ export async function GET() {
         email: employee.email,
         targetHoursWeek: employee.target_hours_week,
         workSchedule: employee.work_schedule,
+        employmentStartDate: employee.employment_start_date,
+        initialOvertimeHours: (employee.initial_overtime_minutes ?? 0) / 60,
         bundesland: employee.bundesland,
       },
       company: {

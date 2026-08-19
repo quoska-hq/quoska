@@ -70,6 +70,7 @@ const config = [
 ignores: [
       "node_modules/**",
       "dist/**",
+      "browser-extension/dist/**",
       "build/**",
       ".next/**",
       ".next-e2e/**",

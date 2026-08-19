@@ -21,6 +21,8 @@
     "test:legal": "vitest run tests/legal/",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "extension:build": "node scripts/build-browser-extension.mjs",
+    "extension:build:local": "QUOSKA_EXTENSION_APP_URL=http://localhost:3000 node scripts/build-browser-extension.mjs",
     "screenshots:marketing": "playwright test -c playwright.marketing.config.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
@@ -31,7 +33,7 @@
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.49.8",
     "@tanstack/react-query": "^5.76.1",
-    "better-sqlite3": "12.4.1",
+    "better-sqlite3": "13.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",

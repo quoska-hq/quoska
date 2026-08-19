@@ -76,10 +76,20 @@
   --sidebar-ring: #6658d3;
 }
 
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100dvh;
+  overflow-x: clip;
 }
 
 ::selection {

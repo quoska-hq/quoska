@@ -10,6 +10,8 @@ interface InviteSummary {
   firstName: string;
   lastName: string;
   email: string;
+  employmentStartDate: string;
+  initialOvertimeHours: number;
 }
 
 interface SetupReviewStepProps {
@@ -44,6 +46,8 @@ export function SetupReviewStep({
 
       <dl className="divide-y border border-slate-200 text-sm">
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Name</dt><dd className="font-medium">{profile.firstName} {profile.lastName}</dd></div>
+        <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Eintritt</dt><dd className="font-medium">{formatDate(profile.employmentStartDate)}</dd></div>
+        <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Startsaldo</dt><dd className="font-medium">{formatHours(profile.initialOvertimeHours)}</dd></div>
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Firma</dt><dd className="font-medium">{company.companyName}</dd></div>
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Bundesland</dt><dd className="font-medium">{getBundeslandLabel(company.bundesland)}</dd></div>
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Arbeitszeit</dt><dd className="font-medium">{formatWorkMinutes(totalScheduleMinutes(schedule))}/Woche</dd></div>
@@ -58,4 +62,14 @@ export function SetupReviewStep({
       </div>
     </div>
   );
+}
+
+function formatDate(value: string): string {
+  const [year, month, day] = value.split("-");
+  return `${day}.${month}.${year}`;
+}
+
+function formatHours(value: number): string {
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toLocaleString("de-DE")} Std.`;
 }

@@ -59,9 +59,13 @@ export function TimeTrackingSettingsCard() {
             aria-label="Automatische Pausen"
             disabled={isLoading || mutation.isPending}
             onClick={() => mutation.mutate(!enabled)}
-            className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${enabled ? "bg-[#6658d3]" : "bg-slate-300"}`}
+            className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full p-0 transition-colors disabled:opacity-50 ${enabled ? "bg-[#6658d3]" : "bg-slate-300"}`}
           >
-            <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-transform ${enabled ? "translate-x-5" : "translate-x-0.5"}`} />
+            <span
+              data-slot="switch-thumb"
+              aria-hidden="true"
+              className={`pointer-events-none absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm transition-transform ${enabled ? "translate-x-5" : "translate-x-0"}`}
+            />
           </button>
         </div>
 

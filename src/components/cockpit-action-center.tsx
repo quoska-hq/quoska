@@ -48,12 +48,19 @@ export function CockpitActionCenter({
         {visible.map((item) => (
           <div
             key={item.id}
-            className="flex min-w-0 items-center gap-3 border-b border-slate-900/10 px-4 py-3 odd:sm:border-r"
+            className="flex min-w-0 items-start gap-3 border-b border-slate-900/10 px-4 py-3 odd:sm:border-r"
           >
-            <i className={`size-2 shrink-0 rounded-full ${severityColor(item.severity)}`} />
+            <i className={`mt-1.5 size-2 shrink-0 rounded-full ${severityColor(item.severity)}`} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-slate-900">{item.title}</p>
-              <p className="mt-0.5 truncate text-xs text-slate-500">{item.description}</p>
+              <p className={`mt-0.5 text-xs text-slate-500 ${item.detail ? "" : "truncate"}`}>
+                {item.description}
+              </p>
+              {item.detail && (
+                <p className="mt-1 text-xs font-medium text-slate-700">
+                  {item.detail}
+                </p>
+              )}
             </div>
             {item.href ? (
               <Link href={item.href} className="text-xs font-semibold text-[#6658d3] hover:underline">

@@ -13,6 +13,7 @@ import {
   MarketingPageShell,
   SectionHeading,
 } from "@/components/marketing/page-shell";
+import { OpenSourceComparison } from "@/components/marketing/open-source-comparison";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -41,7 +42,7 @@ const OPEN_SOURCE_FACTS = [
 ] as const;
 
 const SELF_HOSTING_CHECKLIST = [
-  "Node.js 20+, Docker und Supabase CLI bereitstellen",
+  "Node.js 24+, Docker und Supabase CLI bereitstellen",
   "Supabase-Projekt, Authentifizierung und Datenbank konfigurieren",
   "HTTPS, Domain und sichere Produktionsvariablen einrichten",
   "Backups, Updates und Überwachung selbst verantworten",
@@ -165,7 +166,9 @@ export default function OpenSourceTimeTrackingPage() {
         </div>
       </section>
 
-      <section className="bg-white">
+      <OpenSourceComparison />
+
+      <section className="border-y border-slate-900/10 bg-white">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
           <SectionHeading
             eyebrow="Self-Hosting"

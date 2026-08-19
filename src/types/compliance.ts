@@ -80,6 +80,7 @@ export interface WeekSummary {
   totalMinutes: number;
   targetMinutes: number;
   overtimeMinutes: number;
+  dailyTargetMinutes: number;
 }
 
 /** Clock status response returned by the API. */

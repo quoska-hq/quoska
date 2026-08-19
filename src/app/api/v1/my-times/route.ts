@@ -7,25 +7,29 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
-import { getNowIso } from "@/config/server/timestamps";
+import { getNowIso, getTodayDate } from "@/config/server/timestamps";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getTimeEntriesByDateRange, getActiveEntry } from "@/repos/timeEntryRepo";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import {
+  addDays,
   getWeekMonday,
   getWeekSunday,
-  holidaysToMap,
 } from "@/services/holidayService";
 import {
+  employmentStartDate,
+  calculateRunningOvertimeBalance,
   netMinutesForEntry,
   netMinutesForRunningEntry,
   formatOvertime,
 } from "@/services/overtimeService";
 import type { ApiResponse } from "@/types/api";
 import type { TimeEntry } from "@/types/database";
-import type { PublicHoliday } from "@/types/database";
 import { weekQuerySchema } from "@/types/holiday";
-import { calculateScheduleTargetMinutes } from "@/services/workScheduleService";
+import {
+  calculateScheduleTargetMinutesForRange,
+  scheduledMinutesForDate,
+} from "@/services/workScheduleService";
 
 export interface TimeEntryWithNet extends TimeEntry {
   netMinutes: number;
@@ -44,6 +48,8 @@ export interface MyTimesResponse {
   entries: TimeEntryWithNet[];
   weeklySummaries: WeekOvertimeSummary[];
   cumulativeOvertimeMinutes: number;
+  dailyTargets: Record<string, number>;
+  initialOvertimeMinutes: number;
 }
 
 export async function GET(request: Request) {
@@ -84,23 +90,34 @@ export async function GET(request: Request) {
     }
 
     const nowIso = getNowIso();
+    const todayDate = getTodayDate();
 
     // Get employee config
     const { data: employee } = await supabase
       .from("employees")
-      .select("bundesland, target_hours_week, work_schedule")
+      .select("bundesland, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, created_at")
       .eq("id", employeeId)
       .is("deleted_at", null)
       .single();
 
     const bundesland = employee?.bundesland ?? "berlin";
     const targetHoursWeek = employee?.target_hours_week ?? 40;
+    const employeeStart = employee
+      ? employmentStartDate(employee)
+      : startDate;
+    const hasBalancePeriod = employeeStart <= todayDate;
 
     // Fetch data in parallel
-    const [entries, activeEntry, holidayMap] = await Promise.all([
+    const [entries, activeEntry, holidayMap, balanceEntries, balanceHolidayMap] = await Promise.all([
       getTimeEntriesByDateRange(supabase, tenantId, employeeId, startDate, endDate),
       getActiveEntry(supabase, tenantId, employeeId),
       getHolidayDatesInRange(supabase, bundesland, startDate, endDate),
+      hasBalancePeriod
+        ? getTimeEntriesByDateRange(supabase, tenantId, employeeId, employeeStart, todayDate)
+        : Promise.resolve([]),
+      hasBalancePeriod
+        ? getHolidayDatesInRange(supabase, bundesland, employeeStart, todayDate)
+        : Promise.resolve(new Map<string, string>()),
     ]);
 
     // Add net minutes to each entry
@@ -112,16 +129,17 @@ export async function GET(request: Request) {
     }));
 
     // Group entries by week and calculate overtime per week
-    const weekGroups = groupEntriesByWeek(entries, activeEntry);
+    const weekGroups = groupEntriesByWeek(entries, activeEntry, startDate, endDate);
     const weeklySummaries: WeekOvertimeSummary[] = [];
 
     for (const [weekMonday, weekEntries] of weekGroups) {
       const weekSunday = getWeekSunday(weekMonday);
-      const holidays = filterHolidaysForWeek(holidayMap, weekMonday, weekSunday);
-      const holidayMapObj = holidaysToMap(holidays);
-      const targetMin = calculateScheduleTargetMinutes(
-        weekMonday,
-        holidayMapObj,
+      const targetStart = [weekMonday, startDate, employeeStart].sort().at(-1)!;
+      const targetEnd = [weekSunday, endDate, todayDate].sort()[0]!;
+      const targetMin = calculateScheduleTargetMinutesForRange(
+        targetStart,
+        targetEnd,
+        holidayMap,
         employee?.work_schedule,
         targetHoursWeek,
       );
@@ -149,15 +167,35 @@ export async function GET(request: Request) {
       });
     }
 
-    const cumulativeOvertimeMinutes = weeklySummaries.reduce(
-      (sum, w) => sum + w.overtimeMinutes,
-      0,
+    const balanceTargetMinutes = hasBalancePeriod
+      ? calculateScheduleTargetMinutesForRange(
+          employeeStart,
+          todayDate,
+          balanceHolidayMap,
+          employee?.work_schedule,
+          targetHoursWeek,
+        )
+      : 0;
+    const cumulativeOvertimeMinutes = calculateRunningOvertimeBalance(
+      balanceEntries,
+      balanceTargetMinutes,
+      employee?.initial_overtime_minutes ?? 0,
+      nowIso,
     );
+
+    const dailyTargets: Record<string, number> = {};
+    for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
+      dailyTargets[date] = date < employeeStart || date > todayDate || holidayMap.has(date)
+        ? 0
+        : scheduledMinutesForDate(employee?.work_schedule, date, targetHoursWeek);
+    }
 
     const response: MyTimesResponse = {
       entries: entriesWithNet,
       weeklySummaries,
       cumulativeOvertimeMinutes,
+      dailyTargets,
+      initialOvertimeMinutes: employee?.initial_overtime_minutes ?? 0,
     };
 
     return NextResponse.json<ApiResponse<MyTimesResponse>>(
@@ -177,8 +215,18 @@ export async function GET(request: Request) {
 function groupEntriesByWeek(
   entries: TimeEntry[],
   activeEntry: TimeEntry | null,
+  startDate: string,
+  endDate: string,
 ): Map<string, TimeEntry[]> {
   const weekMap = new Map<string, TimeEntry[]>();
+
+  for (
+    let week = getWeekMonday(startDate);
+    week <= endDate;
+    week = addDays(week, 7)
+  ) {
+    weekMap.set(week, []);
+  }
 
   for (const entry of entries) {
     const key = getWeekMonday(entry.date);
@@ -186,31 +234,10 @@ function groupEntriesByWeek(
     weekMap.get(key)!.push(entry);
   }
 
-  if (activeEntry) {
+  if (activeEntry && activeEntry.date >= startDate && activeEntry.date <= endDate) {
     const key = getWeekMonday(activeEntry.date);
     if (!weekMap.has(key)) weekMap.set(key, []);
   }
 
   return weekMap;
-}
-
-/** Convert holiday map entries to PublicHoliday-like objects for a week range. */
-function filterHolidaysForWeek(
-  holidayMap: Map<string, string>,
-  weekStart: string,
-  weekEnd: string,
-): PublicHoliday[] {
-  const result: PublicHoliday[] = [];
-  for (const [date, name] of holidayMap) {
-    if (date >= weekStart && date <= weekEnd) {
-      result.push({
-        id: "",
-        date,
-        name,
-        bundesland: "",
-        created_at: "",
-      });
-    }
-  }
-  return result;
 }

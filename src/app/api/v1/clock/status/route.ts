@@ -21,9 +21,10 @@ import type { ClockStatusResponse } from "@/types/compliance";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import { addDays } from "@/services/holidayService";
 import {
-  calculateScheduleTargetMinutes,
+  calculateScheduleTargetMinutesForRange,
   scheduledMinutesForDate,
 } from "@/services/workScheduleService";
+import { employmentStartDate } from "@/services/overtimeService";
 
 export async function GET() {
   try {
@@ -133,18 +134,22 @@ export async function GET() {
     // Get employee's actual target hours (not hardcoded)
     const { data: empRecord } = await supabase
       .from("employees")
-      .select("target_hours_week, work_schedule, bundesland")
+      .select("target_hours_week, work_schedule, bundesland, employment_start_date, created_at")
       .eq("id", employeeId)
       .single();
     const targetHoursWeek = empRecord?.target_hours_week ?? 40;
+    const employeeStart = empRecord
+      ? employmentStartDate(empRecord)
+      : weekStartStr;
     const holidayMap = await getHolidayDatesInRange(
       supabase,
       empRecord?.bundesland ?? "berlin",
       weekStartStr,
       weekEndStr,
     );
-    const targetMinutes = calculateScheduleTargetMinutes(
-      weekStartStr,
+    const targetMinutes = calculateScheduleTargetMinutesForRange(
+      employeeStart > weekStartStr ? employeeStart : weekStartStr,
+      todayDate,
       holidayMap,
       empRecord?.work_schedule,
       targetHoursWeek,
@@ -184,7 +189,8 @@ export async function GET() {
 
     // Sum every contractual day, including a full deficit when no entry exists.
     let monthCarryOverMinutes = 0;
-    for (let date = monthStart; date < todayDate; date = addDays(date, 1)) {
+    const carryStart = employeeStart > monthStart ? employeeStart : monthStart;
+    for (let date = carryStart; date < todayDate; date = addDays(date, 1)) {
       const dayTarget = monthHolidayMap.has(date)
         ? 0
         : scheduledMinutesForDate(
@@ -204,6 +210,14 @@ export async function GET() {
         totalMinutes: activeWeekMinutes,
         targetMinutes,
         overtimeMinutes: activeWeekMinutes - targetMinutes,
+        dailyTargetMinutes:
+          todayDate < employeeStart || holidayMap.has(todayDate)
+            ? 0
+            : scheduledMinutesForDate(
+                empRecord?.work_schedule,
+                todayDate,
+                targetHoursWeek,
+              ),
       },
       monthCarryOverMinutes,
     };

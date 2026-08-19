@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Quoska Zeiterfassung",
+  "short_name": "Quoska",
+  "version": "0.1.0",
+  "description": "Arbeitszeit und Pausen direkt im Browser erfassen – ohne Überwachung.",
+  "minimum_chrome_version": "109",
+  "permissions": [
+    "alarms",
+    "identity",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://quoska.de/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Quoska Zeiterfassung",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-192.png",
+      "32": "icons/icon-192.png",
+      "48": "icons/icon-192.png",
+      "128": "icons/icon-192.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-192.png",
+    "32": "icons/icon-192.png",
+    "48": "icons/icon-192.png",
+    "128": "icons/icon-192.png"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Quoska öffnen"
+    }
+  }
+}

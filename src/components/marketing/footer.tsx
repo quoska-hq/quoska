@@ -10,6 +10,7 @@ const FOOTER_LINKS = [
       { href: "/funktionen", label: "Funktionen" },
       { href: "/#ablauf", label: "Ablauf" },
       { href: "/preise", label: "Preise" },
+      { href: "/projektzeiterfassung", label: "Projektzeiterfassung" },
       { href: "/sicherheit", label: "Sicherheit" },
       { href: "/#faq", label: "FAQ" },
     ],
@@ -24,6 +25,8 @@ const FOOTER_LINKS = [
         label: "Rechtslage 2026",
       },
       { href: "/open-source-zeiterfassung", label: "Open Source" },
+      { href: "/arbeitszeitnachweis", label: "Arbeitszeitnachweis" },
+      { href: "/pausenregelung-arbeitszeit", label: "Pausenregelung" },
     ],
   },
   {

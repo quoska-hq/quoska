@@ -3,6 +3,8 @@ import {
   ArrowUpRight,
   BookOpen,
   Building2,
+  Coffee,
+  FileCheck2,
   GitBranch,
   Scale,
 } from "lucide-react";
@@ -36,6 +38,20 @@ const GUIDES = [
     title: "Pflicht zur Arbeitszeiterfassung",
     body: "Was kleine Arbeitgeber schon heute erfassen müssen — mit BAG-Entscheidung und amtlichen Quellen.",
   },
+  {
+    icon: FileCheck2,
+    href: "/arbeitszeitnachweis",
+    eyebrow: "Inhalt und Fristen",
+    title: "Arbeitszeitnachweis 2026",
+    body: "Welche Angaben einen Nachweis prüfbar machen und für welche Regeln Zwei-Jahres-Fristen gelten.",
+  },
+  {
+    icon: Coffee,
+    href: "/pausenregelung-arbeitszeit",
+    eyebrow: "§ 4 ArbZG",
+    title: "Pausenregelung Arbeitszeit",
+    body: "Die Schwellen bei sechs und neun Stunden, 15-Minuten-Blöcke und konkrete Rechenbeispiele.",
+  },
 ] as const;
 
 export function GuidesSection() {
@@ -52,12 +68,12 @@ export function GuidesSection() {
             </h2>
           </div>
           <p className="max-w-xl leading-7 text-slate-700 lg:justify-self-end">
-            Vier Einstiege für Betriebe, die Anforderungen, Bedienung und
+            Sechs Einstiege für Betriebe, die Anforderungen, Bedienung und
             Betriebsmodell vor der Entscheidung verstehen möchten.
           </p>
         </div>
 
-        <div className="mt-12 grid border-l border-t border-slate-900/15 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid border-l border-t border-slate-900/15 md:grid-cols-2 lg:grid-cols-3">
           {GUIDES.map(({ icon: Icon, href, eyebrow, title, body }) => (
             <article
               key={href}

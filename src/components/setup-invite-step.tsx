@@ -5,11 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { getLocalToday } from "@/config/client/date-utils";
 
 interface InviteRow {
   firstName: string;
   lastName: string;
   email: string;
+  employmentStartDate: string;
+  initialOvertimeHours: number;
 }
 
 interface InviteStepProps {
@@ -31,11 +35,21 @@ export function InviteStep({
 }: InviteStepProps) {
   function addRow() {
     if (invites.length < FREE_PLAN_EMPLOYEE_LIMIT - 1) {
-      setInvites([...invites, { firstName: "", lastName: "", email: "" }]);
+      setInvites([...invites, {
+        firstName: "",
+        lastName: "",
+        email: "",
+        employmentStartDate: getLocalToday(),
+        initialOvertimeHours: 0,
+      }]);
     }
   }
 
-  function updateRow(index: number, field: keyof InviteRow, value: string) {
+  function updateRow<K extends keyof InviteRow>(
+    index: number,
+    field: K,
+    value: InviteRow[K],
+  ) {
     const updated = [...invites];
     updated[index] = { ...updated[index], [field]: value };
     setInvites(updated);
@@ -103,6 +117,33 @@ export function InviteStep({
                 placeholder="E-Mail"
                 type="email"
               />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor={`invite-start-${index}`}>Eintrittsdatum</Label>
+                  <Input
+                    id={`invite-start-${index}`}
+                    type="date"
+                    value={invite.employmentStartDate}
+                    onChange={(e) => updateRow(index, "employmentStartDate", e.target.value)}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">Beginn der Sollzeitberechnung</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor={`invite-overtime-${index}`}>Startsaldo (Std.)</Label>
+                  <Input
+                    id={`invite-overtime-${index}`}
+                    type="number"
+                    step="0.25"
+                    value={invite.initialOvertimeHours}
+                    onChange={(e) => updateRow(
+                      index,
+                      "initialOvertimeHours",
+                      Number(e.target.value) || 0,
+                    )}
+                  />
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

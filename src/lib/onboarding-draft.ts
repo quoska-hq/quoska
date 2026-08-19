@@ -9,6 +9,8 @@ export interface OnboardingInvite {
   firstName: string;
   lastName: string;
   email: string;
+  employmentStartDate: string;
+  initialOvertimeHours: number;
 }
 
 export type OnboardingDraftStep =
@@ -35,7 +37,12 @@ export function createOnboardingDraft(email: string): OnboardingDraft {
   return {
     version: 1,
     email: email.trim().toLowerCase(),
-    profile: { firstName: "", lastName: "" },
+    profile: {
+      firstName: "",
+      lastName: "",
+      employmentStartDate: "",
+      initialOvertimeHours: 0,
+    },
     company: { companyName: "", bundesland: "" },
     schedule: { ...DEFAULT_WORK_SCHEDULE },
     invites: [],
@@ -59,13 +66,21 @@ export function loadOnboardingDraft(): OnboardingDraft | null {
       profile: {
         firstName: parsed.profile?.firstName ?? "",
         lastName: parsed.profile?.lastName ?? "",
+        employmentStartDate: parsed.profile?.employmentStartDate ?? "",
+        initialOvertimeHours: parsed.profile?.initialOvertimeHours ?? 0,
       },
       company: {
         companyName: parsed.company?.companyName ?? "",
         bundesland: parsed.company?.bundesland ?? "",
       },
       schedule: normalizeWorkSchedule(parsed.schedule),
-      invites: Array.isArray(parsed.invites) ? parsed.invites : [],
+      invites: Array.isArray(parsed.invites)
+        ? parsed.invites.map((invite) => ({
+            ...invite,
+            employmentStartDate: invite.employmentStartDate ?? "",
+            initialOvertimeHours: invite.initialOvertimeHours ?? 0,
+          }))
+        : [],
     };
   } catch {
     return null;

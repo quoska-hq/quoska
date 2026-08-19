@@ -26,6 +26,10 @@ export interface Employee {
   role: "admin" | "manager" | "employee";
   target_hours_week: number;
   work_schedule?: WorkSchedule;
+  /** Optional for legacy rows and test fixtures created before migration 028. */
+  employment_start_date?: string;
+  /** Opening balance imported when time tracking starts in Quoska. */
+  initial_overtime_minutes?: number;
   bundesland: string | null;
   invitation_token: string | null;
   invited_at: string | null;

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Check } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Check } from "lucide-react";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
 import { PricingSection } from "@/components/marketing/sections/pricing";
 
 export const metadata: Metadata = {
-  title: "Preise der Zeiterfassung",
+  title: "Kostenlose Zeiterfassung bis 3 Personen – Preise",
   description:
     "Quoska kostet ab 0 Euro: kostenlos bis 3 Personen, danach transparente Flatrates nach Teamgröße statt Preis pro Mitarbeiter.",
   alternates: { canonical: "/preise" },
@@ -23,8 +24,8 @@ export default function PricesPage() {
   return (
     <MarketingPageShell
       eyebrow="Preise"
-      title="Ein fester Preis für die passende Teamgröße."
-      intro="Alle Tarife enthalten dieselben Produktfunktionen. Der Preis richtet sich nur nach der Zahl aktiver Mitarbeitender — ohne einzelne Funktionspakete freizuschalten."
+      title="Kostenlose Zeiterfassung für kleine Teams. Feste Preise beim Wachsen."
+      intro="Bis zu drei aktive Personen nutzen Quoska kostenlos und ohne Kreditkarte. Darüber gelten feste Preisstufen nach Teamgröße — alle Tarife enthalten dieselben Produktfunktionen."
     >
       <PricingSection />
       <section className="border-t border-slate-900/10 bg-[#f5f3ee]">
@@ -52,6 +53,13 @@ export default function PricesPage() {
             <PriceNote title="Free ohne Kreditkarte">Für den kostenlosen Tarif ist keine Zahlungsmethode nötig.</PriceNote>
             <PriceNote title="Kleinunternehmerregelung">Gemäß § 19 UStG wird derzeit keine Umsatzsteuer ausgewiesen.</PriceNote>
           </div>
+          <Link
+            href="/zeiterfassung-kleinbetriebe"
+            className="mt-10 inline-flex items-center gap-2 text-sm font-semibold text-slate-950 hover:text-[#5145ad]"
+          >
+            Zeiterfassung für Kleinbetriebe ansehen
+            <ArrowUpRight className="size-4" />
+          </Link>
         </div>
       </section>
     </MarketingPageShell>

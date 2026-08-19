@@ -1,7 +1,28 @@
 import { randomUUID } from "node:crypto";
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 import { adminClient, cleanupTestUser, createTestUser, testEmail, TEST_PASSWORD } from "./helpers";
 import { epochToDate, getCurrentEpochDays } from "@/config/client/date-utils";
+
+async function expectSwitchThumbInset(
+  track: Locator,
+  thumb: Locator,
+  activeEdge: "left" | "right",
+) {
+  await expect.poll(async () => {
+    const trackBox = await track.boundingBox();
+    const thumbBox = await thumb.boundingBox();
+    if (!trackBox || !thumbBox) return Number.NaN;
+    return activeEdge === "left"
+      ? thumbBox.x - trackBox.x
+      : trackBox.x + trackBox.width - thumbBox.x - thumbBox.width;
+  }).toBeCloseTo(2, 0);
+
+  const trackBox = await track.boundingBox();
+  const thumbBox = await thumb.boundingBox();
+  if (!trackBox || !thumbBox) throw new Error("Switch geometry is unavailable");
+  expect(thumbBox.x).toBeGreaterThanOrEqual(trackBox.x);
+  expect(thumbBox.x + thumbBox.width).toBeLessThanOrEqual(trackBox.x + trackBox.width);
+}
 
 test.describe("Manual time entries and automatic breaks", () => {
   const adminEmail = testEmail("manual-time");
@@ -123,9 +144,12 @@ test.describe("Manual time entries and automatic breaks", () => {
     await page.goto("/app/settings");
 
     const toggle = page.getByRole("switch", { name: "Automatische Pausen" });
+    const thumb = toggle.locator('[data-slot="switch-thumb"]');
     await expect(toggle).toHaveAttribute("aria-checked", "true");
+    await expectSwitchThumbInset(toggle, thumb, "right");
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-checked", "false");
+    await expectSwitchThumbInset(toggle, thumb, "left");
 
     const { data: disabled } = await adminClient.from("tenants")
       .select("automatic_breaks_enabled").eq("id", tenantId).single();
@@ -133,6 +157,9 @@ test.describe("Manual time entries and automatic breaks", () => {
 
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-checked", "true");
+    await expectSwitchThumbInset(toggle, thumb, "right");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectSwitchThumbInset(toggle, thumb, "right");
     const { data: enabled } = await adminClient.from("tenants")
       .select("automatic_breaks_enabled").eq("id", tenantId).single();
     expect(enabled?.automatic_breaks_enabled).toBe(true);

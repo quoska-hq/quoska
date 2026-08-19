@@ -7,7 +7,7 @@
  * This file is in the Services layer. It imports from Types and other Services.
  */
 
-import type { TimeEntry } from "@/types/database";
+import type { Employee, TimeEntry } from "@/types/database";
 import type { WeekTargetHours } from "@/types/holiday";
 
 // ---------------------------------------------------------------------------
@@ -67,6 +67,37 @@ export function totalNetMinutesWithActive(
     total += netMinutesForRunningEntry(activeEntry, nowIso);
   }
   return total;
+}
+
+/** Calculate all completed and currently active time in a date range. */
+export function totalTrackedNetMinutes(
+  entries: TimeEntry[],
+  nowIso: string,
+): number {
+  return entries.reduce((total, entry) => {
+    if (entry.clock_out) return total + netMinutesForEntry(entry);
+    if (entry.status === "running" || entry.status === "paused") {
+      return total + netMinutesForRunningEntry(entry, nowIso);
+    }
+    return total;
+  }, 0);
+}
+
+/** Employment start date with a legacy fallback for pre-migration fixtures. */
+export function employmentStartDate(
+  employee: Pick<Employee, "employment_start_date" | "created_at">,
+): string {
+  return employee.employment_start_date ?? employee.created_at.slice(0, 10);
+}
+
+/** Opening balance plus all tracked work minus accrued contractual target. */
+export function calculateRunningOvertimeBalance(
+  entries: TimeEntry[],
+  targetMinutes: number,
+  initialOvertimeMinutes: number,
+  nowIso: string,
+): number {
+  return initialOvertimeMinutes + totalTrackedNetMinutes(entries, nowIso) - targetMinutes;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { CalendarDays, Clock3, FileDown, History, Palmtree, Users } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Clock3,
+  FileDown,
+  History,
+  Palmtree,
+  Users,
+} from "lucide-react";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
 
 export const metadata: Metadata = {
@@ -84,6 +93,20 @@ export default function FunctionsPage() {
               className="h-auto w-full border border-slate-900/10"
             />
           </div>
+        </div>
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-x-7 gap-y-4 px-5 pb-20 text-sm font-semibold sm:px-6 sm:pb-24">
+          <Link href="/projektzeiterfassung" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
+            Projektzeiterfassung im Detail <ArrowUpRight className="size-4" />
+          </Link>
+          <Link href="/arbeitszeitnachweis" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
+            Arbeitszeitnachweis führen <ArrowUpRight className="size-4" />
+          </Link>
+          <Link href="/pausenregelung-arbeitszeit" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
+            Pausenregelung verstehen <ArrowUpRight className="size-4" />
+          </Link>
+          <Link href="/zeiterfassung-kleinbetriebe" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
+            Für Kleinbetriebe <ArrowUpRight className="size-4" />
+          </Link>
         </div>
       </section>
     </MarketingPageShell>

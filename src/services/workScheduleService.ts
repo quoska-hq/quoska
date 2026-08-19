@@ -37,9 +37,26 @@ export function calculateScheduleTargetMinutes(
   scheduleValue: unknown,
   fallbackWeeklyHours = 40,
 ): number {
+  return calculateScheduleTargetMinutesForRange(
+    weekStart,
+    addDays(weekStart, 6),
+    holidayDates,
+    scheduleValue,
+    fallbackWeeklyHours,
+  );
+}
+
+/** Contractual target for an inclusive date range. */
+export function calculateScheduleTargetMinutesForRange(
+  startDate: string,
+  endDate: string,
+  holidayDates: ReadonlySet<string> | ReadonlyMap<string, string>,
+  scheduleValue: unknown,
+  fallbackWeeklyHours = 40,
+): number {
+  if (endDate < startDate) return 0;
   let target = 0;
-  for (let offset = 0; offset < 7; offset++) {
-    const date = addDays(weekStart, offset);
+  for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
     if (!holidayDates.has(date)) {
       target += scheduledMinutesForDate(
         scheduleValue,

@@ -18,6 +18,7 @@ import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import type { ApiResponse } from "@/types/api";
 import type { Employee } from "@/types/database";
 import type { WorkSchedule } from "@/types/work-schedule";
+import { getTodayDate } from "@/config/server/timestamps";
 
 interface EmployeeListResponse {
   active: Employee[];
@@ -31,6 +32,7 @@ interface EmployeeListResponse {
   defaults: {
     bundesland: string | null;
     workSchedule: WorkSchedule | null;
+    employmentStartDate: string;
   };
 }
 
@@ -86,6 +88,7 @@ export async function GET() {
           defaults: {
             bundesland: tenantResult.data?.bundesland ?? null,
             workSchedule: tenantResult.data?.default_work_schedule ?? null,
+            employmentStartDate: getTodayDate(),
           },
         },
         error: null,
@@ -140,6 +143,8 @@ export async function POST(request: Request) {
       role: parsed.data.role,
       targetHoursWeek: parsed.data.targetHoursWeek,
       workSchedule: parsed.data.workSchedule,
+      employmentStartDate: parsed.data.employmentStartDate,
+      initialOvertimeMinutes: parsed.data.initialOvertimeMinutes,
       bundesland: parsed.data.bundesland,
     });
 

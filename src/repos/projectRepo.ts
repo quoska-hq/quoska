@@ -198,10 +198,12 @@ export async function getAssignmentsForEmployee(
 ): Promise<(ProjectAssignment & { project: Project })[]> {
   const { data } = await supabase
     .from("project_assignments")
-    .select("*, project:projects!project_id(*)")
+    .select("*, project:projects!project_id!inner(*)")
     .eq("tenant_id", tenantId)
     .eq("employee_id", employeeId)
-    .eq("project.active", true);
+    .eq("project.tenant_id", tenantId)
+    .eq("project.active", true)
+    .is("project.deleted_at", null);
   return (data as unknown as (ProjectAssignment & { project: Project })[]) ?? [];
 }
 

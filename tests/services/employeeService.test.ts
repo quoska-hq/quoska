@@ -16,6 +16,7 @@ vi.mock("@/repos/employeeRepo", () => ({
 
 vi.mock("@/config/server/timestamps", () => ({
   getNowIso: vi.fn().mockReturnValue("2026-06-02T12:00:00.000Z"),
+  getTodayDate: vi.fn().mockReturnValue("2026-06-02"),
 }));
 
 const sampleEmployee: Employee = {

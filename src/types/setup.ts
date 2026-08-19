@@ -4,6 +4,11 @@ import { workScheduleSchema } from "@/types/work-schedule";
 export const setupProfileSchema = z.object({
   firstName: z.string().trim().min(1, "Vorname ist erforderlich"),
   lastName: z.string().trim().min(1, "Nachname ist erforderlich"),
+  employmentStartDate: z.string().regex(
+    /^\d{4}-\d{2}-\d{2}$/,
+    "Eintrittsdatum ist erforderlich",
+  ),
+  initialOvertimeHours: z.number().min(-10000).max(10000).default(0),
 });
 
 export type SetupProfileInput = z.infer<typeof setupProfileSchema>;
@@ -28,6 +33,8 @@ export const inviteEmployeeSchema = z.object({
         firstName: z.string().min(1, "Vorname erforderlich"),
         lastName: z.string().min(1, "Nachname erforderlich"),
         email: z.string().email("Ungültige E-Mail"),
+        employmentStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        initialOvertimeHours: z.number().min(-10000).max(10000).default(0),
       }),
     )
     .min(0)

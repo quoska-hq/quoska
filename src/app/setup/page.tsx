@@ -28,6 +28,7 @@ import { SetupProgress } from "@/components/setup-progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PartyPopper } from "lucide-react";
+import { getLocalToday } from "@/config/client/date-utils";
 
 type SetupStep = OnboardingDraftStep | "verify" | "done";
 
@@ -38,7 +39,12 @@ export default function SetupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
-  const [profile, setProfile] = useState<SetupProfileInput>({ firstName: "", lastName: "" });
+  const [profile, setProfile] = useState<SetupProfileInput>({
+    firstName: "",
+    lastName: "",
+    employmentStartDate: getLocalToday(),
+    initialOvertimeHours: 0,
+  });
   const [company, setCompany] = useState<SetupCompanyInput>({ companyName: "", bundesland: "" });
   const [schedule, setSchedule] = useState<WorkSchedule>({ ...DEFAULT_WORK_SCHEDULE });
   const [invites, setInvites] = useState<OnboardingInvite[]>([]);
@@ -78,6 +84,8 @@ export default function SetupPage() {
         setProfile({
           firstName: loadedProfile?.firstName ?? "",
           lastName: loadedProfile?.lastName ?? "",
+          employmentStartDate: loadedProfile?.employmentStartDate ?? getLocalToday(),
+          initialOvertimeHours: Number(loadedProfile?.initialOvertimeHours ?? 0),
         });
         setCompany({
           companyName: result.data.company?.name ?? "",
@@ -99,7 +107,10 @@ export default function SetupPage() {
 
     function hydrateDraft(draft: OnboardingDraft, authenticated: boolean) {
       setEmail(draft.email);
-      setProfile(draft.profile);
+      setProfile({
+        ...draft.profile,
+        employmentStartDate: draft.profile.employmentStartDate || getLocalToday(),
+      });
       setCompany(draft.company);
       setSchedule(normalizeWorkSchedule(draft.schedule));
       setInvites(draft.invites);
@@ -163,7 +174,11 @@ export default function SetupPage() {
 
   async function onContinueInvites() {
     const incomplete = invites.some(
-      (invite) => !invite.firstName.trim() || !invite.lastName.trim() || !invite.email.trim(),
+      (invite) =>
+        !invite.firstName.trim() ||
+        !invite.lastName.trim() ||
+        !invite.email.trim() ||
+        !invite.employmentStartDate,
     );
     if (incomplete) {
       setError("Bitte fülle alle Felder der Einladung aus oder entferne die Zeile.");
@@ -228,6 +243,8 @@ export default function SetupPage() {
             targetHoursWeek: scheduleHours(schedule),
             workSchedule: schedule,
             bundesland: company.bundesland,
+            employmentStartDate: invite.employmentStartDate,
+            initialOvertimeMinutes: Math.round(invite.initialOvertimeHours * 60),
           }),
         });
         const result = await response.json();

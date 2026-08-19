@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quoska Zeiterfassung</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header class="brand-row">
+        <div class="brand">
+          <img src="icons/icon-192.png" alt="" width="28" height="28">
+          <span class="brand-copy"><strong>Quoska</strong><small>Zeiterfassung</small></span>
+        </div>
+        <button id="refresh-button" class="icon-button hidden" type="button" title="Status aktualisieren" aria-label="Status aktualisieren">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7"></path></svg>
+        </button>
+      </header>
+
+      <section id="loading-view" class="center-view" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Quoska wird geladen…</p>
+      </section>
+
+      <section id="disconnected-view" class="hidden">
+        <div class="connect-hero">
+          <p class="eyebrow">Direkt im Browser stempeln</p>
+          <h1>Arbeitszeit,<br>ohne Umweg.</h1>
+          <p class="muted">Sicher verbinden und mit einem Klick ein- oder ausstempeln – ohne Browserverlauf oder Seiteninhalte zu lesen.</p>
+        </div>
+        <button id="connect-button" class="button primary full" type="button">Mit Quoska verbinden</button>
+        <p class="privacy-note"><span aria-hidden="true">✓</span> Nur Zugriff auf deinen Quoska-Stempelstatus</p>
+        <p id="connect-error" class="error hidden" role="alert"></p>
+      </section>
+
+      <section id="connected-view" class="hidden">
+        <div id="status-card" class="status-card off">
+          <div class="status-row">
+            <span id="status-dot" class="status-dot off" aria-hidden="true"></span>
+            <div>
+              <p id="status-label" class="status-label" aria-live="polite">Ausgestempelt</p>
+              <p id="employee-name" class="employee-name"></p>
+            </div>
+          </div>
+          <p id="timer" class="timer" aria-label="Erfasste Zeit">00:00:00</p>
+          <p id="timer-caption" class="timer-caption">Bereit zum Einstempeln</p>
+          <div class="day-progress">
+            <div class="progress-meta">
+              <span>Tagesfortschritt</span>
+              <span id="progress-label">0:00 / 0:00 Std.</span>
+            </div>
+            <div id="progress-track" class="progress-track" role="progressbar" aria-label="Fortschritt zum heutigen Arbeitszeitziel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span id="progress-fill" class="progress-fill"></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="clock-in-fields" class="fields">
+          <label for="project-select">Projekt</label>
+          <select id="project-select">
+            <option value="">Ohne Projekt</option>
+          </select>
+          <label for="notes-input">Notiz <span>optional</span></label>
+          <textarea id="notes-input" maxlength="500" rows="2" placeholder="Woran arbeitest du?"></textarea>
+        </div>
+
+        <div id="action-buttons" class="actions">
+          <button id="primary-action" class="button primary full" type="button">Einstempeln</button>
+          <button id="secondary-action" class="button secondary full hidden" type="button">Pause starten</button>
+        </div>
+        <p id="action-error" class="error hidden" role="alert"></p>
+
+        <nav class="quick-links" aria-label="Quoska öffnen">
+          <div><a id="times-link" target="_blank" rel="noreferrer">Meine Zeiten</a><a id="dashboard-link" target="_blank" rel="noreferrer">Dashboard</a></div>
+          <button id="disconnect-button" type="button">Trennen</button>
+        </nav>
+      </section>
+    </main>
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

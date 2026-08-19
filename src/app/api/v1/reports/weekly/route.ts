@@ -7,7 +7,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
-import { getNowIso } from "@/config/server/timestamps";
+import { getNowIso, getTodayDate } from "@/config/server/timestamps";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getEmployeesByTenant } from "@/repos/employeeRepo";
 import { getHolidaysInRange } from "@/repos/holidayRepo";
@@ -17,6 +17,7 @@ import type { ApiResponse } from "@/types/api";
 import type { TimeEntry } from "@/types/database";
 import { z } from "zod";
 import { scheduledMinutesForDate } from "@/services/workScheduleService";
+import { employmentStartDate } from "@/services/overtimeService";
 
 /** Per-day cell in the weekly report. */
 export interface DayCell {
@@ -104,6 +105,7 @@ export async function GET(request: Request) {
     const weekStart = weekStartParam;
     const weekEnd = addDays(weekStart, 6);
     const nowIso = getNowIso();
+    const todayDate = getTodayDate();
 
     // Fetch employees
     const employees = await getEmployeesByTenant(supabase, tenantId);
@@ -123,6 +125,7 @@ export async function GET(request: Request) {
     const employeeRows: EmployeeWeekRow[] = [];
 
     for (const emp of employees) {
+      const employeeStart = employmentStartDate(emp);
       // Get holidays for employee's bundesland
       const empBundesland = emp.bundesland ?? "berlin";
       const holidays = await getHolidaysInRange(
@@ -150,7 +153,7 @@ export async function GET(request: Request) {
         const holidayName = holidayMap.get(date) ?? null;
         const dayOfWeek = getDayOfWeek(date);
 
-        if (!holiday) {
+        if (!holiday && date >= employeeStart && date <= todayDate) {
           targetMinutes += scheduledMinutesForDate(
             emp.work_schedule,
             date,

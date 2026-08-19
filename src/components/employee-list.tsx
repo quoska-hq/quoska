@@ -18,6 +18,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import type { WorkSchedule } from "@/types/work-schedule";
+import { ROLE_LABELS } from "@/types/employee";
 
 interface PlanStatus {
   plan: string | null;
@@ -33,14 +34,9 @@ interface EmployeeListResponse {
   defaults: {
     bundesland: string | null;
     workSchedule: WorkSchedule | null;
+    employmentStartDate: string;
   };
 }
-
-const ROLE_LABELS: Record<string, string> = {
-  admin: "Admin",
-  manager: "Manager",
-  employee: "Mitarbeiter",
-};
 
 export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
   const queryClient = useQueryClient();
@@ -143,8 +139,11 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
                     {emp.first_name} {emp.last_name}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {emp.email} · {ROLE_LABELS[emp.role] ?? emp.role}
+                    {emp.email} · {ROLE_LABELS[emp.role]}
                     {emp.target_hours_week && ` · ${emp.target_hours_week}h/Woche`}
+                    {` · Eintritt ${formatDate(emp.employment_start_date ?? emp.created_at)}`}
+                    {(emp.initial_overtime_minutes ?? 0) !== 0 &&
+                      ` · Startsaldo ${formatOpeningBalance(emp.initial_overtime_minutes ?? 0)}`}
                   </p>
                   {emp.invitation_token && (
                     <Badge variant="secondary" className="mt-1 bg-amber-100 text-amber-800 border-0">
@@ -202,7 +201,7 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
                       {emp.first_name} {emp.last_name}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {emp.email} · {ROLE_LABELS[emp.role] ?? emp.role}
+                      {emp.email} · {ROLE_LABELS[emp.role]}
                     </p>
                   </div>
                 </div>
@@ -217,6 +216,7 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
         <EmployeeAddDialog
           defaultBundesland={employeeData?.defaults.bundesland ?? null}
           defaultWorkSchedule={employeeData?.defaults.workSchedule ?? null}
+          defaultEmploymentStartDate={employeeData?.defaults.employmentStartDate ?? ""}
           onClose={() => setShowAddDialog(false)}
           onSuccess={() => {
             setShowAddDialog(false);
@@ -237,4 +237,14 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
       )}
     </div>
   );
+}
+
+function formatDate(value: string): string {
+  const [year, month, day] = value.slice(0, 10).split("-");
+  return `${day}.${month}.${year}`;
+}
+
+function formatOpeningBalance(minutes: number): string {
+  const value = minutes / 60;
+  return `${value > 0 ? "+" : ""}${value.toLocaleString("de-DE")}h`;
 }

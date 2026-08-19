@@ -54,6 +54,15 @@ test.describe("Employee Invite & Edit — Story 3.1", () => {
       page.getByRole("heading", { name: /mitarbeiter hinzufügen/i }),
     ).toBeVisible();
 
+    const roleSelect = page.getByLabel("Rolle");
+    await expect(roleSelect).toContainText("Mitarbeiter");
+    await roleSelect.click();
+    await page.getByRole("option", { name: "Admin", exact: true }).click();
+    await expect(roleSelect).toContainText("Admin");
+    await roleSelect.click();
+    await page.getByRole("option", { name: "Mitarbeiter", exact: true }).click();
+    await expect(roleSelect).toContainText("Mitarbeiter");
+
     await page.getByLabel("Vorname").fill("Max");
     await page.getByLabel("Nachname").fill("Mustermann");
     await page.getByLabel("E-Mail").fill(newEmail);
@@ -98,6 +107,7 @@ test.describe("Employee Invite & Edit — Story 3.1", () => {
     await expect(
       page.getByRole("heading", { name: /mitarbeiter bearbeiten/i }),
     ).toBeVisible();
+    await expect(page.getByLabel("Rolle")).toContainText("Mitarbeiter");
 
     const firstNameInput = page.getByLabel("Vorname");
     await firstNameInput.clear();

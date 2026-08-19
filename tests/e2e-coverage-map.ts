@@ -272,4 +272,12 @@ export const COVERAGE_MAP: StoryCoverage[] = [
     type: "feature",
     testFiles: ["tests/e2e/presence.spec.ts"],
   },
+  {
+    id: "12.1",
+    name: "Browser Extension — Secure Connection and Clock Cycle",
+    epic: 12,
+    status: "implemented",
+    type: "feature",
+    testFiles: ["tests/e2e/browser-extension.spec.ts"],
+  },
 ];

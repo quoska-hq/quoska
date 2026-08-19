@@ -16,9 +16,12 @@ import {
   listPendingCorrections,
   listMyCorrectionRequests,
 } from "@/services/correctionRequestService";
+import { editTimeEntry } from "@/services/timeEntryEditService";
 import { submitCorrectionSchema } from "@/types/correction";
 import type { ApiResponse } from "@/types/api";
-import type { CorrectionRequest } from "@/types/database";
+import type { CorrectionRequest, TimeEntry } from "@/types/database";
+
+type CorrectionSubmission = CorrectionRequest | TimeEntry;
 
 /**
  * POST — Submit a correction request.
@@ -36,16 +39,41 @@ export async function POST(request: Request) {
       );
     }
 
-    const { tenantId, employeeId } = authResult.data;
+    const { tenantId, employeeId, role } = authResult.data;
 
     // Validate input
     const body: unknown = await request.json();
     const parsed = submitCorrectionSchema.safeParse(body);
     if (!parsed.success) {
       const firstError = parsed.error.issues[0];
-      return NextResponse.json<ApiResponse<CorrectionRequest>>(
+      return NextResponse.json<ApiResponse<CorrectionSubmission>>(
         { data: null, error: firstError?.message ?? "Ungültige Eingabe" },
         { status: 400 },
+      );
+    }
+
+    // An administrator already has authority to correct time entries. Apply
+    // the submitted edit immediately instead of creating work for the cockpit.
+    if (role === "admin") {
+      const result = await editTimeEntry(
+        supabase,
+        tenantId,
+        employeeId,
+        parsed.data.time_entry_id,
+        parsed.data.proposed_change,
+        parsed.data.reason,
+      );
+
+      if (!result.data) {
+        return NextResponse.json<ApiResponse<CorrectionSubmission>>(
+          { data: null, error: result.error },
+          { status: 400 },
+        );
+      }
+
+      return NextResponse.json<ApiResponse<CorrectionSubmission>>(
+        { data: result.data, error: null },
+        { status: 200 },
       );
     }
 
@@ -59,19 +87,19 @@ export async function POST(request: Request) {
     );
 
     if (!result.data) {
-      return NextResponse.json<ApiResponse<CorrectionRequest>>(
+      return NextResponse.json<ApiResponse<CorrectionSubmission>>(
         { data: null, error: result.error },
         { status: 400 },
       );
     }
 
-    return NextResponse.json<ApiResponse<CorrectionRequest>>(
+    return NextResponse.json<ApiResponse<CorrectionSubmission>>(
       { data: result.data, error: null },
       { status: 201 },
     );
   } catch (error) {
     console.error("Correction request error:", error);
-    return NextResponse.json<ApiResponse<CorrectionRequest>>(
+    return NextResponse.json<ApiResponse<CorrectionSubmission>>(
       { data: null, error: "Ein unerwarteter Fehler ist aufgetreten." },
       { status: 500 },
     );

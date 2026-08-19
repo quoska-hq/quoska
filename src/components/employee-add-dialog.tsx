@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { WorkScheduleEditor } from "@/components/work-schedule-editor";
+import { ROLE_LABELS, ROLE_OPTIONS, type Role } from "@/types/employee";
 import {
   DEFAULT_WORK_SCHEDULE,
   normalizeWorkSchedule,
@@ -41,6 +42,7 @@ import {
 interface EmployeeAddDialogProps {
   defaultBundesland: string | null;
   defaultWorkSchedule: WorkSchedule | null;
+  defaultEmploymentStartDate: string;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -48,17 +50,22 @@ interface EmployeeAddDialogProps {
 export function EmployeeAddDialog({
   defaultBundesland,
   defaultWorkSchedule,
+  defaultEmploymentStartDate,
   onClose,
   onSuccess,
 }: EmployeeAddDialogProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("employee");
+  const [role, setRole] = useState<Role>("employee");
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule>(
     normalizeWorkSchedule(defaultWorkSchedule ?? DEFAULT_WORK_SCHEDULE),
   );
   const [bundesland, setBundesland] = useState(defaultBundesland ?? "");
+  const [employmentStartDate, setEmploymentStartDate] = useState(
+    defaultEmploymentStartDate,
+  );
+  const [initialOvertimeHours, setInitialOvertimeHours] = useState("0");
   const [workScheduleValid, setWorkScheduleValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,6 +81,8 @@ export function EmployeeAddDialog({
           role,
           targetHoursWeek: scheduleHours(workSchedule),
           workSchedule,
+          employmentStartDate,
+          initialOvertimeMinutes: Math.round((Number(initialOvertimeHours) || 0) * 60),
           bundesland: bundesland || null,
         }),
       });
@@ -139,17 +148,44 @@ export function EmployeeAddDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Rolle</Label>
-            <Select value={role} onValueChange={(v) => { if (v !== null) setRole(v); }}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
+            <Label htmlFor="add-role">Rolle</Label>
+            <Select value={role} onValueChange={(v) => { if (v !== null) setRole(v as Role); }}>
+              <SelectTrigger id="add-role" className="w-full">
+                <SelectValue>{ROLE_LABELS[role]}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="employee">Mitarbeiter</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
+                {ROLE_OPTIONS.map((roleOption) => (
+                  <SelectItem key={roleOption} value={roleOption}>
+                    {ROLE_LABELS[roleOption]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="add-employment-start">Eintrittsdatum</Label>
+              <Input
+                id="add-employment-start"
+                type="date"
+                value={employmentStartDate}
+                onChange={(event) => setEmploymentStartDate(event.target.value)}
+                required
+              />
+              <p className="text-xs text-muted-foreground">Ab diesem Tag wird Sollzeit berechnet.</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-overtime-balance">Überstunden-Startsaldo</Label>
+              <Input
+                id="add-overtime-balance"
+                type="number"
+                step="0.25"
+                value={initialOvertimeHours}
+                onChange={(event) => setInitialOvertimeHours(event.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">In Stunden; negative Werte sind möglich.</p>
+            </div>
           </div>
 
           <div className="space-y-2">

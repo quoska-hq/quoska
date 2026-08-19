@@ -67,7 +67,7 @@ export function PresencePanel({ open, onClose }: PresencePanelProps) {
       {/* Mobile backdrop — tap to close. Hidden on desktop (docked panel). */}
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/20 md:hidden"
+          className="fixed inset-0 z-50 bg-black/20 md:hidden"
           aria-hidden="true"
           onClick={onClose}
           data-testid="presence-backdrop"
@@ -78,8 +78,12 @@ export function PresencePanel({ open, onClose }: PresencePanelProps) {
         data-testid="presence-panel"
         role="complementary"
         aria-label="Anwesenheit"
-        className={`fixed bottom-0 right-0 top-14 z-40 flex w-[340px] max-w-[86vw] flex-col border-l border-slate-900/15 bg-[#f5f3ee] shadow-[0_20px_55px_rgba(15,23,42,0.14)] transition-transform duration-200 ease-out ${
-          open ? "translate-x-0" : "translate-x-full"
+        aria-hidden={!open}
+        inert={!open}
+        className={`fixed top-14 right-0 bottom-0 z-[60] flex w-[340px] max-w-[86vw] flex-col border-l border-slate-900/15 bg-[#f5f3ee] shadow-[0_20px_55px_rgba(15,23,42,0.14)] transition-[clip-path,opacity] duration-200 ease-out ${
+          open
+            ? "opacity-100 [clip-path:inset(0_0_0_0)]"
+            : "pointer-events-none opacity-0 [clip-path:inset(0_0_0_100%)]"
         }`}
       >
         {/* Panel header */}

@@ -4,6 +4,7 @@ import type {
   TimeEntry,
   TimeEntryAudit,
 } from "@/types/database";
+import type { CorrectionRequestWithEntry } from "@/types/correction";
 
 export interface CockpitAuditRecord extends TimeEntryAudit {
   timeEntry: Pick<TimeEntry, "employee_id" | "date" | "project_id">;
@@ -65,6 +66,28 @@ export async function getCockpitAuditRecords(
     .order("changed_at", { ascending: false })
     .limit(150);
   return (data as unknown as CockpitAuditRecord[] | null) ?? [];
+}
+
+export async function getCockpitCorrectionRecords(
+  supabase: SupabaseClient,
+  tenantId: string,
+  updatedSince: string,
+  employeeId?: string,
+): Promise<CorrectionRequestWithEntry[]> {
+  let query = supabase
+    .from("correction_requests")
+    .select(
+      "*, timeEntry:time_entries!inner(employee_id, date, project_id, clock_in, clock_out, break_minutes, notes)",
+    )
+    .eq("tenant_id", tenantId)
+    .or(`status.eq.pending,updated_at.gte.${updatedSince}`);
+
+  if (employeeId) query = query.eq("timeEntry.employee_id", employeeId);
+
+  const { data } = await query
+    .order("created_at", { ascending: false })
+    .limit(150);
+  return (data as unknown as CorrectionRequestWithEntry[] | null) ?? [];
 }
 
 export async function getCockpitProjects(

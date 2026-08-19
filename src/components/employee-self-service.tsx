@@ -15,15 +15,15 @@ import { useQuery } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
 import type { CorrectionRequest } from "@/types/database";
 import { CorrectionRequestDialog } from "@/components/correction-request-dialog";
+import { TimeEntryEditDialog } from "@/components/time-entry-edit-dialog";
 import { ActivityGrid, type DayActivity } from "@/components/activity-grid";
 import { DayEntryCard } from "@/components/day-entry-card";
 import { ManualTimeEntryDialog } from "@/components/manual-time-entry-dialog";
+import { EmployeeTimeBalanceCards } from "@/components/employee-time-balance-cards";
 import { getWeekBoundsForOffset } from "@/config/client/date-utils";
 import {
   getWeekDays,
   formatShortDate,
-  formatBalance,
-  formatDurationCompact,
   type TimeEntryWithNet,
   type MyTimesData,
 } from "@/components/employee-self-service-helpers";
@@ -35,9 +35,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  TrendingUp,
-  TrendingDown,
-  Minus,
   Plus,
 } from "lucide-react";
 
@@ -57,6 +54,7 @@ export function EmployeeSelfService() {
     },
   });
   const canAddTime = authInfo?.role === "admin" || authInfo?.role === "manager";
+  const canEditDirectly = authInfo?.role === "admin";
 
   const { data, isLoading, refetch } = useQuery<MyTimesData>({
     queryKey: ["myTimes", start, end],
@@ -68,7 +66,7 @@ export function EmployeeSelfService() {
   });
 
   // Rolling 12-month data for the activity grid
-  const { data: activityData } = useQuery<{ entries: TimeEntryWithNet[] }>({
+  const { data: activityData, refetch: refetchActivity } = useQuery<{ entries: TimeEntryWithNet[] }>({
     queryKey: ["myTimes", "activity"],
     queryFn: async () => {
       // eslint-disable-next-line @quoska/legal/no-client-timestamps
@@ -115,7 +113,14 @@ export function EmployeeSelfService() {
   // Derived data
   const weeklySummaries = data?.weeklySummaries ?? [];
   const currentWeekSummary = weeklySummaries.length > 0 ? weeklySummaries[0] : null;
-  const dailyTarget = currentWeekSummary ? Math.round(currentWeekSummary.targetMinutes / 5) : 480;
+  const scheduledDailyTargets = Object.values(data?.dailyTargets ?? {})
+    .filter((minutes) => minutes > 0);
+  const typicalDailyTarget = scheduledDailyTargets.length > 0
+    ? Math.round(
+        scheduledDailyTargets.reduce((total, minutes) => total + minutes, 0) /
+        scheduledDailyTargets.length,
+      )
+    : 480;
 
   // Group entries by date
   const entriesByDate = new Map<string, TimeEntryWithNet[]>();
@@ -193,66 +198,28 @@ export function EmployeeSelfService() {
           />
         )}
 
-        {/* ---- Week Summary Cards ---- */}
         {data && (
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            {/* Week balance */}
-            <Card className="shadow-sm">
-              <CardContent className="py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                  Wochenbilanz
-                </p>
-                <p className={`text-xl font-mono font-bold tabular-nums ${
-                  currentWeekSummary && currentWeekSummary.overtimeMinutes > 0
-                    ? "text-emerald-600"
-                    : currentWeekSummary && currentWeekSummary.overtimeMinutes < 0
-                      ? "text-foreground"
-                      : "text-foreground"
-                }`}>
-                  {currentWeekSummary
-                    ? formatBalance(currentWeekSummary.overtimeMinutes)
-                    : "—"
-                  }
-                </p>
-                {currentWeekSummary && (
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {formatDurationCompact(currentWeekSummary.workedMinutes)} von {formatDurationCompact(currentWeekSummary.targetMinutes)}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Cumulative overtime (from all fetched weeks) */}
-            <Card className="shadow-sm">
-              <CardContent className="py-3">
-                <div className="flex items-center gap-1 mb-1">
-                  {data.cumulativeOvertimeMinutes > 0 ? (
-                    <TrendingUp className="size-3 text-emerald-500" />
-                  ) : data.cumulativeOvertimeMinutes < 0 ? (
-                    <TrendingDown className="size-3 text-amber-500" />
-                  ) : (
-                    <Minus className="size-3 text-muted-foreground" />
-                  )}
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Gesamtüberstunden
-                  </p>
-                </div>
-                <p className={`text-xl font-mono font-bold tabular-nums ${
-                  data.cumulativeOvertimeMinutes > 0
-                    ? "text-emerald-600"
-                    : data.cumulativeOvertimeMinutes < 0
-                      ? "text-amber-600"
-                      : "text-foreground"
-                }`}>
-                  {formatBalance(data.cumulativeOvertimeMinutes)}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <EmployeeTimeBalanceCards
+            currentWeek={currentWeekSummary}
+            cumulativeMinutes={data.cumulativeOvertimeMinutes}
+            initialMinutes={data.initialOvertimeMinutes}
+            isCurrentWeek={weekOffset === 0}
+          />
         )}
 
         {/* Correction dialog */}
-        {correctionEntry && (
+        {correctionEntry && (canEditDirectly ? (
+          <TimeEntryEditDialog
+            entry={correctionEntry}
+            open={!!correctionEntry}
+            onClose={() => setCorrectionEntry(null)}
+            onSaved={() => {
+              refetch();
+              refetchActivity();
+              refetchCorrections();
+            }}
+          />
+        ) : (
           <CorrectionRequestDialog
             entry={correctionEntry}
             open={!!correctionEntry}
@@ -263,7 +230,7 @@ export function EmployeeSelfService() {
               refetchCorrections();
             }}
           />
-        )}
+        ))}
 
         {/* Loading state */}
         {isLoading && (
@@ -299,7 +266,8 @@ export function EmployeeSelfService() {
                   date={date}
                   entries={entries}
                   corrections={corrections}
-                  dailyTarget={dailyTarget}
+                  dailyTarget={data.dailyTargets[date] ?? 0}
+                  canEditDirectly={canEditDirectly}
                   onRequestCorrection={setCorrectionEntry}
                 />
               );
@@ -313,7 +281,7 @@ export function EmployeeSelfService() {
         <CardContent className="py-4">
           <ActivityGrid
             activities={activityMap}
-            dailyTargetMinutes={dailyTarget}
+            dailyTargetMinutes={typicalDailyTarget}
           />
         </CardContent>
       </Card>

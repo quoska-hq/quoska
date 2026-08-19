@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Check, Monitor, Smartphone, Users } from "lucide-react";
+import {
+  ArrowUpRight,
+  Check,
+  FileCheck2,
+  Monitor,
+  Smartphone,
+  Users,
+} from "lucide-react";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
 import { site } from "@/lib/site";
 
@@ -119,6 +127,43 @@ export default function SmallBusinessPage() {
         </div>
       </section>
 
+      <section className="bg-[#f5f3ee]">
+        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-16">
+          <SectionHeading
+            eyebrow="Im Überblick"
+            title="Arbeitszeiterfassung für Kleinbetriebe mit sichtbaren Ausnahmen."
+          >
+            <p>
+              Statt jeden Stundenzettel einzeln zu kontrollieren, sehen
+              Verantwortliche offene Korrekturen, fehlende Einträge,
+              Pausenhinweise und Projektanteile an einem Ort. So beginnt die
+              Prüfung bei den Abweichungen, nicht bei jedem normalen Arbeitstag.
+            </p>
+            <div className="mt-7 space-y-3 text-sm text-slate-700">
+              <p className="flex gap-3">
+                <FileCheck2 className="mt-0.5 size-4 shrink-0 text-[#5145ad]" />
+                Nachvollziehbare Zeitnachweise und CSV-Export
+              </p>
+              <p className="flex gap-3">
+                <Users className="mt-0.5 size-4 shrink-0 text-[#5145ad]" />
+                Rollen für Mitarbeitende und Verantwortliche
+              </p>
+            </div>
+          </SectionHeading>
+          <div className="border border-slate-900/20 bg-white p-2 shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
+            <Image
+              src="/product/cockpit.png"
+              alt="Quoska Cockpit für die Arbeitszeiterfassung im Kleinbetrieb"
+              width={1440}
+              height={960}
+              unoptimized
+              sizes="(max-width: 1024px) 100vw, 760px"
+              className="h-auto w-full border border-slate-900/10"
+            />
+          </div>
+        </div>
+      </section>
+
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
           <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
@@ -169,6 +214,24 @@ export default function SmallBusinessPage() {
               className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]"
             >
               Pflicht für Kleinbetriebe 2026 <ArrowUpRight className="size-4" />
+            </Link>
+            <Link
+              href="/projektzeiterfassung"
+              className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]"
+            >
+              Projektzeiterfassung <ArrowUpRight className="size-4" />
+            </Link>
+            <Link
+              href="/arbeitszeitnachweis"
+              className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]"
+            >
+              Arbeitszeitnachweis führen <ArrowUpRight className="size-4" />
+            </Link>
+            <Link
+              href="/pausenregelung-arbeitszeit"
+              className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]"
+            >
+              Pausenregelung verstehen <ArrowUpRight className="size-4" />
             </Link>
           </div>
         </div>

@@ -116,7 +116,7 @@ export function ClockView() {
 
   // --- Balance calculation ---
   const dailyTargetMinutes = weekSummary
-    ? Math.round(weekSummary.targetMinutes / 5)
+    ? weekSummary.dailyTargetMinutes
     : 480;
 
   // Today's worked minutes

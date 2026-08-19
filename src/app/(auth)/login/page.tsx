@@ -21,6 +21,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+function safeRedirectPath(value: string | null): string {
+  return value?.startsWith("/") && !value.startsWith("//")
+    ? value
+    : "/app/dashboard";
+}
+
 function LoginForm() {
   const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -58,7 +64,7 @@ function LoginForm() {
         return;
       }
 
-      const redirectTo = searchParams.get("redirect") || "/app/dashboard";
+      const redirectTo = safeRedirectPath(searchParams.get("redirect"));
       // eslint-disable-next-line react-hooks/immutability -- full navigation needed for cookie propagation
       window.location.href = redirectTo;
     } catch {
@@ -136,7 +142,7 @@ function LoginForm() {
               <span className="bg-white px-2 text-slate-400">oder</span>
             </div>
           </div>
-          <GoogleSignInButton />
+          <GoogleSignInButton next={safeRedirectPath(searchParams.get("redirect"))} />
         </>
       )}
 

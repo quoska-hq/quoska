@@ -41,6 +41,7 @@ const serverEnvSchema = publicEnvSchema.extend({
   ),
   ANALYTICS_ADMIN_EMAILS: z.string().optional(),
   GOOGLE_SITE_VERIFICATION: z.string().optional(),
+  BROWSER_EXTENSION_IDS: z.string().optional(),
 });
 
 type PublicEnv = z.infer<typeof publicEnvSchema>;
@@ -85,6 +86,7 @@ export const serverEnv: ServerEnv = new Proxy({} as ServerEnv, {
       ANALYTICS_HASH_SECRET: process.env.ANALYTICS_HASH_SECRET,
       ANALYTICS_ADMIN_EMAILS: process.env.ANALYTICS_ADMIN_EMAILS,
       GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
+      BROWSER_EXTENSION_IDS: process.env.BROWSER_EXTENSION_IDS,
     });
     return parsed[prop as keyof ServerEnv];
   },

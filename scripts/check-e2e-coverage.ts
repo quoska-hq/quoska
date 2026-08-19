@@ -73,6 +73,7 @@ const COVERAGE_MAP: StoryCoverage[] = [
 
   // ── Epic 9: Team Presence ──
   { id: "9.1", name: "Anwesenheits-Board — Team presence visible to all roles", epic: 9, status: "implemented", type: "feature", testFiles: ["tests/e2e/presence.spec.ts"] },
+  { id: "12.1", name: "Browser Extension — Secure Connection and Clock Cycle", epic: 12, status: "implemented", type: "feature", testFiles: ["tests/e2e/browser-extension.spec.ts"] },
 ];
 
 // ── Checks ────────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   calculateScheduleTargetMinutes,
+  calculateScheduleTargetMinutesForRange,
   isScheduledWorkday,
   scheduledMinutesForDate,
   workdayForDate,
@@ -31,6 +32,24 @@ describe("workScheduleService", () => {
 
     expect(calculateScheduleTargetMinutes("2026-08-10", mondayHoliday, FOUR_DAY_WORK_SCHEDULE)).toBe(24 * 60);
     expect(calculateScheduleTargetMinutes("2026-08-10", fridayHoliday, FOUR_DAY_WORK_SCHEDULE)).toBe(32 * 60);
+  });
+
+  it("accrues the current week's target only through the current day", () => {
+    expect(calculateScheduleTargetMinutesForRange(
+      "2026-08-10",
+      "2026-08-12",
+      new Set(),
+      DEFAULT_WORK_SCHEDULE,
+    )).toBe(24 * 60);
+  });
+
+  it("starts accruing target time on the employee's first day", () => {
+    expect(calculateScheduleTargetMinutesForRange(
+      "2026-08-12",
+      "2026-08-14",
+      new Set(),
+      DEFAULT_WORK_SCHEDULE,
+    )).toBe(24 * 60);
   });
 
   it("supports contractual weekend work", () => {

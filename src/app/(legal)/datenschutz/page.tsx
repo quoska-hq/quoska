@@ -119,7 +119,33 @@ export default function DatenschutzPage() {
         Aufbewahrungspflichten mehr entgegenstehen.
       </p>
 
-      <h2>7. Auftragsverarbeiter (Art. 28 DSGVO)</h2>
+      <h2>7. Optionale Browser-Erweiterung</h2>
+      <p>
+        Wenn du die Quoska Browser-Erweiterung freiwillig verbindest, verarbeitet
+        sie deinen Namen, deinen aktuellen Stempel- und Pausenstatus, die dir
+        zugewiesenen Projekte sowie eine von dir eingegebene optionale Notiz. Sie
+        übermittelt ausschließlich von dir ausgelöste Stempel- und Pausenaktionen
+        an Quoska. Zweck und Rechtsgrundlagen entsprechen der in Abschnitt&nbsp;6
+        beschriebenen Nutzung der Zeiterfassung.
+      </p>
+      <p>
+        Die Erweiterung speichert einen widerrufbaren Zugangsschlüssel im lokalen
+        Erweiterungsspeicher deines Browsers. Auf dem Quoska-Server werden nur ein
+        kryptografischer Prüfwert des Schlüssels, die Erweiterungs-ID, der
+        Verbindungs- und letzte Nutzungszeitpunkt sowie Ablauf und Widerruf
+        gespeichert. Verbindungscodes verfallen nach fünf Minuten,
+        Erweiterungszugänge spätestens nach 90 Tagen. Du oder ein Administrator
+        deines Betriebs könnt die Verbindung vorher jederzeit in den Einstellungen
+        widerrufen.
+      </p>
+      <p>
+        Die Erweiterung liest oder speichert keinen Browserverlauf, keine besuchten
+        Seiten, keine Seiteninhalte, keine Standortdaten und keine automatische
+        Browseraktivität. Fehlgeschlagene Aktionen werden nicht mit einer lokalen
+        Client-Uhrzeit nachträglich synchronisiert.
+      </p>
+
+      <h2>8. Auftragsverarbeiter (Art. 28 DSGVO)</h2>
       <p>
         Für die Erbringung der Dienstleistung setzen wir folgende
         Auftragsverarbeiter ein. Die jeweils erforderlichen vertraglichen
@@ -140,7 +166,7 @@ export default function DatenschutzPage() {
         ))}
       </ul>
 
-      <h2>8. Hosting und internationale Datenübermittlungen</h2>
+      <h2>9. Hosting und internationale Datenübermittlungen</h2>
       <p>
         Die primären Anwendungs- und Datenbankregionen befinden sich in
         Deutschland. Einzelne Dienstleister oder deren Unterauftragsverarbeiter
@@ -151,7 +177,7 @@ export default function DatenschutzPage() {
         Vereinbarungen und Datenschutzhinweisen der oben genannten Anbieter.
       </p>
 
-      <h2>9. Cookie-freie Reichweitenmessung</h2>
+      <h2>10. Cookie-freie Reichweitenmessung</h2>
       <p>
         Auf den öffentlichen Seiten führen wir eine eigene, datensparsame
         Reichweitenmessung durch. Dabei verarbeiten wir den aufgerufenen Pfad,
@@ -181,7 +207,7 @@ export default function DatenschutzPage() {
         technisch notwendige Sitzungs-Cookies verwendet.
       </p>
 
-      <h2>10. Deine Rechte als betroffene Person</h2>
+      <h2>11. Deine Rechte als betroffene Person</h2>
       <p>Du hast uns gegenüber folgende Rechte:</p>
       <ul>
         <li>Auskunft über deine verarbeiteten Daten (Art.&nbsp;15 DSGVO),</li>
@@ -201,7 +227,7 @@ export default function DatenschutzPage() {
         (Art.&nbsp;77 DSGVO).
       </p>
 
-      <h2>11. Widerspruchsrecht (Art. 21 DSGVO)</h2>
+      <h2>12. Widerspruchsrecht (Art. 21 DSGVO)</h2>
       <p>
         Soweit die Verarbeitung auf Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;e oder
         lit.&nbsp;f DSGVO beruht, hast du das Recht, aus Gründen, die sich aus
@@ -211,7 +237,7 @@ export default function DatenschutzPage() {
         nachweisen.
       </p>
 
-      <h2>12. Datenminimierung &amp; Datensicherheit</h2>
+      <h2>13. Datenminimierung &amp; Datensicherheit</h2>
       <p>
         Wir erfassen nur die Daten, die für die vertragliche und gesetzliche
         Pflicht zur Arbeitszeiterfassung erforderlich sind. Eine GPS- oder
@@ -222,7 +248,7 @@ export default function DatenschutzPage() {
         Zugriff zwischen verschiedenen Arbeitgebern.
       </p>
 
-      <h2>13. Mitarbeitendendaten (Hinweis für Arbeitgeber)</h2>
+      <h2>14. Mitarbeitendendaten (Hinweis für Arbeitgeber)</h2>
       <p>
         Wenn du als Arbeitgeber Quoska einsetzt, legst du Daten deiner
         Beschäftigten an. Für diese Verarbeitung bist du selbst Verantwortlicher.
@@ -232,7 +258,7 @@ export default function DatenschutzPage() {
         informieren.
       </p>
 
-      <h2>14. Aktualität und Änderung</h2>
+      <h2>15. Aktualität und Änderung</h2>
       <p>
         Diese Datenschutzerklärung kann sich ändern, insbesondere wenn wir neue
         Funktionen einführen oder sich die Rechtslage ändert. Die jeweils

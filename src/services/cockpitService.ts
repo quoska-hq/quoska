@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { CorrectionRequest, Employee, Project, TimeEntry } from "@/types/database";
+import type { Employee, Project, TimeEntry } from "@/types/database";
+import type { CorrectionRequestWithEntry } from "@/types/correction";
 import type {
   CockpitData,
   CockpitDailyPoint,
@@ -10,6 +11,7 @@ import { success, failure, type ApiResponse } from "@/types/api";
 import { addDays } from "@/services/holidayService";
 import { scheduledMinutesForDate } from "@/services/workScheduleService";
 import { buildCockpitActivity } from "@/services/cockpitActivityService";
+import { employmentStartDate } from "@/services/overtimeService";
 import {
   absenceTypeOnDate,
   buildCockpitActions,
@@ -20,9 +22,9 @@ import { getEmployeesByTenant } from "@/repos/employeeRepo";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import { getApprovedLeavesForTenant } from "@/repos/leaveRepo";
 import { getActiveSickForTenant } from "@/repos/sickEntryRepo";
-import { getPendingCorrectionRequests } from "@/repos/correctionRequestRepo";
 import {
   getCockpitAuditRecords,
+  getCockpitCorrectionRecords,
   getCockpitActiveEntries,
   getCockpitProjects,
   getCockpitTenantState,
@@ -37,7 +39,7 @@ interface CockpitBuildInput {
   projects: Project[];
   audits: CockpitAuditRecord[];
   absences: CockpitAbsences;
-  corrections: CorrectionRequest[];
+  corrections: CorrectionRequestWithEntry[];
   holidaysByState: Map<string, ReadonlyMap<string, string>>;
   tenantState: string;
   startDate: string;
@@ -66,7 +68,7 @@ function employeeTarget(
 ): number {
   const state = employee.bundesland ?? tenantState;
   const holidays = holidaysByState.get(state) ?? new Map<string, string>();
-  const joinedOn = employee.created_at.slice(0, 10);
+  const joinedOn = employmentStartDate(employee);
   return dates.reduce((total, date) => {
     if (
       date < joinedOn ||
@@ -150,7 +152,7 @@ function buildEmployeeRows(
         : "off";
     const state = employee.bundesland ?? input.tenantState;
     const holidays = input.holidaysByState.get(state) ?? new Map<string, string>();
-    const joinedOn = employee.created_at.slice(0, 10);
+    const joinedOn = employmentStartDate(employee);
     const scheduledDates = dates.filter((date) =>
       date >= joinedOn &&
       !holidays.has(date) &&
@@ -228,7 +230,8 @@ export function buildCockpitData(input: CockpitBuildInput): CockpitData {
     daily,
     employeeRows,
     projects: buildProjects(input.entries, input.projects),
-    activity: buildCockpitActivity(input.audits, input.employees, input.projects),
+    activity: buildCockpitActivity(input.audits, input.employees, input.projects,
+      input.corrections.filter((request) => request.updated_at >= `${input.startDate}T00:00:00.000Z`)),
     actions: buildCockpitActions({
       employees: input.scopedEmployees,
       entries: input.entries,
@@ -271,7 +274,7 @@ export async function getAdminCockpit(
     getCockpitTenantState(supabase, tenantId),
     getApprovedLeavesForTenant(supabase, tenantId, startDate, endDate),
     getActiveSickForTenant(supabase, tenantId, startDate, endDate),
-    getPendingCorrectionRequests(supabase, tenantId),
+    getCockpitCorrectionRecords(supabase, tenantId, `${startDate}T00:00:00.000Z`, employeeId),
   ]);
   const scopedEmployees = employeeId
     ? employees.filter((employee) => employee.id === employeeId)

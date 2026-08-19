@@ -173,7 +173,7 @@ export function WeeklyReportTable() {
       )}
 
       {data && data.employees.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border">
+        <div className="overflow-x-auto rounded-lg border [contain:inline-size]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">

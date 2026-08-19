@@ -122,7 +122,80 @@ test.describe("App Shell — Mobile Responsive", () => {
     await cleanupTestUser(email);
   });
 
-  test("bottom nav appears on mobile viewport", async ({ page }) => {
+  test("mobile navigation stays fitted, fixed and exposes secondary pages", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/login");
+    await page.getByLabel("E-Mail").fill(email);
+    await page.getByLabel("Passwort").fill(TEST_PASSWORD);
+    await page.getByRole("button", { name: /anmelden/i }).click();
+    await expect(page).toHaveURL(/\/app\/dashboard/, { timeout: 10_000 });
+    await expect(page.getByTestId("cockpit-overview")).toBeVisible();
+
+    // Sidebar hidden on mobile
+    const sidebar = page.locator("aside");
+    await expect(sidebar).toBeHidden();
+
+    const bottomNav = page.getByTestId("mobile-bottom-nav");
+    await expect(bottomNav).toBeVisible();
+    await expect(bottomNav).toHaveCSS("position", "fixed");
+    await expect(bottomNav.getByRole("link")).toHaveCount(4);
+    await expect(bottomNav.getByRole("button", { name: "Mehr Navigation öffnen" })).toBeVisible();
+
+    const navBox = await bottomNav.boundingBox();
+    expect(navBox).not.toBeNull();
+    expect(navBox!.x).toBeCloseTo(0, 0);
+    expect(navBox!.width).toBeCloseTo(320, 0);
+    const navSlots = bottomNav.locator(":scope > div > *");
+    await expect(navSlots).toHaveCount(5);
+    for (const slot of await navSlots.all()) {
+      const box = await slot.boundingBox();
+      expect(box?.width).toBeCloseTo(64, 0);
+    }
+    await expect.poll(() => page.evaluate(() =>
+      getComputedStyle(document.documentElement).overflowX,
+    )).toBe("clip");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth))
+      .toBe(320);
+    const initialNavY = navBox!.y;
+    await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, left: 999 }));
+    expect(await page.evaluate(() => window.scrollX)).toBe(0);
+    const scrolledNavBox = await bottomNav.boundingBox();
+    expect(scrolledNavBox?.y).toBeCloseTo(initialNavY, 0);
+
+    await bottomNav.getByRole("button", { name: "Mehr Navigation öffnen" }).click();
+    const moreMenu = page.getByTestId("mobile-more-menu");
+    await expect(moreMenu).toBeVisible();
+    await moreMenu.evaluate(async (element) => {
+      await Promise.all(element.getAnimations({ subtree: true }).map((animation) => animation.finished));
+    });
+    const menuBox = await moreMenu.boundingBox();
+    const horizontalOffsets = await page.evaluate(() => ({
+      window: window.scrollX,
+      html: document.documentElement.scrollLeft,
+      body: document.body.scrollLeft,
+      visualViewport: window.visualViewport?.offsetLeft ?? 0,
+    }));
+    expect(horizontalOffsets).toEqual({ window: 0, html: 0, body: 0, visualViewport: 0 });
+    expect(menuBox?.x).toBeCloseTo(0, 0);
+    expect(menuBox?.width).toBeCloseTo(320, 0);
+    expect((menuBox?.y ?? 0) + (menuBox?.height ?? 0)).toBeCloseTo(568, 0);
+    const menuHeaderBox = await moreMenu.locator('[data-slot="dialog-header"]').boundingBox();
+    expect(menuHeaderBox?.x).toBeCloseTo(0, 0);
+    expect(menuHeaderBox?.width).toBeCloseTo(320, 0);
+    const closeButtonBox = await moreMenu.getByRole("button", { name: "Menü schließen" }).boundingBox();
+    expect((closeButtonBox?.x ?? 0) + (closeButtonBox?.width ?? 0))
+      .toBeLessThanOrEqual(304);
+    await expect(moreMenu.getByRole("link", { name: "Benachrichtigungen" })).toBeVisible();
+    await expect(moreMenu.getByRole("link", { name: "Berichte" })).toBeVisible();
+    await expect(moreMenu.getByRole("button", { name: "Abmelden" })).toBeVisible();
+    await moreMenu.getByRole("link", { name: "Berichte" }).click();
+    await expect(page).toHaveURL(/\/app\/reports/);
+    await expect(moreMenu).not.toBeVisible();
+    await page.evaluate(() => window.scrollTo({ left: 999, top: window.scrollY }));
+    expect(await page.evaluate(() => window.scrollX)).toBe(0);
+  });
+
+  test("app pages do not create horizontal document scrolling on a phone", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/login");
     await page.getByLabel("E-Mail").fill(email);
@@ -130,12 +203,28 @@ test.describe("App Shell — Mobile Responsive", () => {
     await page.getByRole("button", { name: /anmelden/i }).click();
     await expect(page).toHaveURL(/\/app\/dashboard/, { timeout: 10_000 });
 
-    // Sidebar hidden on mobile
-    const sidebar = page.locator("aside");
-    await expect(sidebar).toBeHidden();
-
-    // Bottom nav visible
-    await expect(page.getByRole("link", { name: /stempeln/i }).first()).toBeVisible();
+    const routes = [
+      "/app/dashboard",
+      "/app/clock",
+      "/app/my-times",
+      "/app/notifications",
+      "/app/vacation",
+      "/app/sick",
+      "/app/employees",
+      "/app/projects",
+      "/app/reports",
+      "/app/settings",
+    ];
+    for (const route of routes) {
+      await page.goto(route);
+      await expect(page.getByTestId("app-header")).toBeVisible();
+      const contentBox = await page.locator("[data-app-content]").boundingBox();
+      expect(contentBox?.x, route).toBeGreaterThanOrEqual(0);
+      expect((contentBox?.x ?? 0) + (contentBox?.width ?? 0), route)
+        .toBeLessThanOrEqual(375);
+      await page.evaluate(() => window.scrollTo({ left: 999, top: window.scrollY }));
+      expect(await page.evaluate(() => window.scrollX), route).toBe(0);
+    }
   });
 
   test("sidebar visible on desktop viewport", async ({ page }) => {
