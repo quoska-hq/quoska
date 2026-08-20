@@ -5,7 +5,7 @@ export const FAQ = [
   },
   {
     q: "Was kostet Quoska?",
-    a: "Der Free-Tarif gilt für bis zu 3 Mitarbeitende. Team kostet 9 € monatlich für bis zu 10, Business 59 € für bis zu 50 und Pro 99 € ohne Personenlimit. Gemäß § 19 UStG wird derzeit keine Umsatzsteuer ausgewiesen.",
+    a: "Bis zu 3 Mitarbeitende sind kostenlos. Für die ersten 100 Buchungen kosten Team 9 €, Business 59 € und Pro 99 € im Monat. Danach gelten 19 €, 69 € und 129 €. Gemäß § 19 UStG wird derzeit keine Umsatzsteuer ausgewiesen.",
   },
   {
     q: "Können Mitarbeitende ihre eigenen Zeiten sehen?",

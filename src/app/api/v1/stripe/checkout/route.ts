@@ -29,6 +29,16 @@ function priceIdForTier(
   }[tier];
 }
 
+function founderPromotionCodeIdForTier(
+  tier: "team" | "business" | "pro",
+): string | undefined {
+  return {
+    team: serverEnv.STRIPE_TEAM_FOUNDER_PROMOTION_CODE_ID,
+    business: serverEnv.STRIPE_BUSINESS_FOUNDER_PROMOTION_CODE_ID,
+    pro: serverEnv.STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID,
+  }[tier];
+}
+
 export async function POST(request: Request) {
   if (!isBillingEnabled()) {
     return NextResponse.json<ApiResponse<{ url: string }>>(
@@ -93,6 +103,7 @@ export async function POST(request: Request) {
       priceId,
       tier,
       serverEnv.NEXT_PUBLIC_APP_URL,
+      founderPromotionCodeIdForTier(tier),
     );
 
     if (!result.data) {

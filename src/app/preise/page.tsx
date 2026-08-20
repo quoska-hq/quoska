@@ -7,7 +7,7 @@ import { PricingSection } from "@/components/marketing/sections/pricing";
 export const metadata: Metadata = {
   title: "Kostenlose Zeiterfassung bis 3 Personen – Preise",
   description:
-    "Quoska kostet ab 0 Euro: kostenlos bis 3 Personen, danach transparente Flatrates nach Teamgröße statt Preis pro Mitarbeiter.",
+    "Quoska kostet ab 0 Euro. Die Founder-Preise für Team, Business und Pro liegen bei 9, 59 und 99 Euro statt regulär 19, 69 und 129 Euro.",
   alternates: { canonical: "/preise" },
 };
 
@@ -24,8 +24,8 @@ export default function PricesPage() {
   return (
     <MarketingPageShell
       eyebrow="Preise"
-      title="Kostenlose Zeiterfassung für kleine Teams. Feste Preise beim Wachsen."
-      intro="Bis zu drei aktive Personen nutzen Quoska kostenlos und ohne Kreditkarte. Darüber gelten feste Preisstufen nach Teamgröße — alle Tarife enthalten dieselben Produktfunktionen."
+      title="Faire Preise für frühe Teams."
+      intro="Bis 3 Personen kostenlos. Für die ersten 100 Buchungen gelten die Founder-Preise 9 €, 59 € und 99 € — danach 19 €, 69 € und 129 €."
     >
       <PricingSection />
       <section className="border-t border-slate-900/10 bg-[#f5f3ee]">

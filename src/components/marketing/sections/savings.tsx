@@ -15,7 +15,7 @@ export function SavingsSection() {
               Die Rechnung
             </p>
             <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-              Bei 20 Mitarbeitern sparst du über 1.400 € im Jahr.
+              Bei 20 Mitarbeitern sparst du über 1.000 € im Jahr.
             </h2>
             <p className="mt-3 text-slate-600">
               Die meisten Zeiterfassungen berechnen pro Mitarbeiter. Quoska
@@ -26,9 +26,9 @@ export function SavingsSection() {
             <div className="mt-6 inline-flex items-center gap-4 rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-violet-600">
-                  Quoska Team
+                  Quoska Business
                 </p>
-                <p className="text-2xl font-extrabold text-slate-900">468 €/Jahr</p>
+                <p className="text-2xl font-extrabold text-slate-900">708 €/Jahr</p>
               </div>
               <span className="text-2xl text-slate-300">vs.</span>
               <div>
@@ -61,8 +61,8 @@ export function SavingsSection() {
                 </li>
               ))}
               <li className="flex items-center justify-between rounded-lg bg-violet-600 px-4 py-3 text-sm text-white shadow-md shadow-violet-600/30">
-                <span className="font-semibold">Quoska Team</span>
-                <span className="font-bold">39 €/Monat</span>
+                <span className="font-semibold">Quoska Business</span>
+                <span className="font-bold">59 €/Monat Founder</span>
               </li>
             </ul>
             <p className="mt-3 text-xs text-slate-500">

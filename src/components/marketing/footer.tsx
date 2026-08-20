@@ -10,6 +10,7 @@ const FOOTER_LINKS = [
       { href: "/funktionen", label: "Funktionen" },
       { href: "/#ablauf", label: "Ablauf" },
       { href: "/preise", label: "Preise" },
+      { href: "/alternativen", label: "Alternativen" },
       { href: "/projektzeiterfassung", label: "Projektzeiterfassung" },
       { href: "/sicherheit", label: "Sicherheit" },
       { href: "/#faq", label: "FAQ" },
@@ -63,9 +64,9 @@ export function MarketingFooter() {
   return (
     <footer className="border-t border-slate-900/10 bg-[#f5f3ee]">
       <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 sm:py-16">
-        <div className="grid grid-cols-2 gap-8 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-7">
           {/* Brand */}
-          <div className="col-span-2 lg:col-span-1">
+          <div className="col-span-2 lg:pr-8">
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/icons/logo.png"
@@ -78,18 +79,17 @@ export function MarketingFooter() {
                 Quoska
               </span>
             </Link>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-600">
-              Eine klare Zeiterfassung für den Arbeitsalltag in deutschen
-              Betrieben.
+            <p className="mt-4 max-w-[17rem] text-[15px] leading-6 text-slate-600">
+              Zeiterfassung für deutsche Betriebe.
             </p>
-            <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-slate-600">
+            <p className="mt-5 inline-flex border border-slate-900/15 bg-white px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600">
               Entwickelt in Deutschland
             </p>
             <a
               href={site.githubUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-800 transition-colors hover:text-[#5145ad]"
+              className="mt-5 flex w-fit items-center gap-2 text-sm font-semibold text-slate-800 transition-colors hover:text-[#5145ad]"
             >
               <svg
                 aria-hidden="true"

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LegalValue } from "@/components/marketing/legal-value";
 import { legalInfo, site } from "@/lib/site";
 import { legalStandDate } from "@/config/server/site-meta";
+import { FOUNDER_OFFERS, PLANS } from "@/config/plans";
 
 export const metadata: Metadata = {
   title: "AGB",
@@ -88,11 +89,17 @@ export default function AgbPage() {
       </p>
       <p>
         (2) Der Tarif „Free“ ist für Betriebe mit bis zu drei aktiven
-        Mitarbeitenden kostenlos. Der Tarif „Team“ kostet 9&nbsp;€ je
-        Monat und umfasst bis zu zehn aktive Mitarbeitende. Der Tarif
-        „Business“ kostet 59&nbsp;€ je Monat und umfasst bis zu 50 aktive
-        Mitarbeitende. Der Tarif „Pro“ kostet 99&nbsp;€ je Monat und hat
-        kein Limit für die Zahl aktiver Mitarbeitender.
+        Mitarbeitenden kostenlos. Regulär kostet „Team“ {PLANS.team.priceEur}
+        &nbsp;€ je Monat und umfasst bis zu zehn aktive Mitarbeitende,
+        „Business“ kostet {PLANS.business.priceEur}&nbsp;€ bei bis zu 50 aktiven
+        Mitarbeitenden und „Pro“ kostet {PLANS.pro.priceEur}&nbsp;€ ohne
+        Personenlimit. Für die ersten {FOUNDER_OFFERS.team.maxOrganizations}{" "}
+        Buchungen des jeweiligen Tarifs gelten, vorbehaltlich der beim Checkout
+        angezeigten Verfügbarkeit, die Founder-Preise{" "}
+        {FOUNDER_OFFERS.team.priceEur}&nbsp;€, {FOUNDER_OFFERS.business.priceEur}
+        &nbsp;€ und {FOUNDER_OFFERS.pro.priceEur}&nbsp;€. Der gebuchte
+        Founder-Preis gilt, solange das entsprechende Abonnement ohne
+        Unterbrechung besteht.
       </p>
       <p>
         (3) Zahlungen sind monatlich im Voraus fällig. Zahlungsverzug führt

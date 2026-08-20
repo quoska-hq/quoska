@@ -48,3 +48,62 @@ Weitere Details stehen in Googles Dokumentation zu
 [Search Console](https://developers.google.com/search/docs/monitor-debug/search-console-start)
 und zum
 [erneuten Crawlen](https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl).
+
+## Status „Seite mit Weiterleitung“
+
+Dieser Status ist kein Indexierungsfehler, wenn Google eine nicht-kanonische
+Variante gefunden hat. Bei Quoska werden insbesondere diese Varianten dauerhaft
+auf die bevorzugte HTTPS-Adresse ohne `www` und ohne abschließenden Slash
+weitergeleitet:
+
+- `http://quoska.de/...` → `https://quoska.de/...`
+- `https://www.quoska.de/...` → `https://quoska.de/...`
+- `https://quoska.de/preise/` → `https://quoska.de/preise`
+
+Nur die Ziele gehören in die Sitemap und in interne Links. Das lässt sich für
+alle Sitemap-URLs mit einem Request ohne automatisches Folgen von Redirects
+prüfen; jede eingetragene URL muss direkt `200` liefern. Wenn Search Console
+eine URL aus der Sitemap als Weiterleitung meldet, die exakte URL aus dem Bericht
+prüfen: Dann liegt möglicherweise eine veraltete Sitemap, ein alter interner Link
+oder eine abweichende Canonical-URL vor.
+
+## Strukturierte Daten
+
+Die Website setzt JSON-LD für `Organization`, `WebSite`, die Web-Anwendung und
+inhaltsspezifische Seiten ein. Vergleichsseiten verwenden zusätzlich
+`BreadcrumbList`; der Vergleichshub ein `ItemList`. Vor einem Deployment sind
+die betroffenen URLs mit Googles Rich Results Test und nach dem Deployment mit
+der URL-Prüfung zu kontrollieren.
+
+`FAQPage` kann semantisch weiterhin verwendet werden. Google hat den FAQ-Rich-
+Result jedoch zum 7. Mai 2026 vollständig eingestellt
+([Dokumentations-Changelog](https://developers.google.com/search/updates)); das
+Markup erzeugt dort keine besondere Suchdarstellung mehr und beeinflusst das
+Ranking nicht. Für `SoftwareApplication` verlangt Google für den speziellen
+[App-Rich-Result](https://developers.google.com/search/docs/appearance/structured-data/software-app)
+neben Preisangaben auch eine echte Bewertung oder Rezension. Solche Werte dürfen
+nicht erfunden werden; bis belastbare Bewertungen vorhanden sind, bleibt das
+Markup korrekt, ist aber voraussichtlich nicht für diesen Rich Result qualifiziert.
+
+## KI-Crawler und `llms.txt`
+
+`robots.txt` erlaubt alle öffentlichen Seiten weiterhin über die Wildcard-Regel
+und nennt zusätzlich die derzeit dokumentierten Crawler von OpenAI, Anthropic,
+Perplexity und Google ausdrücklich. Authentifizierte App-Seiten, API-Endpunkte
+und der Setup-Assistent bleiben auch für diese Bots gesperrt. Das schützt keine
+Geheimnisse — Zugriffsschutz muss immer durch Authentifizierung erfolgen —,
+verhindert aber unnötiges Crawling privater Oberflächen.
+
+Die wichtigsten Produktinformationen und Links stehen zusätzlich unter
+<https://quoska.de/llms.txt>. Dieses Format kann KI-Diensten die Orientierung
+erleichtern, ist aber kein standardisiertes Google-Rankingsignal. Für klassische
+SEO bleiben zugängliche HTML-Inhalte, Canonicals, interne Links und die Sitemap
+maßgeblich.
+
+Offizielle Dokumentation:
+
+- [OpenAI-Crawler und Suchsichtbarkeit](https://help.openai.com/en/articles/12627856-publishers-and-developers-faq)
+- [Anthropic-Crawler](https://support.anthropic.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler)
+- [Perplexity-Crawler](https://docs.perplexity.ai/docs/resources/perplexity-crawlers)
+- [Google-Extended](https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers)
+- [Google: Einführung in robots.txt](https://developers.google.com/search/docs/crawling-indexing/robots/intro)

@@ -137,7 +137,79 @@ function subscriptionEvent(opts: {
 
 // ---- Tests ---------------------------------------------------------------
 
-import { processWebhookEvent, getActivePlan } from "@/services/subscriptionService";
+import {
+  founderOfferStatusFromPromotionCode,
+  getActivePlan,
+  processWebhookEvent,
+} from "@/services/subscriptionService";
+
+function founderPromotionCode(overrides: {
+  active?: boolean;
+  amountOff?: number;
+  promotionRedemptions?: number;
+  couponRedemptions?: number;
+  maxRedemptions?: number | null;
+  firstTimeTransaction?: boolean;
+} = {}): Stripe.PromotionCode {
+  const maxRedemptions = overrides.maxRedemptions === undefined ? 100 : overrides.maxRedemptions;
+  return {
+    active: overrides.active ?? true,
+    max_redemptions: maxRedemptions,
+    times_redeemed: overrides.promotionRedemptions ?? 0,
+    restrictions: {
+      first_time_transaction: overrides.firstTimeTransaction ?? true,
+    },
+    coupon: {
+      valid: true,
+      amount_off: overrides.amountOff ?? 1000,
+      currency: "eur",
+      duration: "forever",
+      max_redemptions: maxRedemptions,
+      times_redeemed: overrides.couponRedemptions ?? 0,
+    },
+  } as unknown as Stripe.PromotionCode;
+}
+
+describe("Founder offer validation", () => {
+  test("reports the effective number of remaining redemptions", () => {
+    expect(
+      founderOfferStatusFromPromotionCode(
+        founderPromotionCode({ promotionRedemptions: 23, couponRedemptions: 20 }),
+      ),
+    ).toEqual({ configured: true, available: true, remaining: 77 });
+  });
+
+  test("marks the offer unavailable when all 100 redemptions are used", () => {
+    expect(
+      founderOfferStatusFromPromotionCode(
+        founderPromotionCode({ promotionRedemptions: 100 }),
+      ),
+    ).toEqual({ configured: true, available: false, remaining: 0 });
+  });
+
+  test("fails closed when the discount or restrictions do not match", () => {
+    expect(
+      founderOfferStatusFromPromotionCode(founderPromotionCode({ amountOff: 900 })),
+    ).toEqual({ configured: true, available: false, remaining: null });
+    expect(
+      founderOfferStatusFromPromotionCode(
+        founderPromotionCode({ firstTimeTransaction: false }),
+      ),
+    ).toEqual({ configured: true, available: false, remaining: null });
+  });
+
+  test("validates the tier-specific Pro discount", () => {
+    expect(
+      founderOfferStatusFromPromotionCode(
+        founderPromotionCode({ amountOff: 3000 }),
+        "pro",
+      ),
+    ).toEqual({ configured: true, available: true, remaining: 100 });
+    expect(
+      founderOfferStatusFromPromotionCode(founderPromotionCode(), "pro"),
+    ).toEqual({ configured: true, available: false, remaining: null });
+  });
+});
 
 describe("getActivePlan", () => {
   test("returns the tenant's stored plan with billingEnabled flag", async () => {

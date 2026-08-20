@@ -5,6 +5,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { SiteAnalyticsTracker } from "@/components/site-analytics-tracker";
+import { SiteStructuredData } from "@/components/seo/site-structured-data";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -74,6 +75,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <SiteStructuredData />
         {children}
         <SiteAnalyticsTracker />
         {/* Service worker registration */}

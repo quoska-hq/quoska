@@ -11,7 +11,9 @@ import { GuidesSection } from "@/components/marketing/sections/guides";
 import { PricingSection } from "@/components/marketing/sections/pricing";
 import { FaqSection, FAQ } from "@/components/marketing/sections/faq";
 import { FinalCtaSection } from "@/components/marketing/sections/final-cta";
-import { site, legalInfo } from "@/lib/site";
+import { JsonLd } from "@/components/seo/json-ld";
+import { FOUNDER_OFFERS, PLAN_ORDER, PLANS } from "@/config/plans";
+import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: {
@@ -38,31 +40,13 @@ export const metadata: Metadata = {
   },
 };
 
-/** Structured data for rich results: Organization + WebSite + SoftwareApplication + FAQPage. */
-const orgEmail = legalInfo.email.includes("[TODO:") ? undefined : legalInfo.email;
-
+/** Product and visible FAQ data; Organization and WebSite live in the root layout. */
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
-      "@id": `${site.url}/#organization`,
-      name: site.name,
-      url: site.url,
-      logo: `${site.url}/icons/icon-512.png`,
-      sameAs: [site.githubUrl],
-      ...(orgEmail ? { email: orgEmail } : {}),
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${site.url}/#website`,
-      url: site.url,
-      name: site.name,
-      inLanguage: "de-DE",
-      publisher: { "@id": `${site.url}/#organization` },
-    },
-    {
-      "@type": "SoftwareApplication",
+      "@type": ["SoftwareApplication", "WebApplication"],
+      "@id": `${site.url}/#software`,
       name: site.name,
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
@@ -71,11 +55,39 @@ const jsonLd = {
       description:
         "Digitale Zeiterfassung für kleine Betriebe mit Pausen, Urlaub, Korrekturen und Auswertungen.",
       publisher: { "@id": `${site.url}/#organization` },
+      isAccessibleForFree: true,
+      featureList: [
+        "Arbeitszeiterfassung und Pausen",
+        "Korrekturen mit Aktivitätsverlauf",
+        "Urlaub und Krankheit",
+        "Projektzeiterfassung",
+        "Cockpit, Berichte und CSV-Export",
+      ],
       offers: [
-        { "@type": "Offer", name: "Free", price: "0", priceCurrency: "EUR" },
-        { "@type": "Offer", name: "Team", price: "9", priceCurrency: "EUR" },
-        { "@type": "Offer", name: "Business", price: "59", priceCurrency: "EUR" },
-        { "@type": "Offer", name: "Pro", price: "99", priceCurrency: "EUR" },
+        ...Object.values(FOUNDER_OFFERS).map((offer) => ({
+          "@type": "Offer",
+          name: `${PLANS[offer.plan].label} Founder`,
+          price: String(offer.priceEur),
+          priceCurrency: "EUR",
+          url: `${site.url}/preise`,
+          availability: "https://schema.org/LimitedAvailability",
+          description: `Founder-Preis für die ersten ${offer.maxOrganizations} Buchungen dieses Tarifs`,
+        })),
+        ...PLAN_ORDER.map((key) => {
+          const plan = PLANS[key];
+          return {
+            "@type": "Offer",
+            name: plan.label,
+            price: String(plan.priceEur ?? 0),
+            priceCurrency: "EUR",
+            url: `${site.url}/preise`,
+            availability: "https://schema.org/InStock",
+            description:
+              plan.employeeLimit === null
+                ? "Ohne Personenlimit"
+                : `Bis ${plan.employeeLimit} aktive Personen`,
+          };
+        }),
       ],
     },
     {
@@ -93,10 +105,7 @@ const jsonLd = {
 export default function HomePage() {
   return (
     <div className="flex min-h-full flex-col bg-[#f5f3ee]">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       <MarketingNav />
 
       <main className="flex-1">

@@ -14,7 +14,7 @@ const POINTS = [
   {
     icon: Coins,
     title: "Pro-Kopf-Preise frusten",
-    body: "Die meisten Anbieter berechnen 3–8 € pro Mitarbeiter und Monat. Bei 20 Personen zahlst du schnell 110–160 €. Quoska kostet 39 € — für die komplette Belegschaft. Flatrate, ohne Wenn und Aber.",
+    body: "Die meisten Anbieter berechnen 3–8 € pro Mitarbeiter und Monat. Bei 20 Personen zahlst du schnell 110–160 €. Quoska Business startet zum Founder-Preis von 59 € — für die komplette Belegschaft.",
   },
 ] as const;
 

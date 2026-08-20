@@ -7,7 +7,7 @@
  * is hidden.
  *
  * Tiers (centralized in @/config/plans):
- *   free €0 ≤3 · team €9 ≤10 · business €59 ≤50 · pro €99 unlimited
+ *   free €0 ≤3 · paid tiers €19/€69/€129 (€9/€59/€99 Founder)
  */
 
 "use client";
@@ -17,7 +17,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
 import type { Plan } from "@/types/tenant";
-import { PLANS } from "@/config/plans";
+import { FOUNDER_OFFERS, PLANS } from "@/config/plans";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,11 @@ interface BillingStatus {
   billingEnabled: boolean;
   canUpgrade: boolean;
   employeeLimit: number | null;
+  founderOffers: Record<"team" | "business" | "pro", {
+    configured: boolean;
+    available: boolean;
+    remaining: number | null;
+  }>;
 }
 
 const PAID_TIERS: ReadonlyArray<"team" | "business" | "pro"> = ["team", "business", "pro"];
@@ -166,7 +171,12 @@ export function BillingCard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               {PAID_TIERS.map((tier) => {
                 const cfg = PLANS[tier];
+                const offer = FOUNDER_OFFERS[tier];
                 const isCurrent = currentPlan === tier;
+                const hasFounderPrice = data.founderOffers[tier].available;
+                const displayedPrice = hasFounderPrice
+                  ? offer.priceEur
+                  : cfg.priceEur;
                 return (
                   <div
                     key={tier}
@@ -176,8 +186,21 @@ export function BillingCard() {
                   >
                     <p className="text-sm font-semibold">{cfg.label}</p>
                     <p className="text-xs text-muted-foreground">
-                      {cfg.priceEur} €/Monat
+                      {displayedPrice} €/Monat
+                      {hasFounderPrice && (
+                        <span className="ml-1">
+                          statt <span className="line-through">{cfg.priceEur} €</span>
+                        </span>
+                      )}
                     </p>
+                    {hasFounderPrice && (
+                      <p className="mt-1 text-[11px] font-medium text-[#5548ba]">
+                        Founder-Preis
+                        {data.founderOffers[tier].remaining !== null
+                          ? ` · noch ${data.founderOffers[tier].remaining} verfügbar`
+                          : ""}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {cfg.employeeLimit === null
                         ? "Unbegrenzt"

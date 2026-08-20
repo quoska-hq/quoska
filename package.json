@@ -23,6 +23,7 @@
     "test:e2e:ui": "playwright test --ui",
     "extension:build": "node scripts/build-browser-extension.mjs",
     "extension:build:local": "QUOSKA_EXTENSION_APP_URL=http://localhost:3000 node scripts/build-browser-extension.mjs",
+    "search-console": "node scripts/search-console.mjs",
     "screenshots:marketing": "playwright test -c playwright.marketing.config.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"

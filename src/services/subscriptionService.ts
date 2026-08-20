@@ -20,7 +20,13 @@ import type { Plan } from "@/types/tenant";
 import type { ApiResponse } from "@/types/api";
 import { success, failure } from "@/types/api";
 import { getStripe } from "@/lib/stripe";
-import { planFromStripePriceId, configuredPriceIds } from "@/config/plans";
+import {
+  FOUNDER_OFFERS,
+  planFromStripePriceId,
+  configuredPriceIds,
+  type PaidPlan,
+} from "@/config/plans";
+import { serverEnv } from "@/config/env";
 import {
   recordWebhookEvent,
   markWebhookProcessed,
@@ -35,6 +41,14 @@ export interface ActivePlan {
   /** True when the deployment can process payments (UI gating). */
   billingEnabled: boolean;
 }
+
+export interface FounderOfferStatus {
+  configured: boolean;
+  available: boolean;
+  remaining: number | null;
+}
+
+export type FounderOfferStatuses = Record<PaidPlan, FounderOfferStatus>;
 
 /** The current plan for a tenant, plus the billing-enabled flag. */
 export async function getActivePlan(
@@ -60,22 +74,40 @@ export async function createCheckout(
   tenantName: string,
   customerEmail: string,
   priceId: string,
-  tier: "team" | "business" | "pro",
+  tier: PaidPlan,
   appUrl: string,
+  founderPromotionCodeId?: string,
 ): Promise<ApiResponse<{ url: string }>> {
   const stripe = getStripe();
   if (!stripe) return failure("Billing ist nicht aktiviert.");
   if (!priceId) return failure("Kein Preis konfiguriert.");
 
+  const founderOffer =
+    founderPromotionCodeId
+      ? await retrieveFounderOfferStatus(stripe, founderPromotionCodeId, tier)
+      : { configured: false, available: false, remaining: null };
+  const applyFounderOffer = founderOffer.available && !!founderPromotionCodeId;
+  const metadata = {
+    tenantId,
+    tenantName,
+    priceId,
+    tier,
+    founderOffer: applyFounderOffer ? "true" : "false",
+  };
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
+    ...(applyFounderOffer
+      ? { discounts: [{ promotion_code: founderPromotionCodeId }] }
+      : {}),
     client_reference_id: tenantId,
     customer_email: customerEmail,
     billing_address_collection: "required",
     tax_id_collection: { enabled: true },
+    metadata,
     subscription_data: {
-      metadata: { tenantId, tenantName, priceId, tier },
+      metadata,
     },
     success_url: `${appUrl}/app/settings?status=success`,
     cancel_url: `${appUrl}/app/settings?status=cancelled`,
@@ -83,6 +115,94 @@ export async function createCheckout(
 
   if (!session.url) return failure("Checkout-Session konnte nicht erstellt werden.");
   return success({ url: session.url });
+}
+
+/** Public-safe availability summary for the authenticated billing UI. */
+export async function getFounderOfferStatuses(): Promise<FounderOfferStatuses> {
+  const entries = await Promise.all(
+    (["team", "business", "pro"] as const).map(async (tier) => [
+      tier,
+      await getFounderOfferStatus(tier),
+    ] as const),
+  );
+  return Object.fromEntries(entries) as FounderOfferStatuses;
+}
+
+export async function getFounderOfferStatus(tier: PaidPlan): Promise<FounderOfferStatus> {
+  const promotionCodeId = founderPromotionCodeId(tier);
+  const stripe = getStripe();
+  if (!stripe || !promotionCodeId) {
+    return { configured: false, available: false, remaining: null };
+  }
+  return retrieveFounderOfferStatus(stripe, promotionCodeId, tier);
+}
+
+async function retrieveFounderOfferStatus(
+  stripe: Stripe,
+  promotionCodeId: string,
+  tier: PaidPlan,
+): Promise<FounderOfferStatus> {
+  try {
+    const promotionCode = await stripe.promotionCodes.retrieve(promotionCodeId);
+    const status = founderOfferStatusFromPromotionCode(promotionCode, tier);
+    if (status.configured && status.remaining === null) {
+      console.error("Founder promotion code does not match the expected offer settings.");
+    }
+    return status;
+  } catch (error) {
+    console.error("Founder promotion code lookup failed:", error);
+    return { configured: true, available: false, remaining: null };
+  }
+}
+
+/**
+ * Validate the externally configured Stripe promotion before displaying or
+ * applying it. A wrong coupon must fail closed to the standard Team price.
+ */
+export function founderOfferStatusFromPromotionCode(
+  promotionCode: Stripe.PromotionCode,
+  tier: PaidPlan = "team",
+): FounderOfferStatus {
+  const offer = FOUNDER_OFFERS[tier];
+  const coupon = promotionCode.coupon;
+  const limits = [
+    promotionCode.max_redemptions === null
+      ? null
+      : promotionCode.max_redemptions - promotionCode.times_redeemed,
+    coupon.max_redemptions === null
+      ? null
+      : coupon.max_redemptions - coupon.times_redeemed,
+  ].filter((value): value is number => value !== null);
+  const configuredLimit = [promotionCode.max_redemptions, coupon.max_redemptions]
+    .filter((value): value is number => value !== null)
+    .reduce((lowest, value) => Math.min(lowest, value), Number.POSITIVE_INFINITY);
+
+  const hasExpectedConfiguration =
+    coupon.valid &&
+    coupon.amount_off === offer.discountEur * 100 &&
+    coupon.currency?.toLowerCase() === "eur" &&
+    coupon.duration === "forever" &&
+    configuredLimit === offer.maxOrganizations &&
+    promotionCode.restrictions.first_time_transaction;
+
+  if (!hasExpectedConfiguration) {
+    return { configured: true, available: false, remaining: null };
+  }
+
+  const remaining = Math.max(0, Math.min(...limits));
+  return {
+    configured: true,
+    available: promotionCode.active && remaining > 0,
+    remaining,
+  };
+}
+
+function founderPromotionCodeId(tier: PaidPlan): string | undefined {
+  return {
+    team: serverEnv.STRIPE_TEAM_FOUNDER_PROMOTION_CODE_ID,
+    business: serverEnv.STRIPE_BUSINESS_FOUNDER_PROMOTION_CODE_ID,
+    pro: serverEnv.STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID,
+  }[tier];
 }
 
 /**

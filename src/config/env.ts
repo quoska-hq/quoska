@@ -27,8 +27,14 @@ const serverEnvSchema = publicEnvSchema.extend({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_TEAM_PRICE_ID: z.string().optional(),
+  STRIPE_TEAM_LEGACY_PRICE_IDS: z.string().optional(),
   STRIPE_BUSINESS_PRICE_ID: z.string().optional(),
+  STRIPE_BUSINESS_LEGACY_PRICE_IDS: z.string().optional(),
   STRIPE_PRO_PRICE_ID: z.string().optional(),
+  STRIPE_PRO_LEGACY_PRICE_IDS: z.string().optional(),
+  STRIPE_TEAM_FOUNDER_PROMOTION_CODE_ID: z.string().optional(),
+  STRIPE_BUSINESS_FOUNDER_PROMOTION_CODE_ID: z.string().optional(),
+  STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   CRON_SECRET: z.preprocess(
     (value) => (value === "" ? undefined : value),
@@ -78,8 +84,18 @@ export const serverEnv: ServerEnv = new Proxy({} as ServerEnv, {
       STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
       STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
       STRIPE_TEAM_PRICE_ID: process.env.STRIPE_TEAM_PRICE_ID,
+      STRIPE_TEAM_LEGACY_PRICE_IDS: process.env.STRIPE_TEAM_LEGACY_PRICE_IDS,
       STRIPE_BUSINESS_PRICE_ID: process.env.STRIPE_BUSINESS_PRICE_ID,
+      STRIPE_BUSINESS_LEGACY_PRICE_IDS:
+        process.env.STRIPE_BUSINESS_LEGACY_PRICE_IDS,
       STRIPE_PRO_PRICE_ID: process.env.STRIPE_PRO_PRICE_ID,
+      STRIPE_PRO_LEGACY_PRICE_IDS: process.env.STRIPE_PRO_LEGACY_PRICE_IDS,
+      STRIPE_TEAM_FOUNDER_PROMOTION_CODE_ID:
+        process.env.STRIPE_TEAM_FOUNDER_PROMOTION_CODE_ID,
+      STRIPE_BUSINESS_FOUNDER_PROMOTION_CODE_ID:
+        process.env.STRIPE_BUSINESS_FOUNDER_PROMOTION_CODE_ID,
+      STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID:
+        process.env.STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID,
       RESEND_API_KEY: process.env.RESEND_API_KEY,
       CRON_SECRET: process.env.CRON_SECRET,
       ANALYTICS_DB_PATH: process.env.ANALYTICS_DB_PATH,

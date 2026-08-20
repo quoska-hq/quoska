@@ -9,7 +9,11 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
-import { getActivePlan } from "@/services/subscriptionService";
+import {
+  getActivePlan,
+  getFounderOfferStatuses,
+  type FounderOfferStatuses,
+} from "@/services/subscriptionService";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { isBillingEnabled } from "@/lib/stripe";
 import { employeeLimitForPlan } from "@/config/plans";
@@ -24,6 +28,8 @@ export interface BillingStatus {
   canUpgrade: boolean;
   /** Employee cap for the current plan (null = unlimited). */
   employeeLimit: number | null;
+  /** Limited Team launch price, checked against Stripe server-side. */
+  founderOffers: FounderOfferStatuses;
 }
 
 export async function GET() {
@@ -45,6 +51,14 @@ export async function GET() {
     // (server-side hosted Checkout needs the secret key + at least one price).
     const canUpgrade = isBillingEnabled();
     const employeeLimit = employeeLimitForPlan(plan);
+    const unavailableOffer = { configured: false, available: false, remaining: null };
+    const founderOffers = canUpgrade
+      ? await getFounderOfferStatuses()
+      : {
+          team: unavailableOffer,
+          business: unavailableOffer,
+          pro: unavailableOffer,
+        };
 
     return NextResponse.json<ApiResponse<BillingStatus>>(
       {
@@ -53,6 +67,7 @@ export async function GET() {
           billingEnabled,
           canUpgrade,
           employeeLimit,
+          founderOffers,
         },
         error: null,
       },

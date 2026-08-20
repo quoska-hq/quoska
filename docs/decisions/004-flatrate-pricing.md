@@ -1,7 +1,7 @@
 # ADR-004: Flatrate Pricing Model
 
 **Date:** 2026-05-12  
-**Status:** Accepted  
+**Status:** Superseded by ADR-005
 **Decision:** Quoska uses flat-rate pricing (no per-employee charge). Free tier up to 3 employees, €39/month for unlimited.
 
 ## Context
