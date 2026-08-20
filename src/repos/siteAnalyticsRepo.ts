@@ -6,6 +6,7 @@ import type {
   SiteAnalyticsPageview,
   SiteAnalyticsSummary,
 } from "@/types/site-analytics";
+import type { FreeToolAnalyticsEvent } from "@/types/free-tools";
 
 type Sqlite = Database.Database;
 
@@ -35,6 +36,20 @@ export function recordSitePageview(
       @utmSource, @utmMedium, @utmCampaign
     )
   `).run(pageview);
+  return result.changes === 1;
+}
+
+export function recordFreeToolEvent(
+  event: FreeToolAnalyticsEvent,
+  db: Sqlite = getSiteAnalyticsDb(),
+): boolean {
+  const result = db.prepare(`
+    INSERT OR IGNORE INTO free_tool_events (
+      occurred_at, event_key, visitor_hash, event, tool, format, placement
+    ) VALUES (
+      @occurredAt, @eventKey, @visitorHash, @event, @tool, @format, @placement
+    )
+  `).run(event);
   return result.changes === 1;
 }
 
@@ -102,6 +117,8 @@ export function getSiteAnalyticsSummary(
     regions: regionCounts(db, fromIso, toIso),
     devices: topCounts(db, "device", fromIso, toIso),
     campaigns: topCounts(db, "utm_campaign", fromIso, toIso, true),
+    toolActivity: toolEventCounts(db, fromIso, toIso, false),
+    toolConversions: toolEventCounts(db, fromIso, toIso, true),
   };
 }
 
@@ -109,8 +126,30 @@ export function pruneSiteAnalytics(
   cutoffIso: string,
   db: Sqlite = getSiteAnalyticsDb(),
 ): number {
-  return db.prepare("DELETE FROM site_pageviews WHERE occurred_at < ?")
+  const pageviews = db.prepare("DELETE FROM site_pageviews WHERE occurred_at < ?")
     .run(cutoffIso).changes;
+  const toolEvents = db.prepare("DELETE FROM free_tool_events WHERE occurred_at < ?")
+    .run(cutoffIso).changes;
+  return pageviews + toolEvents;
+}
+
+function toolEventCounts(
+  db: Sqlite,
+  fromIso: string,
+  toIso: string,
+  conversionsOnly: boolean,
+): AnalyticsCount[] {
+  const filter = conversionsOnly
+    ? "AND event IN ('free_tool_product_click', 'free_tool_signup_start')"
+    : "";
+  return db.prepare(`
+    SELECT tool || ' · ' || event AS label, COUNT(*) AS count
+    FROM free_tool_events
+    WHERE occurred_at >= ? AND occurred_at <= ? ${filter}
+    GROUP BY tool, event
+    ORDER BY count DESC, label ASC
+    LIMIT 12
+  `).all(fromIso, toIso) as AnalyticsCount[];
 }
 
 function topCounts(

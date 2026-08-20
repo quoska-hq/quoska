@@ -253,6 +253,9 @@ export default function WorkTimeRecordPage() {
             })}
           </div>
           <div className="mt-8 flex flex-wrap gap-6 text-sm font-semibold">
+            <Link href="/stundenzettel" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
+              Stundenzettel kostenlos ausfüllen <ArrowUpRight className="size-4" />
+            </Link>
             <Link href="/funktionen" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
               Funktionen ansehen <ArrowUpRight className="size-4" />
             </Link>

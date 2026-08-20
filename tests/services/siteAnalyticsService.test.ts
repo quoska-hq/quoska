@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { isSiteAnalyticsAdmin, isSiteAnalyticsEnabled } from "@/config/server/site-analytics-access";
 import {
+  buildFreeToolEvent,
   buildSitePageview,
   extractClientIp,
   isLikelyBot,
@@ -61,5 +62,27 @@ describe("site analytics privacy and normalization", () => {
     expect(extractClientIp(headers)).toBe("203.0.113.7");
     expect(isLikelyBot("Googlebot/2.1")).toBe(true);
     expect(isLikelyBot("Mozilla/5.0 Firefox/142")).toBe(false);
+  });
+
+  it("accepts only allowlisted, privacy-safe free-tool dimensions", () => {
+    vi.stubEnv("ANALYTICS_HASH_SECRET", "c".repeat(32));
+    const event = buildFreeToolEvent({
+      input: {
+        event: "free_tool_export",
+        tool: "stundenzettel",
+        format: "csv",
+        placement: "result",
+      },
+      ip: "8.8.8.8",
+      userAgent: "Mozilla/5.0 Firefox/142",
+      nowIso: "2026-08-20T10:00:00.123Z",
+    });
+    expect(event).toMatchObject({
+      event: "free_tool_export",
+      tool: "stundenzettel",
+      format: "csv",
+      placement: "result",
+    });
+    expect(JSON.stringify(event)).not.toContain("8.8.8.8");
   });
 });

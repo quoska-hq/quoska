@@ -30,6 +30,15 @@ const FOOTER_LINKS = [
     ],
   },
   {
+    title: "Werkzeuge",
+    links: [
+      { href: "/arbeitszeitrechner", label: "Arbeitszeitrechner" },
+      { href: "/stundenzettel", label: "Stundenzettel" },
+      { href: "/ueberstundenrechner", label: "Überstundenrechner" },
+      { href: "/monatsarbeitszeit-rechner", label: "Monatsarbeitszeit" },
+    ],
+  },
+  {
     title: "Rechtliches",
     links: [
       { href: "/impressum", label: "Impressum" },
@@ -54,7 +63,7 @@ export function MarketingFooter() {
   return (
     <footer className="border-t border-slate-900/10 bg-[#f5f3ee]">
       <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 sm:py-16">
-        <div className="grid grid-cols-2 gap-8 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-8 lg:grid-cols-6">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2">

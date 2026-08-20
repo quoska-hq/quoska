@@ -9,6 +9,12 @@ import type {
   SiteAnalyticsEventInput,
   SiteAnalyticsPageview,
 } from "@/types/site-analytics";
+import type {
+  FreeToolAnalyticsEvent,
+  FreeToolEventInput,
+  FreeToolEventName,
+  FreeToolId,
+} from "@/types/free-tools";
 
 const PRIVATE_ROUTE_PREFIXES = [
   "/_next", "/api", "/app", "/auth", "/setup", "/login",
@@ -16,6 +22,14 @@ const PRIVATE_ROUTE_PREFIXES = [
 ];
 
 const BOT_PATTERN = /bot|crawler|spider|headless|preview|facebookexternalhit|slurp/i;
+const TOOL_EVENTS: readonly FreeToolEventName[] = [
+  "free_tool_view", "free_tool_calculate", "free_tool_export",
+  "free_tool_product_click", "free_tool_signup_start",
+];
+const TOOL_IDS: readonly FreeToolId[] = [
+  "arbeitszeitrechner", "stundenzettel", "ueberstundenrechner",
+  "monatsarbeitszeit-rechner",
+];
 
 export function isTrackablePublicPath(pathname: string): boolean {
   if (!pathname.startsWith("/") || pathname.length > 180) return false;
@@ -69,6 +83,40 @@ export function buildSitePageview(params: {
     utmSource: normalizeText(params.input.utmSource, 80),
     utmMedium: normalizeText(params.input.utmMedium, 80),
     utmCampaign: normalizeText(params.input.utmCampaign, 120),
+  };
+}
+
+export function buildFreeToolEvent(params: {
+  input: FreeToolEventInput;
+  ip: string;
+  userAgent: string;
+  nowIso: string;
+}): FreeToolAnalyticsEvent | null {
+  const secret = serverEnv.ANALYTICS_HASH_SECRET;
+  if (!secret || !TOOL_EVENTS.includes(params.input.event) || !TOOL_IDS.includes(params.input.tool)) {
+    return null;
+  }
+  const format = ["csv", "pdf", "print"].includes(params.input.format ?? "")
+    ? params.input.format ?? null
+    : null;
+  const placement = ["result", "product_bridge", "footer"].includes(
+    params.input.placement ?? "",
+  ) ? params.input.placement ?? null : null;
+  const visitorHash = digest(
+    secret,
+    `${params.nowIso.slice(0, 10)}|${params.ip}|${params.userAgent}`,
+  );
+  return {
+    occurredAt: params.nowIso,
+    eventKey: digest(
+      secret,
+      [visitorHash, params.input.event, params.input.tool, format, placement, params.nowIso].join("|"),
+    ),
+    visitorHash,
+    event: params.input.event,
+    tool: params.input.tool,
+    format,
+    placement,
   };
 }
 

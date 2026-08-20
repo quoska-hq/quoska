@@ -27,6 +27,18 @@ const DEVICE_NAMES: Record<string, string> = {
   desktop: "Desktop", tablet: "Tablet", mobile: "Mobil",
 };
 
+const TOOL_EVENT_NAMES: Record<string, string> = {
+  arbeitszeitrechner: "Arbeitszeitrechner",
+  stundenzettel: "Stundenzettel",
+  ueberstundenrechner: "Überstundenrechner",
+  "monatsarbeitszeit-rechner": "Monatsarbeitszeit",
+  free_tool_view: "Aufruf",
+  free_tool_calculate: "Berechnung",
+  free_tool_export: "Export",
+  free_tool_product_click: "Produkt-Klick",
+  free_tool_signup_start: "Registrierung",
+};
+
 export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSummary }) {
   const maxDaily = Math.max(...summary.daily.map((point) => point.pageviews), 1);
 
@@ -114,6 +126,13 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
       {summary.campaigns.length > 0 && (
         <RankingCard title="Kampagnen" icon={<MousePointerClick />} rows={summary.campaigns} empty="Noch keine Kampagnen" />
       )}
+
+      {(summary.toolActivity.length > 0 || summary.toolConversions.length > 0) && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <RankingCard title="Kostenlose Tools" icon={<Activity />} rows={translateToolEvents(summary.toolActivity)} empty="Noch keine Tool-Nutzung" />
+          <RankingCard title="Tool-Conversions" icon={<MousePointerClick />} rows={translateToolEvents(summary.toolConversions)} empty="Noch keine Tool-Conversions" />
+        </div>
+      )}
     </div>
   );
 }
@@ -164,4 +183,14 @@ function formatShortDate(value: string): string { const [, m, d] = value.split("
 function showDateLabel(index: number, length: number): boolean {
   const step = length <= 7 ? 1 : length <= 30 ? 6 : 18;
   return index === 0 || index === length - 1 || index % step === 0;
+}
+
+function translateToolEvents(rows: AnalyticsCount[]): AnalyticsCount[] {
+  return rows.map((row) => ({
+    ...row,
+    label: row.label
+      .split(" · ")
+      .map((part) => TOOL_EVENT_NAMES[part] ?? part)
+      .join(" · "),
+  }));
 }

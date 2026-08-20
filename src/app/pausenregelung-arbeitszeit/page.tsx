@@ -226,6 +226,9 @@ export default function BreakRulesPage() {
             </FactCard>
           </div>
           <div className="mt-8 flex flex-wrap gap-6 text-sm font-semibold">
+            <Link href="/arbeitszeitrechner" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
+              Arbeitszeit und Pausen berechnen <ArrowUpRight className="size-4" />
+            </Link>
             <Link href="/arbeitszeitnachweis" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
               Arbeitszeitnachweis ansehen <ArrowUpRight className="size-4" />
             </Link>

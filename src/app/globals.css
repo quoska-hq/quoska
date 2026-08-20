@@ -199,6 +199,49 @@ body {
   }
 }
 
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  body:has([data-timesheet-print]) * {
+    visibility: hidden !important;
+  }
+
+  [data-timesheet-print],
+  [data-timesheet-print] * {
+    visibility: visible !important;
+  }
+
+  [data-timesheet-print] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: white;
+    color: black;
+  }
+
+  [data-no-print] {
+    display: none !important;
+  }
+
+  .timesheet-print-heading {
+    display: block !important;
+    padding: 12px 20px;
+    font-size: 18px;
+  }
+
+  [data-timesheet-print] input {
+    border-color: #94a3b8 !important;
+    height: 30px !important;
+  }
+
+  [data-timesheet-print] [data-slot="input"] {
+    font-size: 10px !important;
+  }
+}
+
 /* --------------------------------------------------------------------------
  * Clock View — Premium animations
  * -------------------------------------------------------------------------- */

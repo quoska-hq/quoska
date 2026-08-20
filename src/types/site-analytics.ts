@@ -49,4 +49,6 @@ export interface SiteAnalyticsSummary {
   regions: AnalyticsCount[];
   devices: AnalyticsCount[];
   campaigns: AnalyticsCount[];
+  toolActivity: AnalyticsCount[];
+  toolConversions: AnalyticsCount[];
 }

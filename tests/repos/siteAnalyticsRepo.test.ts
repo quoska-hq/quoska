@@ -4,9 +4,11 @@ import { initializeSiteAnalyticsSchema } from "@/config/server/site-analytics-db
 import {
   getSiteAnalyticsSummary,
   pruneSiteAnalytics,
+  recordFreeToolEvent,
   recordSitePageview,
 } from "@/repos/siteAnalyticsRepo";
 import type { SiteAnalyticsPageview } from "@/types/site-analytics";
+import type { FreeToolAnalyticsEvent } from "@/types/free-tools";
 
 describe("site analytics repository", () => {
   let db: Database.Database;
@@ -55,7 +57,25 @@ describe("site analytics repository", () => {
   it("deletes events older than the retention cutoff", () => {
     add({ eventKey: "old", occurredAt: "2026-01-01T00:00:00.000Z" });
     add({ eventKey: "recent", occurredAt: "2026-08-01T00:00:00.000Z" });
-    expect(pruneSiteAnalytics("2026-02-01T00:00:00.000Z", db)).toBe(1);
+    addToolEvent({ eventKey: "old-tool", occurredAt: "2026-01-02T00:00:00.000Z" });
+    expect(pruneSiteAnalytics("2026-02-01T00:00:00.000Z", db)).toBe(2);
+  });
+
+  it("summarizes tool usage and conversion events separately", () => {
+    addToolEvent({ eventKey: "view", event: "free_tool_view" });
+    addToolEvent({ eventKey: "calculate", event: "free_tool_calculate" });
+    addToolEvent({ eventKey: "signup", event: "free_tool_signup_start" });
+    const summary = getSiteAnalyticsSummary(
+      7,
+      "2026-08-06T00:00:00.000Z",
+      "2026-08-12T23:59:59.999Z",
+      "2026-08-12",
+      db,
+    );
+    expect(summary.toolActivity).toHaveLength(3);
+    expect(summary.toolConversions).toEqual([
+      { label: "arbeitszeitrechner · free_tool_signup_start", count: 1 },
+    ]);
   });
 
   function add(overrides: Partial<SiteAnalyticsPageview>): boolean {
@@ -71,6 +91,19 @@ describe("site analytics repository", () => {
       utmSource: null,
       utmMedium: null,
       utmCampaign: null,
+      ...overrides,
+    }, db);
+  }
+
+  function addToolEvent(overrides: Partial<FreeToolAnalyticsEvent>): boolean {
+    return recordFreeToolEvent({
+      occurredAt: "2026-08-12T10:00:00.000Z",
+      eventKey: "tool-key",
+      visitorHash: "visitor-a",
+      event: "free_tool_calculate",
+      tool: "arbeitszeitrechner",
+      format: null,
+      placement: null,
       ...overrides,
     }, db);
   }

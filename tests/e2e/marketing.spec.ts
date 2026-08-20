@@ -15,6 +15,10 @@ const PUBLIC_PAGES = [
   ["/arbeitszeitnachweis", "Arbeitszeitnachweis 2026"],
   ["/pausenregelung-arbeitszeit", "Pausenregelung Arbeitszeit"],
   ["/projektzeiterfassung", "Projektzeiterfassung für kleine Teams"],
+  ["/arbeitszeitrechner", "Arbeitszeitrechner: Netto-Arbeitszeit"],
+  ["/stundenzettel", "Stundenzettel kostenlos"],
+  ["/ueberstundenrechner", "Überstundenrechner"],
+  ["/monatsarbeitszeit-rechner", "Monatsarbeitszeit-Rechner"],
 ] as const;
 
 test.describe("Marketing and SEO", () => {

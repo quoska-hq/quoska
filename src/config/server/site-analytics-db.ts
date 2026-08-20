@@ -28,6 +28,30 @@ export function initializeSiteAnalyticsSchema(db: Database.Database): void {
       ON site_pageviews (occurred_at);
     CREATE INDEX IF NOT EXISTS idx_site_pageviews_visitor
       ON site_pageviews (visitor_hash, occurred_at);
+
+    CREATE TABLE IF NOT EXISTS free_tool_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      occurred_at TEXT NOT NULL,
+      event_key TEXT NOT NULL UNIQUE,
+      visitor_hash TEXT NOT NULL,
+      event TEXT NOT NULL CHECK (event IN (
+        'free_tool_view', 'free_tool_calculate', 'free_tool_export',
+        'free_tool_product_click', 'free_tool_signup_start'
+      )),
+      tool TEXT NOT NULL CHECK (tool IN (
+        'arbeitszeitrechner', 'stundenzettel', 'ueberstundenrechner',
+        'monatsarbeitszeit-rechner'
+      )),
+      format TEXT CHECK (format IS NULL OR format IN ('csv', 'pdf', 'print')),
+      placement TEXT CHECK (
+        placement IS NULL OR placement IN ('result', 'product_bridge', 'footer')
+      )
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_free_tool_events_occurred_at
+      ON free_tool_events (occurred_at);
+    CREATE INDEX IF NOT EXISTS idx_free_tool_events_funnel
+      ON free_tool_events (tool, event, occurred_at);
   `);
 }
 
