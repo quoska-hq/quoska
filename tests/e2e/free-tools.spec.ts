@@ -35,6 +35,7 @@ test.describe("free working-time tools", () => {
     await page.getByLabel("Beginn Sa, 01.08.").fill("08:00");
     await page.getByLabel("Ende Sa, 01.08.").fill("16:30");
     await page.getByLabel("Pause Sa, 01.08.").fill("30");
+    await expect(page.getByLabel("Beginn Sa, 01.08.")).toHaveCSS("color", "rgb(23, 24, 27)");
 
     const result = page.locator('section[aria-live="polite"]');
     await expect(result).toContainText("08:00");
@@ -48,6 +49,20 @@ test.describe("free working-time tools", () => {
     });
     await page.getByRole("button", { name: "PDF / Drucken" }).click();
     await expect(page.locator("body")).toHaveAttribute("data-print-called", "true");
+
+    await page.emulateMedia({ media: "print" });
+    const printSheet = page.locator("[data-timesheet-print-sheet]");
+    await expect(page.locator("[data-timesheet-screen]")).toBeHidden();
+    await expect(printSheet).toBeVisible();
+    await expect(printSheet.getByText("Musterbetrieb", { exact: true })).toBeVisible();
+    await expect(printSheet.getByText("Erika Beispiel", { exact: true })).toBeVisible();
+    await expect(printSheet.getByText("08:00", { exact: true }).first()).toBeVisible();
+    await expect(printSheet.getByText("16:30", { exact: true })).toBeVisible();
+    await expect(printSheet).toContainText("Monatssumme: 08:00");
+    const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
+    expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+    expect(pdf.byteLength).toBeGreaterThan(10_000);
+    expect(pdf.toString("latin1")).toMatch(/\/Type \/Pages\s*\/Count 1\b/);
   });
 
   test("Überstundenrechner combines target, actual and prior balance", async ({ page }) => {
