@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MonitorSmartphone, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, MonitorSmartphone, ShieldCheck } from "lucide-react";
 import { formatDateTimeDE } from "@/config/client/date-utils";
+import { getChromeWebStoreUrl } from "@/config/browser-extension-store";
 import type { ApiResponse } from "@/types/api";
 import type { BrowserExtensionConnection } from "@/types/browser-extension";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -53,6 +55,33 @@ export function BrowserExtensionConnectionsCard() {
             Hier kannst du aktive Erweiterungen prüfen und verlorene oder nicht
             mehr verwendete Browser-Verbindungen sofort widerrufen.
           </p>
+        </div>
+
+        <div className="border border-[#6658d3]/25 bg-[#eeebff] p-4 sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <div>
+            <p className="text-sm font-semibold text-slate-950">Quoska für Chrome</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+              Stemple Arbeitszeit und Pausen direkt über die Browserleiste –
+              ohne Zugriff auf deinen Browserverlauf.
+            </p>
+          </div>
+          <div className="mt-4 flex shrink-0 flex-wrap items-center gap-4 sm:mt-0 sm:flex-col sm:items-end sm:gap-2">
+            <a
+              href={getChromeWebStoreUrl("settings")}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-9 items-center justify-center gap-2 bg-slate-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#5145ad]"
+            >
+              In Chrome hinzufügen
+              <ArrowUpRight className="size-4" />
+            </a>
+            <Link
+              href="/browser-erweiterung"
+              className="text-xs font-semibold text-slate-600 hover:text-[#5145ad]"
+            >
+              Mehr erfahren
+            </Link>
+          </div>
         </div>
 
         {connections.isLoading && (

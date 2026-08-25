@@ -34,6 +34,7 @@ ${standardPrices}
 
 - Startseite: ${site.url}
 - Funktionen: ${site.url}/funktionen
+- Chrome-Erweiterung: ${site.url}/browser-erweiterung
 - Preise: ${site.url}/preise
 - Sicherheit und Datenschutz: ${site.url}/sicherheit
 - Alternativen und Vergleiche: ${site.url}/alternativen

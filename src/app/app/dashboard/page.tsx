@@ -7,6 +7,7 @@
 
 import { createClient } from "@/config/supabase/server";
 import { AdminCockpit } from "@/components/admin-cockpit";
+import { BrowserExtensionDashboardPromo } from "@/components/browser-extension-dashboard-promo";
 import { ManagerDashboard } from "@/components/manager-dashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -66,6 +67,8 @@ export default async function DashboardPage() {
           {isAdmin ? "Arbeitszeit und Aktivitäten im Überblick" : "Zeiterfassung für dein Team"}
         </p>
       </div>
+
+      <BrowserExtensionDashboardPromo />
 
       {!setupComplete && (
         <Alert className="border-amber-200 bg-amber-50/50">

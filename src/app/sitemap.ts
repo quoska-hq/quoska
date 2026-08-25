@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: base, lastModified: "2026-08-20" },
     { url: `${base}/funktionen`, lastModified: "2026-08-19" },
+    { url: `${base}/browser-erweiterung`, lastModified: "2026-08-25" },
     { url: `${base}/preise`, lastModified: "2026-08-19" },
     { url: `${base}/sicherheit`, lastModified: "2026-08-11" },
     { url: `${base}/digitale-zeiterfassung`, lastModified: "2026-08-19" },

@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 const PUBLIC_PAGES = [
   ["/", "Digitale Zeiterfassung für kleine Betriebe"],
   ["/funktionen", "Funktionen der digitalen Zeiterfassung"],
+  ["/browser-erweiterung", "Chrome-Erweiterung für Zeiterfassung"],
   ["/preise", "Kostenlose Zeiterfassung bis 3 Personen"],
   ["/sicherheit", "Sicherheit und Datenschutz"],
   ["/digitale-zeiterfassung", "Digitale Zeiterfassung einführen"],
@@ -121,6 +122,7 @@ test.describe("Marketing and SEO", () => {
     expect(body).toContain("Business Founder: 59 EUR pro Monat statt 69 EUR");
     expect(body).toContain("Pro Founder: 99 EUR pro Monat statt 129 EUR");
     expect(body).toMatch(/- Preise: https?:\/\/[^/]+\/preise/);
+    expect(body).toMatch(/- Chrome-Erweiterung: https?:\/\/[^/]+\/browser-erweiterung/);
     expect(body).toMatch(/- Alternativen und Vergleiche: https?:\/\/[^/]+\/alternativen/);
   });
 
@@ -215,6 +217,30 @@ test.describe("Marketing and SEO", () => {
       "href",
       "https://github.com/quoska-hq/quoska",
     );
+  });
+
+  test("browser extension page links to the published Chrome Web Store listing", async ({ page }) => {
+    await page.goto("/browser-erweiterung");
+
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Arbeitszeit erfassen. Direkt aus Chrome.",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("img", { name: /quoska chrome-erweiterung/i }),
+    ).toBeVisible();
+
+    const storeLinks = page.getByRole("link", { name: "In Chrome hinzufügen" });
+    await expect(storeLinks).toHaveCount(2);
+    for (const link of await storeLinks.all()) {
+      await expect(link).toHaveAttribute(
+        "href",
+        /chromewebstore\.google\.com\/detail\/quoska-zeiterfassung\/nkjalipmbhbgbbclhmghlhglljlkdclh\?utm_source=quoska/,
+      );
+      await expect(link).toHaveAttribute("target", "_blank");
+    }
   });
 
   test("legal guide identifies its legal status, limitations, and primary sources", async ({ page }) => {

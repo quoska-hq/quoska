@@ -11,6 +11,7 @@ const FOOTER_LINKS = [
       { href: "/#ablauf", label: "Ablauf" },
       { href: "/preise", label: "Preise" },
       { href: "/alternativen", label: "Alternativen" },
+      { href: "/browser-erweiterung", label: "Chrome-Erweiterung" },
       { href: "/projektzeiterfassung", label: "Projektzeiterfassung" },
       { href: "/sicherheit", label: "Sicherheit" },
       { href: "/#faq", label: "FAQ" },
@@ -31,7 +32,7 @@ const FOOTER_LINKS = [
     ],
   },
   {
-    title: "Werkzeuge",
+    title: "Tools",
     links: [
       { href: "/arbeitszeitrechner", label: "Arbeitszeitrechner" },
       { href: "/stundenzettel", label: "Stundenzettel" },

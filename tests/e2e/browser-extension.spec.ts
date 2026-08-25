@@ -44,6 +44,11 @@ test.describe("Browser extension API cycle", () => {
     await page.getByLabel("Passwort").fill(TEST_PASSWORD);
     await page.getByRole("button", { name: /anmelden/i }).click();
     await expect(page).toHaveURL(/\/app\/dashboard/);
+    await expect(page.getByText("Stempeln, ohne Quoska offen zu halten.")).toBeVisible();
+    await expect(page.getByRole("link", { name: "In Chrome hinzufügen" })).toHaveAttribute(
+      "href",
+      /chromewebstore\.google\.com\/detail\/quoska-zeiterfassung\/nkjalipmbhbgbbclhmghlhglljlkdclh/,
+    );
 
     const verifier = secret();
     const state = secret();
@@ -123,6 +128,7 @@ test.describe("Browser extension API cycle", () => {
     expect((await clockOut.json()).data.activeEntry).toBeNull();
 
     await page.goto("/app/settings");
+    await expect(page.getByText("Quoska für Chrome")).toBeVisible();
     await expect(page.getByText("Quoska Browser-Erweiterung · Berta Browser")).toBeVisible();
     await page.getByRole("button", { name: "Verbindung widerrufen" }).click();
     await expect(page.getByText("Noch keine Browser-Erweiterung verbunden.")).toBeVisible();

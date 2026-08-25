@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: "/funktionen", label: "Funktionen" },
   { href: "/#ablauf", label: "Ablauf" },
   { href: "/sicherheit", label: "Sicherheit" },
+  { href: "/browser-erweiterung", label: "Chrome" },
   { href: "/preise", label: "Preise" },
 ] as const;
 

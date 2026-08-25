@@ -144,6 +144,15 @@ export default function DatenschutzPage() {
         Browseraktivität. Fehlgeschlagene Aktionen werden nicht mit einer lokalen
         Client-Uhrzeit nachträglich synchronisiert.
       </p>
+      <p>
+        Die Nutzung der über die Erweiterung empfangenen Informationen durch
+        Quoska entspricht der Chrome Web Store User Data Policy einschließlich
+        der Anforderungen zur eingeschränkten Nutzung (Limited Use). Quoska
+        verwendet diese Informationen ausschließlich, um die oben beschriebene
+        Zeiterfassung bereitzustellen, abzusichern und ihre Zuverlässigkeit zu
+        gewährleisten – nicht für Werbung, Bonitätsprüfungen oder sachfremde
+        Zwecke.
+      </p>
 
       <h2>8. Auftragsverarbeiter (Art. 28 DSGVO)</h2>
       <p>
