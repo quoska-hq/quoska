@@ -25,7 +25,7 @@ export function BrowserExtensionDashboardPromo() {
   if (!connections.data || connections.data.length > 0) return null;
 
   return (
-    <aside
+    <section
       aria-labelledby="browser-extension-promo-title"
       className="border border-[#6658d3]/30 bg-[#eeebff] p-5 sm:flex sm:items-center sm:justify-between sm:gap-8"
     >
@@ -70,6 +70,6 @@ export function BrowserExtensionDashboardPromo() {
           Mehr erfahren
         </Link>
       </div>
-    </aside>
+    </section>
   );
 }
