@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PageHeader } from "@/components/page-header";
 import {
   ChevronLeft,
   ChevronRight,
@@ -148,16 +149,10 @@ export function EmployeeSelfService() {
   return (
     <TooltipProvider>
       <div>
-        {/* ---- Header with week navigation ---- */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Meine Zeiten
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Übersicht deiner Arbeitszeiten
-            </p>
-          </div>
+        <PageHeader
+          title="Meine Zeiten"
+          description="Übersicht deiner Arbeitszeiten"
+          actions={(
           <div className="flex flex-wrap items-center justify-end gap-2">
             {canAddTime && (
               <Button onClick={() => setManualEntryOpen(true)} size="sm" className="gap-1.5">
@@ -188,7 +183,8 @@ export function EmployeeSelfService() {
             </Button>
             </div>
           </div>
-        </div>
+          )}
+        />
 
         {canAddTime && (
           <ManualTimeEntryDialog

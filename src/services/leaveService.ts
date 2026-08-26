@@ -201,7 +201,9 @@ export async function getLeaveBalance(
   year: number,
 ): Promise<LeaveBalance> {
   const entitlement = await getLeaveEntitlement(supabase, tenantId, employeeId, year);
-  const total = entitlement ? entitlement.total_days + entitlement.carried_over : DEFAULT_VACATION_DAYS;
+  const annual = entitlement?.total_days ?? DEFAULT_VACATION_DAYS;
+  const carriedOver = entitlement?.carried_over ?? 0;
+  const total = annual + carriedOver;
 
   const allRequests = await getLeaveRequestsByEmployee(supabase, tenantId, employeeId);
   const yearRequests = allRequests.filter(
@@ -212,7 +214,14 @@ export async function getLeaveBalance(
   const pending = yearRequests.filter((r) => r.status === "pending").reduce((s, r) => s + r.work_days_count, 0);
   const available = Math.max(0, total - used - pending);
 
-  return { total, used, pending, available, carried_over: entitlement?.carried_over ?? 0 };
+  return {
+    annual,
+    total,
+    used,
+    pending,
+    available,
+    carried_over: carriedOver,
+  };
 }
 
 // ---------------------------------------------------------------------------

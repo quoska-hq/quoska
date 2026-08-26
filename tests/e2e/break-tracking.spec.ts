@@ -71,6 +71,23 @@ test.describe("Break Tracking — Story 2.2", () => {
     // Should show "Pause seit" sublabel
     await expect(page.getByText(/pause seit/i)).toBeVisible({ timeout: 5_000 });
 
+    // The current break duration is visible as a live stopwatch.
+    await expect(page.getByTestId("active-break-duration")).toContainText(
+      /\d+:\d{2}:\d{2}/,
+    );
+    await expect(page.getByTestId("active-break-duration")).toContainText(
+      /Mindestpause/,
+    );
+    await expect(page.getByRole("button", { name: /pause beenden/i })).toBeDisabled();
+
+    // On other tabs, the global header must require ending the pause first.
+    await page.goto("/app/dashboard");
+    const appHeader = page.getByTestId("app-header");
+    await expect(appHeader.getByRole("button", { name: "Pause beenden" })).toBeVisible();
+    await expect(appHeader.getByRole("button", { name: "Pause beenden" })).toBeDisabled();
+    await expect(appHeader.getByRole("button", { name: "Ausstempeln" })).not.toBeVisible();
+    await expect(page).toHaveTitle(/^Pause \d+:\d{2}:\d{2} · Quoska$/);
+
     // Clean up: end break (may get min-duration error, so force-complete via DB)
     await cleanupForEmail(email);
   });

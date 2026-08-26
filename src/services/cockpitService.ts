@@ -8,7 +8,7 @@ import type {
   CockpitProjectRow,
 } from "@/types/cockpit";
 import { success, failure, type ApiResponse } from "@/types/api";
-import { addDays } from "@/services/holidayService";
+import { getCockpitDates } from "@/services/cockpitPeriodService";
 import { scheduledMinutesForDate } from "@/services/workScheduleService";
 import { buildCockpitActivity } from "@/services/cockpitActivityService";
 import { employmentStartDate } from "@/services/overtimeService";
@@ -53,10 +53,6 @@ function netMinutes(entry: TimeEntry): number {
   if (entry.status !== "completed" || !entry.clock_out) return 0;
   const elapsed = (Date.parse(entry.clock_out) - Date.parse(entry.clock_in)) / 60_000;
   return Math.max(0, Math.round(elapsed - (entry.break_minutes ?? 0)));
-}
-
-function datesInRange(startDate: string, days: number): string[] {
-  return Array.from({ length: days }, (_, index) => addDays(startDate, index));
 }
 
 function employeeTarget(
@@ -208,7 +204,7 @@ function buildProjects(entries: TimeEntry[], projects: Project[]): CockpitProjec
 }
 
 export function buildCockpitData(input: CockpitBuildInput): CockpitData {
-  const dates = datesInRange(input.startDate, input.days);
+  const dates = getCockpitDates(input.startDate, input.endDate);
   const daily = buildDaily(dates, input.scopedEmployees, input.entries, input);
   const employeeRows = buildEmployeeRows(input.scopedEmployees, input.entries, dates, input);
   const workedMinutes = daily.reduce((total, day) => total + day.workedMinutes, 0);

@@ -15,6 +15,7 @@ import { LeaveRequestList } from "@/components/leave-request-list";
 import { LeaveReviewList } from "@/components/leave-review-list";
 import { AbsenceCalendar } from "@/components/absence-calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHeader } from "@/components/page-header";
 
 export default function VacationPage() {
   const { data: authInfo } = useQuery<{ role: string; employeeId: string }>({
@@ -32,12 +33,7 @@ export default function VacationPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Urlaub</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Urlaubsanträge und Übersicht
-        </p>
-      </div>
+      <PageHeader title="Urlaub" description="Urlaubsanträge und Übersicht" />
 
       {/* Balance */}
       <div className="mb-6">

@@ -8,8 +8,10 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { ApiResponse } from "@/types/api";
 import type { Employee } from "@/types/database";
+import type { LeaveBalance } from "@/types/leave";
 import type { Bundesland } from "@/types/tenant";
 import { BUNDESLAENDER, BUNDESLAND_LABELS, getBundeslandLabel } from "@/types/tenant";
 import {
@@ -50,6 +52,7 @@ export function EmployeeEditDialog({
   onClose,
   onSuccess,
 }: EmployeeEditDialogProps) {
+  const queryClient = useQueryClient();
   const [firstName, setFirstName] = useState(employee.first_name);
   const [lastName, setLastName] = useState(employee.last_name);
   const [role, setRole] = useState<Employee["role"]>(employee.role);
@@ -65,8 +68,27 @@ export function EmployeeEditDialog({
   const [initialOvertimeHours, setInitialOvertimeHours] = useState(
     String((employee.initial_overtime_minutes ?? 0) / 60),
   );
+  const [annualVacationDaysOverride, setAnnualVacationDaysOverride] = useState<string | null>(null);
+  const [carriedOverDaysOverride, setCarriedOverDaysOverride] = useState<string | null>(null);
   const [workScheduleValid, setWorkScheduleValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const leaveBalanceQuery = useQuery<LeaveBalance>({
+    queryKey: ["leaveBalance", employee.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/v1/leave-entitlements/${employee.id}`);
+      const json: ApiResponse<LeaveBalance> = await response.json();
+      if (!response.ok || !json.data) {
+        throw new Error(json.error ?? "Urlaubsanspruch konnte nicht geladen werden");
+      }
+      return json.data;
+    },
+  });
+
+  const annualVacationDays = annualVacationDaysOverride
+    ?? (leaveBalanceQuery.data ? String(leaveBalanceQuery.data.annual) : "");
+  const carriedOverDays = carriedOverDaysOverride
+    ?? (leaveBalanceQuery.data ? String(leaveBalanceQuery.data.carried_over) : "");
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -88,17 +110,55 @@ export function EmployeeEditDialog({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Fehler beim Speichern");
-      return json;
+
+      const entitlementResponse = await fetch(
+        `/api/v1/leave-entitlements/${employee.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            total_days: Number(annualVacationDays),
+            carried_over: Number(carriedOverDays),
+          }),
+        },
+      );
+      const entitlementJson = await entitlementResponse.json();
+      if (!entitlementResponse.ok) {
+        throw new Error(
+          entitlementJson.error ?? "Urlaubsanspruch konnte nicht gespeichert werden",
+        );
+      }
+
+      return { employee: json.data, entitlement: entitlementJson.data };
     },
-    onSuccess,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leaveBalance"] });
+      onSuccess();
+    },
     onError: (err) => setError(err.message),
   });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    const annual = Number(annualVacationDays);
+    const carriedOver = Number(carriedOverDays);
+    if (!Number.isInteger(annual) || annual < 20 || annual > 40) {
+      setError("Der Jahresanspruch muss zwischen 20 und 40 Tagen liegen.");
+      return;
+    }
+    if (!Number.isInteger(carriedOver) || carriedOver < 0 || carriedOver > 20) {
+      setError("Der Resturlaub muss zwischen 0 und 20 Tagen liegen.");
+      return;
+    }
+
     mutation.mutate();
   }
+
+  const leaveBalanceError = leaveBalanceQuery.error instanceof Error
+    ? leaveBalanceQuery.error.message
+    : null;
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -107,9 +167,9 @@ export function EmployeeEditDialog({
           <DialogTitle>Mitarbeiter bearbeiten</DialogTitle>
         </DialogHeader>
 
-        {error && (
+        {(error || leaveBalanceError) && (
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{error ?? leaveBalanceError}</AlertDescription>
           </Alert>
         )}
 
@@ -177,6 +237,43 @@ export function EmployeeEditDialog({
             </div>
           </div>
 
+          <div className="space-y-3 border border-slate-200 p-4">
+            <div>
+              <h3 className="text-sm font-semibold">Urlaubsanspruch</h3>
+              <p className="text-xs text-muted-foreground">Kontingent für das laufende Kalenderjahr.</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="edit-annual-vacation-days">Urlaubstage pro Jahr</Label>
+                <Input
+                  id="edit-annual-vacation-days"
+                  type="number"
+                  min="20"
+                  max="40"
+                  step="1"
+                  value={annualVacationDays}
+                  onChange={(event) => setAnnualVacationDaysOverride(event.target.value)}
+                  disabled={leaveBalanceQuery.isLoading || Boolean(leaveBalanceError)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-carried-over-days">Übertragener Resturlaub</Label>
+                <Input
+                  id="edit-carried-over-days"
+                  type="number"
+                  min="0"
+                  max="20"
+                  step="1"
+                  value={carriedOverDays}
+                  onChange={(event) => setCarriedOverDaysOverride(event.target.value)}
+                  disabled={leaveBalanceQuery.isLoading || Boolean(leaveBalanceError)}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Arbeitszeit</Label>
             <WorkScheduleEditor
@@ -209,7 +306,15 @@ export function EmployeeEditDialog({
             <DialogClose render={<Button variant="outline" />}>
               Abbrechen
             </DialogClose>
-            <Button type="submit" disabled={mutation.isPending || !workScheduleValid}>
+            <Button
+              type="submit"
+              disabled={
+                mutation.isPending ||
+                !workScheduleValid ||
+                leaveBalanceQuery.isLoading ||
+                Boolean(leaveBalanceError)
+              }
+            >
               {mutation.isPending ? "Wird gespeichert…" : "Speichern"}
             </Button>
           </DialogFooter>

@@ -46,7 +46,7 @@ export function useLiveElapsedSeconds(
     const tick = () => {
       // eslint-disable-next-line @quoska/legal/no-client-timestamps
       const nowMs = Date.now();
-      setSeconds(Math.max(0, Math.round((nowMs - clockInMs) / 1000) - breakSec));
+      setSeconds(Math.max(0, Math.floor((nowMs - clockInMs) / 1000) - breakSec));
     };
     tick();
     const id = setInterval(tick, 1000);

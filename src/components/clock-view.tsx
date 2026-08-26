@@ -1,11 +1,10 @@
 /**
  * ClockView — Premium clock in/out UI with circular progress ring,
- * animated state transitions, break tracking, and compliance warnings.
+ * state transitions, break tracking, and compliance warnings.
  *
  * Features:
  * - Optimistic UI: button changes instantly on click, rolls back on error
  * - Pop animation: satisfying bounce on button press
- * - Animated counter: balance number smoothly transitions between values
  */
 
 "use client";
@@ -20,17 +19,19 @@ import { ProjectSelector } from "@/components/project-selector";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PageHeader } from "@/components/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Pause, Coffee } from "lucide-react";
 import {
   getButtonConfig,
   type OptimisticAction,
 } from "@/components/clock-button-config";
-import { useAnimatedValue } from "@/components/use-animated-value";
 import { formatDuration } from "@/components/clock-format";
 import { ClockMainCard } from "@/components/clock-main-card";
+import { ClockDayProgress } from "@/components/clock-day-progress";
 import { TodaySummaryCard } from "@/components/clock-today-summary";
 import { WeekSummaryCard } from "@/components/clock-week-summary";
+import { useLiveElapsedSeconds } from "@/components/use-live-clock";
 
 export function ClockView() {
   const [displayMinutes, setDisplayMinutes] = useState(0);
@@ -63,6 +64,7 @@ export function ClockView() {
   const todaySummary = statusData?.todaySummary;
   const weekSummary = statusData?.weekSummary;
   const monthCarryOverMinutes = statusData?.monthCarryOverMinutes ?? 0;
+  const activeBreakSeconds = useLiveElapsedSeconds(activeBreak?.break_start, 0);
 
   const { data: myProjects } = useQuery<{ id: string; name: string }[]>({
     queryKey: ["myProjects"],
@@ -104,15 +106,18 @@ export function ClockView() {
     const breakMin = activeEntry.break_minutes ?? 0;
 
     const tick = () => {
-      // eslint-disable-next-line @quoska/legal/no-client-timestamps
-      const nowMs = Date.now();
-      setDisplayMinutes(Math.round(Math.abs(nowMs - clockInMs) / 60_000) - breakMin);
+      const endMs = activeBreak
+        ? Date.parse(activeBreak.break_start)
+        // eslint-disable-next-line @quoska/legal/no-client-timestamps
+        : Date.now();
+      setDisplayMinutes(Math.round(Math.abs(endMs - clockInMs) / 60_000) - breakMin);
     };
 
     tick();
+    if (activeBreak) return;
     intervalRef.current = setInterval(tick, 30_000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [activeEntry?.clock_in, activeEntry?.break_minutes]);
+  }, [activeBreak, activeEntry?.clock_in, activeEntry?.break_minutes]);
 
   // --- Balance calculation ---
   const dailyTargetMinutes = weekSummary
@@ -123,22 +128,19 @@ export function ClockView() {
   // When running: live counter + previously completed sessions today
   // When not running: all completed sessions from the API summary
   const completedTodayMinutes = todaySummary?.netMinutes ?? 0;
-  const todayWorkedMinutes = activeEntry?.status === "running"
+  const todayWorkedMinutes = activeEntry
     ? displayMinutes + completedTodayMinutes
     : completedTodayMinutes;
 
-  const liveBalance = todayWorkedMinutes - dailyTargetMinutes + monthCarryOverMinutes;
-
-  // Animated counter for the balance display
-  const animatedBalance = useAnimatedValue(liveBalance, 600);
+  const todayBalance = todayWorkedMinutes - dailyTargetMinutes;
 
   const progressFraction = dailyTargetMinutes > 0
     ? todayWorkedMinutes / dailyTargetMinutes
     : 0;
 
-  const isDeficit = liveBalance < 0;
+  const isDeficit = todayBalance < 0;
   // Only celebrate if user has actually worked today AND balance is positive
-  const hasReachedTarget = liveBalance >= 0 && todayWorkedMinutes > 0;
+  const hasReachedTarget = todayBalance >= 0 && todayWorkedMinutes > 0;
 
   // Clear optimistic state when the server reflects the action.
   // Uses React's "set state during render" reconciliation pattern (per the
@@ -164,10 +166,9 @@ export function ClockView() {
     setPopKey((k) => k + 1);
 
     if (activeBreak) {
-      setOptimisticAction("resume");
-      resumeMutation.mutate(undefined, {
-        onError: () => setOptimisticAction(null),
-      });
+      // Ending a break is server-validated (including the 15-minute minimum).
+      // Keep the paused UI stable until the server confirms the transition.
+      resumeMutation.mutate(undefined);
       return;
     }
     if (activeEntry?.status === "running") {
@@ -208,100 +209,92 @@ export function ClockView() {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col items-center">
-        {/* Centered heading */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Stempeln</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Arbeitszeit mit einem Klick erfassen
-          </p>
-        </div>
+      <div className="w-full">
+        <PageHeader
+          title="Stempeln"
+          description="Arbeitszeit starten, pausieren und den Tag im Blick behalten."
+        />
 
-        <div className="space-y-5 w-full max-w-sm">
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="mb-5">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
-        {/* ---- Main Clock Card ---- */}
-        <ClockMainCard
-          ringProgress={ringProgress}
-          ringSize={ringSize}
-          ringStroke={ringStroke}
-          hasReachedTarget={hasReachedTarget}
-          isDeficit={isDeficit}
-          activeEntry={activeEntry}
-          activeBreak={activeBreak}
-          isActive={isActive}
-          activePulse={activePulse}
-          popKey={popKey}
-          btn={btn}
-          btnShadow={btnShadow}
-          isProcessing={isProcessing}
-          optimisticAction={optimisticAction}
-          onClockAction={handleClockAction}
-          animatedBalance={animatedBalance}
-          liveBalance={liveBalance}
-          todaySummary={todaySummary ?? null}
-          projectName={projectName}
-          monthCarryOverMinutes={monthCarryOverMinutes}
-          todayWorkedMinutes={todayWorkedMinutes}
-          dailyTargetMinutes={dailyTargetMinutes}
-          progressFraction={progressFraction}
-        />
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(19rem,0.85fr)]">
+          <section className="space-y-4">
+            <ClockMainCard
+              ringProgress={ringProgress}
+              ringSize={ringSize}
+              ringStroke={ringStroke}
+              hasReachedTarget={hasReachedTarget}
+              isDeficit={isDeficit}
+              activeEntry={activeEntry}
+              activeBreak={activeBreak}
+              isActive={isActive}
+              activePulse={activePulse}
+              popKey={popKey}
+              btn={btn}
+              btnShadow={btnShadow}
+              isProcessing={isProcessing}
+              optimisticAction={optimisticAction}
+              onClockAction={handleClockAction}
+              projectName={projectName}
+              activeBreakSeconds={activeBreakSeconds}
+            />
 
-        {/* Project selector */}
-        {!activeEntry && !optimisticAction && (
-          <ProjectSelector value={selectedProject} onValueChange={setSelectedProject} />
-        )}
+            {!activeEntry && !optimisticAction && (
+              <ProjectSelector value={selectedProject} onValueChange={setSelectedProject} />
+            )}
 
-        {/* Retroactive project selector while clocked in */}
-        {activeEntry?.status === "running" && !activeBreak && !activeEntry.project_id && (
-          <ProjectSelector value={selectedProject} onValueChange={(v) => {
-            setSelectedProject(v);
-            if (v && activeEntry) updateProjectMutation.mutate({ entryId: activeEntry.id, projectId: v });
-          }} />
-        )}
+            {activeEntry?.status === "running" && !activeBreak && !activeEntry.project_id && (
+              <ProjectSelector value={selectedProject} onValueChange={(v) => {
+                setSelectedProject(v);
+                if (v && activeEntry) updateProjectMutation.mutate({ entryId: activeEntry.id, projectId: v });
+              }} />
+            )}
 
-        {/* Pause button */}
-        {activeEntry?.status === "running" && !activeBreak && (
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handlePause}
-              disabled={isProcessing && !optimisticAction}
-              className="gap-2 rounded-full px-6"
-            >
-              <Pause className="size-4" />
-              Pause starten
-            </Button>
-          </div>
-        )}
+            {activeEntry?.status === "running" && !activeBreak && (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handlePause}
+                disabled={isProcessing && !optimisticAction}
+                className="w-full gap-2"
+              >
+                <Pause className="size-4" />
+                Pause starten
+              </Button>
+            )}
 
-        {/* Break time summary */}
-        {activeEntry && activeEntry.break_minutes > 0 && (
-          <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
-            <Coffee className="size-3.5" />
-            Pause heute: {formatDuration(activeEntry.break_minutes)}
-          </div>
-        )}
+            {activeEntry && activeEntry.break_minutes > 0 && (
+              <div className="flex items-center gap-1.5 px-1 text-sm text-muted-foreground">
+                <Coffee className="size-3.5" />
+                Pause heute: {formatDuration(activeEntry.break_minutes)}
+              </div>
+            )}
 
-        {/* Compliance warnings */}
-        {compliance && compliance.warnings.length > 0 && (
-          <ComplianceWarnings warnings={compliance.warnings} />
-        )}
+            {compliance && compliance.warnings.length > 0 && (
+              <ComplianceWarnings warnings={compliance.warnings} />
+            )}
+          </section>
 
-        {/* Today summary */}
-        {!activeEntry && todaySummary?.clockIn && (
-          <TodaySummaryCard todaySummary={todaySummary} />
-        )}
+          <aside className="space-y-4">
+            <ClockDayProgress
+              workedMinutes={todayWorkedMinutes}
+              targetMinutes={dailyTargetMinutes}
+              balanceMinutes={todayBalance}
+              carryOverMinutes={monthCarryOverMinutes}
+            />
 
-        {/* Week summary */}
-        {weekSummary && (
-          <WeekSummaryCard weekSummary={weekSummary} />
-        )}
+            {!activeEntry && todaySummary?.clockIn && (
+              <TodaySummaryCard todaySummary={todaySummary} />
+            )}
+
+            {weekSummary && (
+              <WeekSummaryCard weekSummary={weekSummary} />
+            )}
+          </aside>
         </div>
       </div>
     </TooltipProvider>

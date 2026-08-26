@@ -88,7 +88,7 @@ export function SickEntryForm({ employeeId, onSuccess }: SickEntryFormProps) {
       }}
     >
       <DialogTrigger
-        render={<Button size="sm" variant="outline" className="gap-1.5" />}
+        render={<Button size="sm" className="gap-1.5" />}
       >
         <Plus className="size-4" />
         Krankmeldung erfassen

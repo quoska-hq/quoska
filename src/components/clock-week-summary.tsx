@@ -16,7 +16,7 @@ import {
 
 export function WeekSummaryCard({ weekSummary }: { weekSummary: WeekSummary }) {
   return (
-    <Card size="sm">
+    <Card size="sm" data-testid="clock-week-summary">
       <CardContent>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">

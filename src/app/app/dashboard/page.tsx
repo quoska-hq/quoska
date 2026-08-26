@@ -12,6 +12,7 @@ import { ManagerDashboard } from "@/components/manager-dashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PageHeader } from "@/components/page-header";
 import Link from "next/link";
 import { Clock, ClipboardList, Bell, AlertTriangle } from "lucide-react";
 
@@ -57,16 +58,14 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl text-slate-950">
-          {isAdmin
-            ? "Cockpit"
-            : `Willkommen bei Quoska${firstName ? `, ${firstName}` : ""}`}
-        </h1>
-        <p className="mt-2 text-sm text-slate-500">
-          {isAdmin ? "Arbeitszeit und Aktivitäten im Überblick" : "Zeiterfassung für dein Team"}
-        </p>
-      </div>
+      <PageHeader
+        title={isAdmin
+          ? "Cockpit"
+          : `Willkommen bei Quoska${firstName ? `, ${firstName}` : ""}`}
+        description={isAdmin
+          ? "Arbeitszeit und Aktivitäten im Überblick"
+          : "Zeiterfassung für dein Team"}
+      />
 
       <BrowserExtensionDashboardPromo />
 

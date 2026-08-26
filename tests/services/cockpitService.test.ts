@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildCockpitData } from "@/services/cockpitService";
+import { getCockpitDateRange } from "@/services/cockpitPeriodService";
 import type { Employee, Project, TimeEntry } from "@/types/database";
 import type { CockpitAuditRecord } from "@/repos/cockpitRepo";
 import type { CorrectionRequestWithEntry } from "@/types/correction";
@@ -117,6 +118,38 @@ function build(overrides: Partial<Parameters<typeof buildCockpitData>[0]> = {}) 
 }
 
 describe("CockpitService", () => {
+  it("uses Monday through today for the weekly period", () => {
+    expect(getCockpitDateRange("2026-08-12", 7)).toEqual({
+      startDate: "2026-08-10",
+      endDate: "2026-08-12",
+    });
+    expect(getCockpitDateRange("2026-08-16", 7)).toEqual({
+      startDate: "2026-08-10",
+      endDate: "2026-08-16",
+    });
+  });
+
+  it("keeps the 30-day period rolling", () => {
+    expect(getCockpitDateRange("2026-08-12", 30)).toEqual({
+      startDate: "2026-07-14",
+      endDate: "2026-08-12",
+    });
+  });
+
+  it("does not include future weekdays in the current week target", () => {
+    const data = build({
+      startDate: "2026-08-10",
+      endDate: "2026-08-12",
+    });
+
+    expect(data.daily.map((day) => day.date)).toEqual([
+      "2026-08-10",
+      "2026-08-11",
+      "2026-08-12",
+    ]);
+    expect(data.summary.targetMinutes).toBe(1_440);
+  });
+
   it("aggregates worked time, targets and projects", () => {
     const data = build();
     expect(data.summary.workedMinutes).toBe(480);
@@ -178,6 +211,32 @@ describe("CockpitService", () => {
       employeeName: "Anna Admin",
       actorName: "Anna Admin",
       projectName: "Website",
+    });
+  });
+
+  it("hides the internal automatic-break reset behind a pause correction", () => {
+    const pauseChange: CockpitAuditRecord = {
+      ...audit,
+      id: "pause-change",
+      action: "update",
+      field_name: "break_minutes",
+      old_value: "45",
+      new_value: "30",
+      reason: "Pausenzeit korrigiert",
+    };
+    const automaticReset: CockpitAuditRecord = {
+      ...pauseChange,
+      id: "automatic-reset",
+      field_name: "automatic_break_minutes",
+      new_value: "0",
+    };
+
+    const data = build({ audits: [pauseChange, automaticReset] });
+
+    expect(data.activity).toHaveLength(1);
+    expect(data.activity[0]).toMatchObject({
+      id: "pause-change",
+      detail: "Pausenzeit: 45 Min. → 30 Min.",
     });
   });
 

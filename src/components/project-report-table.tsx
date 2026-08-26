@@ -77,8 +77,47 @@ export function ProjectReportTable() {
           </CardContent>
         </Card>
       ) : (
-        <div className="overflow-hidden border border-slate-900/15 bg-white">
-          <table className="w-full text-sm">
+        <>
+          <div className="space-y-3 sm:hidden">
+            {rows.map((row) => (
+              <article
+                key={row.project_id ?? "__none__"}
+                className="border border-slate-900/15 bg-white p-4"
+              >
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-semibold text-slate-950">
+                    {row.project_name}
+                  </h3>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {row.customer_name ?? "Kein Kunde"}
+                  </p>
+                </div>
+                <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-slate-900/10 pt-3">
+                  <div>
+                    <dt className="text-[11px] text-muted-foreground">Stunden</dt>
+                    <dd className="mt-0.5 text-sm font-semibold tabular-nums">
+                      {formatDuration(row.total_minutes)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[11px] text-muted-foreground">Einträge</dt>
+                    <dd className="mt-0.5 text-sm font-semibold tabular-nums">
+                      {row.entry_count}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[11px] text-muted-foreground">Personen</dt>
+                    <dd className="mt-0.5 text-sm font-semibold tabular-nums">
+                      {row.employee_count}
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto border border-slate-900/15 bg-white sm:block">
+            <table className="min-w-[42rem] w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b">
                 <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Projekt</th>
@@ -99,8 +138,9 @@ export function ProjectReportTable() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

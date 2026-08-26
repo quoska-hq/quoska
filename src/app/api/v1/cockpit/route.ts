@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
-import { addDays } from "@/services/holidayService";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getAdminCockpit } from "@/services/cockpitService";
+import { getCockpitDateRange } from "@/services/cockpitPeriodService";
 import { cockpitQuerySchema, type CockpitData } from "@/types/cockpit";
 import type { ApiResponse } from "@/types/api";
 
@@ -37,8 +37,7 @@ export async function GET(request: Request) {
     }
 
     const days = parsed.data.days as 7 | 30;
-    const endDate = getTodayDate();
-    const startDate = addDays(endDate, -(days - 1));
+    const { startDate, endDate } = getCockpitDateRange(getTodayDate(), days);
     const result = await getAdminCockpit(
       supabase,
       auth.data.tenantId,

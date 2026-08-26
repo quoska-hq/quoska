@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PageHeader } from "@/components/page-header";
 interface AuthInfo {
   role: string;
 }
@@ -111,12 +112,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Einstellungen</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Export, DSGVO und Account
-        </p>
-      </div>
+      <PageHeader title="Einstellungen" description="Export, DSGVO und Account" />
 
       <div className="space-y-8">
         {/* Billing (only renders on the hosted/commercial build) */}

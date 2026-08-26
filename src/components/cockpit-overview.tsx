@@ -16,7 +16,7 @@ export function CockpitOverview({
     {
       label: "Erfasst",
       value: formatCockpitMinutes(data.summary.workedMinutes),
-      hint: data.period.days === 7 ? "letzte 7 Tage" : "letzte 30 Tage",
+      hint: data.period.days === 7 ? "diese Woche bis heute" : "letzte 30 Tage",
       icon: Clock3,
     },
     {

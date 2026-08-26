@@ -90,7 +90,7 @@ test.describe("Manual time entries and automatic breaks", () => {
     await page.goto("/app/my-times");
     await page.getByRole("button", { name: "Zeit nachtragen" }).click();
 
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog", { name: "Zeit manuell hinzufügen" });
     await expect(dialog.getByLabel("Datum")).toContainText(germanDate(today));
     await dialog.getByLabel("Beginn").fill("08:00");
     await dialog.getByLabel("Ende", { exact: true }).fill("17:00");
@@ -118,7 +118,7 @@ test.describe("Manual time entries and automatic breaks", () => {
     await page.goto("/app/reports");
     await page.getByRole("button", { name: "Zeit hinzufügen" }).click();
 
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog", { name: "Zeit manuell hinzufügen" });
     await dialog.getByRole("combobox").click();
     await page.getByRole("option", { name: "Tina Team" }).click();
     await dialog.getByLabel("Datum").click();

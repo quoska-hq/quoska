@@ -18,7 +18,7 @@ export function TodaySummaryCard({ todaySummary }: { todaySummary: TodaySummary 
         <div className="flex items-center gap-2 mb-2">
           <Clock className="size-3.5 text-muted-foreground" />
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Heute
+            Buchung heute
           </span>
         </div>
         <Separator className="mb-2" />

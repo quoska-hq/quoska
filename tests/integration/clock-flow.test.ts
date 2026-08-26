@@ -253,12 +253,12 @@ describe("Break minimum 15 minutes (§4 ArbZG)", () => {
     };
     const supabase = createMockSupabase(tables);
 
-    // End break after only 12 minutes
-    const result = await endBreak(supabase, "t-1", "e-1", "b-1", "2026-05-30T10:12:00.000Z");
+    // Even 14:59.999 is still shorter than the required full 15 minutes.
+    const result = await endBreak(supabase, "t-1", "e-1", "b-1", "2026-05-30T10:14:59.999Z");
 
     expect(result.data).toBeNull();
     expect(result.error).toContain("mindestens 15 Minuten");
-    expect(result.error).toContain("12 Minuten");
+    expect(result.error).toContain("14 Minuten");
   });
 });
 

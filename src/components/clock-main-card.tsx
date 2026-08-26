@@ -1,7 +1,6 @@
 /**
  * ClockMainCard — the primary clock card: circular progress ring, the main
- * stamp button, live status badge, animated balance display, and the
- * carry-over / daily-progress indicators.
+ * stamp button, and the live status.
  *
  * Presentational: all values arrive as already-computed props.
  */
@@ -9,7 +8,6 @@
 "use client";
 
 import type { TimeEntry, BreakSession } from "@/types/database";
-import type { TodaySummary } from "@/types/compliance";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,12 +20,12 @@ import {
   CheckCircle2,
   Clock,
   Coffee,
-  TrendingUp,
 } from "lucide-react";
 import { formatTimeLocal } from "@/config/client/date-utils";
 import { ProgressRing } from "@/components/progress-ring";
-import { formatBalance, formatDuration, formatDurationCompact } from "@/components/clock-format";
 import type { ClockButtonConfig, OptimisticAction } from "@/components/clock-button-config";
+import { formatStopwatch } from "@/components/use-live-clock";
+import { MIN_BREAK_BLOCK_SECONDS } from "@/config/break-policy";
 
 interface ClockMainCardProps {
   ringProgress: number;
@@ -45,14 +43,8 @@ interface ClockMainCardProps {
   isProcessing: boolean;
   optimisticAction: OptimisticAction;
   onClockAction: () => void;
-  animatedBalance: number;
-  liveBalance: number;
-  todaySummary: TodaySummary | null;
   projectName?: string;
-  monthCarryOverMinutes: number;
-  todayWorkedMinutes: number;
-  dailyTargetMinutes: number;
-  progressFraction: number;
+  activeBreakSeconds: number;
 }
 
 export function ClockMainCard({
@@ -71,34 +63,31 @@ export function ClockMainCard({
   isProcessing,
   optimisticAction,
   onClockAction,
-  animatedBalance,
-  liveBalance,
-  todaySummary,
   projectName,
-  monthCarryOverMinutes,
-  todayWorkedMinutes,
-  dailyTargetMinutes,
-  progressFraction,
+  activeBreakSeconds,
 }: ClockMainCardProps) {
-  const buttonHint = btn.label === "Ausstempeln"
-    ? "Arbeitszeit beenden"
-    : btn.label === "Pause beenden"
-      ? "Zurück an die Arbeit"
-      : "Arbeitszeit starten";
+  const breakRemainingSeconds = activeBreak
+    ? Math.max(0, MIN_BREAK_BLOCK_SECONDS - activeBreakSeconds)
+    : 0;
+  const canEndBreak = activeBreak
+    ? breakRemainingSeconds === 0
+    : optimisticAction !== "pause";
+  const buttonHint = activeBreak && breakRemainingSeconds > 0
+    ? `Noch ${formatStopwatch(breakRemainingSeconds)}`
+    : btn.label === "Ausstempeln"
+      ? "Arbeitszeit beenden"
+      : btn.label === "Pause beenden"
+        ? "Zurück an die Arbeit"
+        : "Arbeitszeit starten";
 
   return (
-    <Card className="overflow-visible border-slate-900/15 bg-[linear-gradient(180deg,#ffffff_0%,#fbfaf7_100%)] !shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
+    <Card className="overflow-visible border-slate-900/15 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.07)]">
       <CardContent className="flex flex-col items-center gap-5 px-6 py-6 sm:px-7 sm:py-7">
 
         <div className="flex w-full items-center justify-between border-b border-slate-900/10 pb-4">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-[#5145ad]">
-              Heute
-            </p>
-            <p className="mt-0.5 text-sm font-semibold text-slate-900">
-              Dein Arbeitstag
-            </p>
-          </div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-[#5145ad]">
+            Heute
+          </p>
 
           {isActive ? (
             <Badge
@@ -116,7 +105,7 @@ export function ClockMainCard({
           ) : (
             <Badge variant="outline" className="gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
               <Clock className="size-3" />
-              Startklar
+              Nicht eingestempelt
             </Badge>
           )}
         </div>
@@ -141,7 +130,7 @@ export function ClockMainCard({
                 <button
                   {...props}
                   onClick={onClockAction}
-                  disabled={isProcessing && !optimisticAction}
+                  disabled={isProcessing || !canEndBreak}
                   aria-label={btn.label}
                   className={`
                     stamp-button relative z-10
@@ -177,7 +166,11 @@ export function ClockMainCard({
               )}
             />
             <TooltipContent side="bottom">
-              <p>{btn.label}</p>
+              <p>
+                {activeBreak && breakRemainingSeconds > 0
+                  ? `Pause kann in ${formatStopwatch(breakRemainingSeconds)} beendet werden.`
+                  : btn.label}
+              </p>
             </TooltipContent>
           </Tooltip>
 
@@ -191,36 +184,32 @@ export function ClockMainCard({
           )}
         </div>
 
-        {/* ---- Animated balance display ---- */}
-        {(activeEntry || (todaySummary && todaySummary.netMinutes > 0)) && !activeBreak ? (
-          <div className="text-center">
-            <p className={`text-[2.15rem] font-mono font-bold tracking-[-0.04em] tabular-nums ${
-              animatedBalance < 0
-                ? "text-foreground"
-                : animatedBalance === 0
-                  ? "text-foreground"
-                  : "text-emerald-600"
-            }`}>
-              {animatedBalance < 0
-                ? formatDuration(Math.abs(animatedBalance))
-                : formatBalance(animatedBalance)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {animatedBalance < 0
-                ? "noch bis zum Tagesziel"
-                : animatedBalance === 0
-                  ? "Tagesziel erreicht"
-                  : "Überstunden heute"
-              }
-            </p>
-          </div>
-        ) : null}
-
         {/* Break running indicator */}
         {activeBreak && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Coffee className="size-4 text-amber-500" />
-            <span>Pause läuft…</span>
+          <div
+            className="flex w-full items-center justify-center gap-3 border-t border-slate-900/10 pt-4"
+            data-testid="active-break-duration"
+          >
+            <span className="flex size-9 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+              <Coffee className="size-4" />
+            </span>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Aktuelle Pause
+              </p>
+              <time
+                className="mt-0.5 block font-mono text-xl font-semibold tabular-nums text-slate-950"
+                dateTime={`PT${activeBreakSeconds}S`}
+                aria-label={`Aktuelle Pause: ${formatStopwatch(activeBreakSeconds)}`}
+              >
+                {formatStopwatch(activeBreakSeconds)}
+              </time>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {breakRemainingSeconds > 0
+                  ? `Noch ${formatStopwatch(breakRemainingSeconds)} Mindestpause`
+                  : "Mindestdauer erreicht"}
+              </p>
+            </div>
           </div>
         )}
 
@@ -233,7 +222,7 @@ export function ClockMainCard({
         )}
 
         {/* Target reached celebration message */}
-        {hasReachedTarget && !activeEntry && liveBalance > 0 && (
+        {hasReachedTarget && !activeEntry && (
           <div className="celebrate-text text-center">
             <p className="text-sm font-semibold text-emerald-600">
               🎉 Tagesziel erreicht!
@@ -241,37 +230,6 @@ export function ClockMainCard({
           </div>
         )}
 
-        {/* Carry-over info */}
-        {monthCarryOverMinutes !== 0 && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <TrendingUp className={`size-3 ${monthCarryOverMinutes > 0 ? "text-emerald-500" : "text-amber-500"}`} />
-            <span>
-              {monthCarryOverMinutes > 0
-                ? `Übertrag aus vorherigen Tagen: +${formatDurationCompact(monthCarryOverMinutes)}`
-                : `Übertrag aus vorherigen Tagen: -${formatDurationCompact(Math.abs(monthCarryOverMinutes))}`
-              }
-            </span>
-          </div>
-        )}
-
-        {/* Daily progress indicator */}
-        {(todayWorkedMinutes > 0 || hasReachedTarget) && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{formatDurationCompact(todayWorkedMinutes)}</span>
-            <span className="text-muted-foreground/40">/</span>
-            <span>{formatDurationCompact(dailyTargetMinutes)} Soll</span>
-            <Badge
-              variant={hasReachedTarget ? "default" : "secondary"}
-              className={`text-[10px] px-1.5 py-0 rounded-full ${
-                hasReachedTarget
-                  ? "bg-emerald-600 text-white border-0"
-                  : ""
-              }`}
-            >
-              {Math.min(Math.round(progressFraction * 100), 100)}%
-            </Badge>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

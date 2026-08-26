@@ -247,6 +247,7 @@ describe("getLeaveBalance", () => {
         { ...baseLeave, id: "lr-2", status: "pending", work_days_count: 3, type: "urlaub", start_date: "2026-07-01" },
       ],
     }), "t-1", "e-1", 2026);
+    expect(balance.annual).toBe(28);
     expect(balance.total).toBe(28);
     expect(balance.used).toBe(5);
     expect(balance.pending).toBe(3);
@@ -256,6 +257,7 @@ describe("getLeaveBalance", () => {
   test("returns default 20 days when no entitlement exists", async () => {
     const { getLeaveBalance } = await import("@/services/leaveService");
     const balance = await getLeaveBalance(createBalanceMock({ selectEntitlement: null, selectEmployeeLeaves: [] }), "t-1", "e-1", 2026);
+    expect(balance.annual).toBe(20);
     expect(balance.total).toBe(20);
     expect(balance.available).toBe(20);
   });
@@ -270,6 +272,21 @@ describe("getLeaveBalance", () => {
       ],
     }), "t-1", "e-1", 2026);
     expect(balance.available).toBe(0);
+  });
+
+  test("keeps annual entitlement separate from carried-over days", async () => {
+    const { getLeaveBalance } = await import("@/services/leaveService");
+    const balance = await getLeaveBalance(createBalanceMock({
+      selectEntitlement: { ...baseEntitlement, total_days: 28, carried_over: 3 },
+      selectEmployeeLeaves: [],
+    }), "t-1", "e-1", 2026);
+
+    expect(balance).toMatchObject({
+      annual: 28,
+      carried_over: 3,
+      total: 31,
+      available: 31,
+    });
   });
 });
 

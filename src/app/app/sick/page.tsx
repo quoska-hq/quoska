@@ -14,6 +14,7 @@ import { SickEntryList } from "@/components/sick-entry-list";
 import { AbsenceCalendar } from "@/components/absence-calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PageHeader } from "@/components/page-header";
 
 interface EntgeltfortzahlungEntry {
   sickEntry: { id: string; start_date: string; employee_id: string };
@@ -37,12 +38,10 @@ export default function SickPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Krankmeldungen</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Krankheitstage und AU-Bescheinigungen
-        </p>
-      </div>
+      <PageHeader
+        title="Krankmeldungen"
+        description="Krankheitstage und AU-Bescheinigungen"
+      />
 
       <Tabs defaultValue="entries">
         <TabsList className="mb-4">

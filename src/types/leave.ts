@@ -34,6 +34,7 @@ export const updateEntitlementSchema = z.object({
 /* eslint-enable @quoska/legal/enforce-max-working-hours */
 
 export interface LeaveBalance {
+  annual: number;
   total: number;
   used: number;
   pending: number;

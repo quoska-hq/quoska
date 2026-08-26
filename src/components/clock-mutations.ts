@@ -113,6 +113,13 @@ function useClockMutations(
     pauseMutation.error?.message ??
     resumeMutation.error?.message;
 
+  const clearError = () => {
+    clockInMutation.reset();
+    clockOutMutation.reset();
+    pauseMutation.reset();
+    resumeMutation.reset();
+  };
+
   return {
     clockInMutation,
     clockOutMutation,
@@ -120,6 +127,7 @@ function useClockMutations(
     resumeMutation,
     isProcessing,
     error,
+    clearError,
   };
 }
 

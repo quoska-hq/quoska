@@ -9,6 +9,7 @@ import {
   Users,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 import type { AnalyticsCount, SiteAnalyticsSummary } from "@/types/site-analytics";
 
 const PERIODS = [7, 30, 90] as const;
@@ -44,16 +45,10 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
 
   return (
     <div className="space-y-6" data-testid="site-analytics-dashboard">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#6658d3]">
-            Quoska Website
-          </p>
-          <h1 className="text-3xl text-slate-950">Besucher-Analytics</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Cookie-frei · täglich neue Besucherkennung · 180 Tage Aufbewahrung
-          </p>
-        </div>
+      <PageHeader
+        title="Website-Analytics"
+        description="Cookie-frei · täglich neue Besucherkennung · 180 Tage Aufbewahrung"
+        actions={(
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex border border-slate-900/15 bg-white p-1">
             {PERIODS.map((days) => (
@@ -77,7 +72,8 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
             <RefreshCw className="size-3.5" /> Aktualisieren
           </Link>
         </div>
-      </div>
+        )}
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard icon={<Users />} label="Besucher" value={formatNumber(summary.visitors)} note={`${summary.todayVisitors} heute`} />

@@ -42,17 +42,21 @@ export function ProjectSelector({ value, onValueChange }: ProjectSelectorProps) 
   if (!projects || projects.length === 0) return null;
 
   return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-medium text-gray-500 flex items-center gap-1.5">
+    <div className="space-y-2 rounded-sm border border-slate-900/15 bg-white p-4">
+      <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
         <Briefcase className="size-3" />
-        Projekt
+        Projektzuordnung
       </label>
       <Select
         value={value ?? "none"}
         onValueChange={(v: string | null) => onValueChange(v === "none" ? null : v)}
       >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Kein Projekt" />
+        <SelectTrigger className="w-full bg-[#faf9f6]">
+          <SelectValue placeholder="Kein Projekt">
+            {value
+              ? projects.find((project) => project.id === value)?.name ?? "Kein Projekt"
+              : "Kein Projekt"}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">Kein Projekt</SelectItem>

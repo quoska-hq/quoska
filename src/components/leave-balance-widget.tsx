@@ -6,29 +6,22 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
+import type { LeaveBalance } from "@/types/leave";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Palmtree } from "lucide-react";
-
-interface LeaveBalanceData {
-  total: number;
-  used: number;
-  pending: number;
-  available: number;
-  carried_over: number;
-}
 
 export function LeaveBalanceWidget({ employeeId }: { employeeId?: string }) {
   const url = employeeId
     ? `/api/v1/leave-entitlements/${employeeId}`
     : "/api/v1/leave-entitlements/me";
 
-  const { data, isLoading } = useQuery<LeaveBalanceData>({
+  const { data, isLoading } = useQuery<LeaveBalance>({
     queryKey: ["leaveBalance", employeeId],
     queryFn: async () => {
       const res = await fetch(url);
-      const json: ApiResponse<LeaveBalanceData> = await res.json();
+      const json: ApiResponse<LeaveBalance> = await res.json();
       return json.data!;
     },
   });

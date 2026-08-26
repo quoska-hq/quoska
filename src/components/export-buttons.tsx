@@ -46,9 +46,11 @@ export function ExportButtons({ weekStart, weekEnd }: ExportButtonsProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center sm:w-auto">
       <Button
         variant="outline"
+        size="sm"
+        className="w-full sm:w-auto"
         onClick={() => handleExport("csv")}
         disabled={exporting !== null}
       >

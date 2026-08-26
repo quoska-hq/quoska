@@ -120,7 +120,7 @@ export function CorrectionReviewList() {
                       />
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         className="bg-green-600 text-white hover:bg-green-700"

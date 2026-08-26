@@ -85,7 +85,9 @@ test.describe("Clock In / Out — Story 2.1", () => {
     await expect(page.getByText(/seit \d{2}:\d{2}/i)).toBeVisible({ timeout: 5_000 });
 
     // Should show daily progress (format: "Xm / Yh Soll")
-    await expect(page.getByText(/soll/i)).toBeVisible({ timeout: 5_000 });
+    await expect(
+      page.getByTestId("clock-day-progress").getByText(/soll/i),
+    ).toBeVisible({ timeout: 5_000 });
 
     // "Pause starten" button should appear
     await expect(page.getByRole("button", { name: /pause starten/i })).toBeVisible();

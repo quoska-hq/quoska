@@ -13,6 +13,7 @@ import { ExportButtons } from "@/components/export-buttons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DayCell {
   date: string;
@@ -114,7 +115,7 @@ export function WeeklyReportTable() {
   return (
     <div>
       {/* Week navigation */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold">Wochenbericht</h2>
           {data && (
@@ -123,30 +124,42 @@ export function WeeklyReportTable() {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setWeekOffset((w) => w - 1)}
-          >
-            ← Vorwoche
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setWeekOffset(0)}
-            disabled={weekOffset === 0}
-          >
-            Aktuelle Woche
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setWeekOffset((w) => w + 1)}
-            disabled={weekOffset >= 0}
-          >
-            Nächste →
-          </Button>
+        <div
+          className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
+          data-testid="weekly-report-navigation"
+        >
+          <div className="grid w-full grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] gap-2 sm:flex sm:w-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-9 px-0 sm:w-auto sm:px-3"
+              aria-label="Vorwoche"
+              onClick={() => setWeekOffset((w) => w - 1)}
+            >
+              <ChevronLeft className="size-4" />
+              <span className="hidden sm:inline">Vorwoche</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => setWeekOffset(0)}
+              disabled={weekOffset === 0}
+            >
+              Aktuelle Woche
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-9 px-0 sm:w-auto sm:px-3"
+              aria-label="Nächste Woche"
+              onClick={() => setWeekOffset((w) => w + 1)}
+              disabled={weekOffset >= 0}
+            >
+              <span className="hidden sm:inline">Nächste</span>
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
           {data && (
             <ExportButtons
               weekStart={data.weekStart}
@@ -173,11 +186,16 @@ export function WeeklyReportTable() {
       )}
 
       {data && data.employees.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border [contain:inline-size]">
-          <table className="w-full text-sm">
+        <div
+          className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border [contain:inline-size]"
+          data-testid="weekly-report-scroll"
+        >
+          <table className="min-w-[52rem] w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="text-left px-3 py-2 font-medium">Mitarbeiter</th>
+                <th className="sticky left-0 z-10 bg-muted px-3 py-2 text-left font-medium">
+                  Mitarbeiter
+                </th>
                 {weekDays.map((day) => (
                   <th
                     key={day.date}
@@ -202,7 +220,7 @@ export function WeeklyReportTable() {
                   key={emp.employeeId}
                   className="border-b last:border-0"
                 >
-                  <td className="px-3 py-2 font-medium">
+                  <td className="sticky left-0 z-10 bg-white px-3 py-2 font-medium">
                     <button
                       onClick={() =>
                         setDrillDown({

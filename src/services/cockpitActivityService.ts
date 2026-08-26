@@ -16,6 +16,10 @@ const FIELD_LABELS: Record<string, string> = {
   project_id: "Projekt",
 };
 
+// Internal attribution changes remain in the immutable audit trail, but are
+// implementation details of the visible break correction in the activity log.
+const INTERNAL_AUDIT_FIELDS = new Set(["automatic_break_minutes"]);
+
 function activityCategory(
   record: CockpitAuditRecord,
 ): CockpitActivityCategory {
@@ -86,28 +90,30 @@ export function buildCockpitActivity(
   );
   const projectNames = new Map(projects.map((project) => [project.id, project.name]));
 
-  const auditRows = records.map((record) => {
-    const targetId = record.timeEntry.employee_id;
-    return {
-      id: record.id,
-      occurredAt: record.changed_at,
-      category: activityCategory(record),
-      title: activityTitle(record),
-      detail: activityDetail(record),
-      reason: record.reason && !["Clock in", "Clock out"].includes(record.reason)
-        ? record.reason
-        : null,
-      employeeId: targetId,
-      employeeName: employeeNames.get(targetId) ?? "Unbekannt",
-      actorName: record.changed_by
-        ? employeeNames.get(record.changed_by) ?? "Unbekannt"
-        : "System",
-      projectName: record.timeEntry.project_id
-        ? projectNames.get(record.timeEntry.project_id) ?? "Unbekanntes Projekt"
-        : null,
-      entryDate: record.timeEntry.date,
-    };
-  });
+  const auditRows = records
+    .filter((record) => !INTERNAL_AUDIT_FIELDS.has(record.field_name ?? ""))
+    .map((record) => {
+      const targetId = record.timeEntry.employee_id;
+      return {
+        id: record.id,
+        occurredAt: record.changed_at,
+        category: activityCategory(record),
+        title: activityTitle(record),
+        detail: activityDetail(record),
+        reason: record.reason && !["Clock in", "Clock out"].includes(record.reason)
+          ? record.reason
+          : null,
+        employeeId: targetId,
+        employeeName: employeeNames.get(targetId) ?? "Unbekannt",
+        actorName: record.changed_by
+          ? employeeNames.get(record.changed_by) ?? "Unbekannt"
+          : "System",
+        projectName: record.timeEntry.project_id
+          ? projectNames.get(record.timeEntry.project_id) ?? "Unbekanntes Projekt"
+          : null,
+        entryDate: record.timeEntry.date,
+      };
+    });
 
   const correctionRows: CockpitActivityRow[] = corrections.map((request) => {
     const targetId = request.employee_id;

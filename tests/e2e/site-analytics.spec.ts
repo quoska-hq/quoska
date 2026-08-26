@@ -42,7 +42,7 @@ test.describe("owner-only website analytics", () => {
     await page.getByRole("link", { name: "Website-Analytics" }).click();
     await expect(page).toHaveURL(/\/app\/site-analytics/);
     await expect(page.getByTestId("site-analytics-dashboard")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Besucher-Analytics" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Website-Analytics" })).toBeVisible();
     await expect(page.getByText("/funktionen", { exact: true })).toBeVisible();
     await expect(page.getByText("e2e-test", { exact: true })).toBeVisible();
     await expect(page.getByText("Mobil", { exact: true })).toBeVisible();

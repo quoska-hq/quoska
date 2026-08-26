@@ -79,17 +79,23 @@ export function EmployeeEntryList({
   return (
     <div>
       {/* Header with back button */}
-      <div className="mb-4 flex items-center gap-3">
-        <Button variant="outline" size="sm" onClick={onBack}>
-          ← Zurück
-        </Button>
-        <div>
-          <h3 className="text-lg font-semibold">{employeeName}</h3>
-          <p className="text-sm text-muted-foreground">
-            {formatDate(startDate)} – {formatDate(endDate)}
-          </p>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 items-center gap-3">
+          <Button variant="outline" size="sm" className="shrink-0" onClick={onBack}>
+            ← Zurück
+          </Button>
+          <div className="min-w-0">
+            <h3 className="truncate text-lg font-semibold">{employeeName}</h3>
+            <p className="text-sm text-muted-foreground">
+              {formatDate(startDate)} – {formatDate(endDate)}
+            </p>
+          </div>
         </div>
-        <Button size="sm" className="ml-auto gap-1.5" onClick={() => setManualEntryOpen(true)}>
+        <Button
+          size="sm"
+          className="w-full gap-1.5 sm:ml-auto sm:w-auto"
+          onClick={() => setManualEntryOpen(true)}
+        >
           <Plus className="size-3.5" />
           Zeit hinzufügen
         </Button>
@@ -125,7 +131,7 @@ export function EmployeeEntryList({
           {data.entries.map((entry, index) => (
             <div key={entry.id}>
               {index > 0 && <Separator />}
-              <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">
@@ -145,7 +151,7 @@ export function EmployeeEntryList({
                       <Badge variant="outline">Manuell</Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="break-words text-sm text-muted-foreground">
                     {formatTimeLocal(entry.clock_in)}
                     {entry.clock_out
                       ? ` – ${formatTimeLocal(entry.clock_out)}`
@@ -168,7 +174,7 @@ export function EmployeeEntryList({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 ml-3">
+                <div className="flex shrink-0 flex-wrap items-center gap-3 sm:ml-3 sm:gap-2">
                   {entry.status === "completed" && (
                     <Button
                       variant="link"

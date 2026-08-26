@@ -32,8 +32,10 @@ export function ClockTabTitle() {
   });
 
   const activeEntry = status?.activeEntry ?? null;
+  const activeBreak = status?.activeBreak ?? null;
   const clockIn = activeEntry?.clock_in ?? null;
   const elapsed = useLiveElapsedSeconds(clockIn, activeEntry?.break_minutes ?? 0);
+  const breakElapsed = useLiveElapsedSeconds(activeBreak?.break_start, 0);
 
   // Remember the title we took over from, so we can restore it on clock-out.
   // Captured once, the first time we start overriding.
@@ -44,7 +46,9 @@ export function ClockTabTitle() {
       if (originalRef.current === null) {
         originalRef.current = document.title;
       }
-      document.title = `${formatStopwatch(elapsed)} · ${APP_NAME}`;
+      document.title = activeBreak
+        ? `Pause ${formatStopwatch(breakElapsed)} · ${APP_NAME}`
+        : `${formatStopwatch(elapsed)} · ${APP_NAME}`;
     } else {
       // Restore the page title Next.js set, exactly once, then stop touching it.
       if (originalRef.current !== null) {
@@ -52,7 +56,7 @@ export function ClockTabTitle() {
         originalRef.current = null;
       }
     }
-  }, [clockIn, elapsed]);
+  }, [activeBreak, breakElapsed, clockIn, elapsed]);
 
   return null;
 }

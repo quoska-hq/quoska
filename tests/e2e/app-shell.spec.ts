@@ -227,6 +227,69 @@ test.describe("App Shell — Mobile Responsive", () => {
     }
   });
 
+  test("reports controls and table stay inside a narrow phone viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/login");
+    await page.getByLabel("E-Mail").fill(email);
+    await page.getByLabel("Passwort").fill(TEST_PASSWORD);
+    await page.getByRole("button", { name: /anmelden/i }).click();
+    await expect(page).toHaveURL(/\/app\/dashboard/, { timeout: 10_000 });
+    await page.goto("/app/reports");
+
+    const content = page.locator("[data-app-content]");
+    const reports = page.getByTestId("reports-page");
+    await expect(reports.getByRole("heading", { name: "Berichte" })).toBeVisible();
+    await expect(reports.getByRole("tab")).toHaveCount(3);
+    await expect(page.getByTestId("weekly-report-scroll")).toBeVisible({ timeout: 10_000 });
+
+    const contentBox = await content.boundingBox();
+    expect(contentBox).not.toBeNull();
+    const boundedElements = [
+      reports.getByRole("button", { name: "Zeit hinzufügen" }),
+      reports.locator('[data-slot="tabs-list"]'),
+      page.getByTestId("weekly-report-navigation"),
+      page.getByTestId("weekly-report-scroll"),
+    ];
+
+    for (const element of boundedElements) {
+      const box = await element.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(contentBox!.x - 1);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(
+        contentBox!.x + contentBox!.width + 1,
+      );
+    }
+
+    const reportScroll = page.getByTestId("weekly-report-scroll");
+    expect(await reportScroll.evaluate((element) => element.scrollWidth > element.clientWidth))
+      .toBe(true);
+  });
+
+  test("clock errors remain visible and dismissible on mobile", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/login");
+    await page.getByLabel("E-Mail").fill(email);
+    await page.getByLabel("Passwort").fill(TEST_PASSWORD);
+    await page.getByRole("button", { name: /anmelden/i }).click();
+    await expect(page).toHaveURL(/\/app\/dashboard/, { timeout: 10_000 });
+
+    await page.route("**/api/v1/clock/in", async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ data: null, error: "Stempeln vorübergehend nicht möglich" }),
+      });
+    });
+
+    const appHeader = page.getByTestId("app-header");
+    await appHeader.getByRole("button", { name: "Stempeln" }).click();
+    const toast = page.getByTestId("clock-error-toast");
+    await expect(toast).toBeVisible();
+    await expect(toast).toContainText("Stempeln vorübergehend nicht möglich");
+    await toast.getByRole("button", { name: "Fehlermeldung schließen" }).click();
+    await expect(toast).not.toBeVisible();
+  });
+
   test("sidebar visible on desktop viewport", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/login");

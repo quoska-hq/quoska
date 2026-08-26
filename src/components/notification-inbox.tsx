@@ -115,7 +115,6 @@ export function NotificationInbox() {
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <Skeleton className="h-8 w-48" />
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-16 w-full" />
       </div>
@@ -137,17 +136,14 @@ export function NotificationInbox() {
 
   return (
     <div className="space-y-4">
-      {/* Header with mark-all button */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">
-          Benachrichtigungen
-          {unreadCount > 0 && (
-            <Badge variant="destructive" className="ml-2">
+      {unreadCount > 0 && (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-slate-700">
+            <Badge variant="destructive" className="mr-2">
               {unreadCount}
             </Badge>
-          )}
-        </h2>
-        {unreadCount > 0 && (
+            {unreadCount === 1 ? "ungelesene Nachricht" : "ungelesene Nachrichten"}
+          </p>
           <Button
             variant="link"
             size="sm"
@@ -156,8 +152,8 @@ export function NotificationInbox() {
           >
             Alle gelesen
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Notification list */}
       <div className="border border-slate-900/15 bg-white">

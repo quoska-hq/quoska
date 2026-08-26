@@ -7,6 +7,7 @@
 
 import { createClient } from "@/config/supabase/server";
 import { EmployeeList } from "@/components/employee-list";
+import { PageHeader } from "@/components/page-header";
 
 export default async function EmployeesPage() {
   const supabase = await createClient();
@@ -26,12 +27,7 @@ export default async function EmployeesPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Mitarbeiter</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Verwalte dein Team
-        </p>
-      </div>
+      <PageHeader title="Mitarbeiter" description="Verwalte dein Team" />
 
       <EmployeeList isAdmin={isAdmin} />
     </div>

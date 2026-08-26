@@ -65,10 +65,10 @@ export function AdminCockpit() {
           </Select>
           <Select value={String(days)} onValueChange={(value) => value && setDays(Number(value) as 7 | 30)}>
             <SelectTrigger className="w-32 bg-white" aria-label="Zeitraum">
-              <SelectValue>{days} Tage</SelectValue>
+              <SelectValue>{days === 7 ? "Diese Woche" : "30 Tage"}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7">7 Tage</SelectItem>
+              <SelectItem value="7">Diese Woche</SelectItem>
               <SelectItem value="30">30 Tage</SelectItem>
             </SelectContent>
           </Select>

@@ -23,9 +23,10 @@ import {
   getBreakSessionById,
   getCompletedBreakSessions,
 } from "@/repos/breakSessionRepo";
-
-/** Minimum break block duration in minutes (§4 ArbZG) */
-const MIN_BREAK_BLOCK_MINUTES = 15;
+import {
+  MIN_BREAK_BLOCK_MILLISECONDS,
+  MIN_BREAK_BLOCK_MINUTES,
+} from "@/config/break-policy";
 
 /**
  * Start a break — pause a running time entry.
@@ -157,13 +158,12 @@ export async function endBreak(
   // 3. Calculate duration and enforce minimum
   const breakStart = Date.parse(breakSession.break_start);
   const breakEnd = Date.parse(nowIso);
-  const durationMinutes = Math.round(
-    Math.abs(breakEnd - breakStart) / 60000,
-  );
+  const durationMilliseconds = breakEnd - breakStart;
+  const durationMinutes = Math.floor(durationMilliseconds / 60_000);
 
-  if (durationMinutes < MIN_BREAK_BLOCK_MINUTES) {
+  if (durationMilliseconds < MIN_BREAK_BLOCK_MILLISECONDS) {
     return failure(
-      `Pause muss mindestens ${MIN_BREAK_BLOCK_MINUTES} Minuten dauern (§4 ArbZG). Aktuell: ${durationMinutes} Minuten.`,
+      `Pause muss mindestens ${MIN_BREAK_BLOCK_MINUTES} Minuten dauern (§4 ArbZG). Aktuell: ${Math.max(0, durationMinutes)} Minuten.`,
     );
   }
 

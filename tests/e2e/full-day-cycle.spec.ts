@@ -178,7 +178,9 @@ test.describe("Full Day Cycle — Story 2.4", () => {
     await expect(page.getByText(/diese woche/i)).toBeVisible({ timeout: 5_000 });
 
     // Should show "Soll:" target hours
-    await expect(page.getByText(/soll:/i)).toBeVisible();
+    await expect(
+      page.getByTestId("clock-week-summary").getByText(/soll:/i),
+    ).toBeVisible();
   });
 });
 

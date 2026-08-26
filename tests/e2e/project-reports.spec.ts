@@ -77,8 +77,8 @@ test.describe("Project Reports — Epic 11", () => {
     await page.goto("/app/reports");
     await page.getByRole("tab", { name: /projekte/i }).click();
 
-    await expect(page.getByText(PROJECT_NAME).first()).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText(/stunden/i).first()).toBeVisible();
+    await expect(page.getByRole("cell", { name: PROJECT_NAME })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("columnheader", { name: "Stunden" })).toBeVisible();
   });
 
   test("project report shows Ohne Projekt for unassigned entries", async ({ page }) => {
@@ -111,7 +111,7 @@ test.describe("Project Reports — Epic 11", () => {
     await page.goto("/app/reports");
     await page.getByRole("tab", { name: /projekte/i }).click();
 
-    await expect(page.getByText(/ohne projekt/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("cell", { name: /ohne projekt/i })).toBeVisible({ timeout: 10_000 });
   });
 
   test("project report has week navigation", async ({ page }) => {
