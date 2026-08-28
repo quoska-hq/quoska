@@ -30,8 +30,8 @@ export function DeviceLaptop({
             src={src}
             alt={alt}
             fill
-            unoptimized
-            priority={priority}
+            preload={priority}
+            fetchPriority={priority ? "high" : undefined}
             loading={priority ? "eager" : "lazy"}
             sizes={sizes}
             className="object-cover object-top"

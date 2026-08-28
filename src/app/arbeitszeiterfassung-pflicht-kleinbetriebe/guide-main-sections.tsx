@@ -3,6 +3,7 @@ import { ArrowUpRight, Check, CircleAlert } from "lucide-react";
 import { SectionHeading } from "@/components/marketing/page-shell";
 import { DutyRow, SourceLink } from "./guide-components";
 import { CHECKLIST, SOURCES } from "./guide-data";
+import { ChecklistPrintButton } from "@/components/marketing/checklist-print-button";
 
 export function GuideMainSections() {
   return (
@@ -96,7 +97,7 @@ export function GuideMainSections() {
         </div>
       </section>
 
-      <section className="bg-white">
+      <section id="checkliste" data-worktime-checklist-print className="scroll-mt-24 bg-white">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-2 lg:gap-20">
           <div>
             <SectionHeading eyebrow="Einführung" title="Eine belastbare betriebliche Checkliste.">
@@ -116,8 +117,9 @@ export function GuideMainSections() {
                 </li>
               ))}
             </ul>
+            <ChecklistPrintButton />
           </div>
-          <div className="self-end bg-[#f5f3ee] p-7 sm:p-9">
+          <div data-checklist-print-hide className="self-end bg-[#f5f3ee] p-7 sm:p-9">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5145ad]">
               Umsetzung mit Quoska
             </p>

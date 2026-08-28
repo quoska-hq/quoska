@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 const PUBLIC_PAGES = [
   ["/", "Digitale Zeiterfassung für kleine Betriebe"],
   ["/funktionen", "Funktionen der digitalen Zeiterfassung"],
+  ["/ueber-uns", "Über Quoska"],
   ["/browser-erweiterung", "Chrome-Erweiterung für Zeiterfassung"],
   ["/preise", "Kostenlose Zeiterfassung bis 3 Personen"],
   ["/sicherheit", "Sicherheit und Datenschutz"],
@@ -31,6 +32,7 @@ test.describe("Marketing and SEO", () => {
     for (const [path, title] of PUBLIC_PAGES) {
       await page.goto(path);
       await expect(page).toHaveTitle(new RegExp(title));
+      await expect(page.locator("h1"), `${path} must expose one primary heading`).toHaveCount(1);
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /index, follow/);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", new RegExp(`${path === "/" ? "" : path}$`));
     }
@@ -123,6 +125,7 @@ test.describe("Marketing and SEO", () => {
     expect(body).toContain("Pro Founder: 99 EUR pro Monat statt 129 EUR");
     expect(body).toMatch(/- Preise: https?:\/\/[^/]+\/preise/);
     expect(body).toMatch(/- Chrome-Erweiterung: https?:\/\/[^/]+\/browser-erweiterung/);
+    expect(body).toMatch(/- Über Quoska und Redaktion: https?:\/\/[^/]+\/ueber-uns/);
     expect(body).toMatch(/- Alternativen und Vergleiche: https?:\/\/[^/]+\/alternativen/);
   });
 
@@ -253,6 +256,13 @@ test.describe("Marketing and SEO", () => {
     ).toBeVisible();
     await expect(page.getByText(/keine rechtsberatung für den einzelfall/i)).toBeVisible();
     await expect(page.getByText(/noch nicht zwingend sein/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Oskar Kuiper" })).toHaveAttribute(
+      "href",
+      "/ueber-uns#oskar-kuiper",
+    );
+    await expect(
+      page.getByRole("button", { name: /checkliste drucken oder als pdf speichern/i }),
+    ).toBeVisible();
     await expect(page.getByRole("link", { name: /BAG, 1 ABR 22\/21/i }).first()).toHaveAttribute(
       "href",
       "https://www.bundesarbeitsgericht.de/entscheidung/1-abr-22-21/",

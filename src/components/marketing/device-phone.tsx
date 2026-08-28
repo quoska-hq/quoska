@@ -30,15 +30,15 @@ export function DevicePhone({
         aria-hidden="true"
       />
       <div
-        className="absolute left-[6.55%] top-[3.25%] h-[93.5%] w-[86.9%] overflow-hidden bg-[#f8f7f3] shadow-[inset_0_0_0_1px_rgba(15,23,42,0.35)]"
+        className="absolute left-[5.9%] top-[3.25%] h-[93.5%] w-[88.2%] overflow-hidden bg-[#f8f7f3] shadow-[inset_0_0_0_1px_rgba(15,23,42,0.35)]"
         style={{ borderRadius: "9.2% / 4.25%" }}
       >
         <Image
           src={src}
           alt={alt}
           fill
-          unoptimized
-          priority={priority}
+          preload={priority}
+          fetchPriority={priority ? "high" : undefined}
           loading={priority ? "eager" : "lazy"}
           sizes={sizes}
           className="object-fill"
@@ -48,8 +48,8 @@ export function DevicePhone({
         src="/product/device-frame-iphone-16-pro.png"
         alt=""
         fill
-        unoptimized
-        priority={priority}
+        preload={priority}
+        fetchPriority={priority ? "high" : undefined}
         loading={priority ? "eager" : "lazy"}
         sizes={sizes}
         className="pointer-events-none object-fill"

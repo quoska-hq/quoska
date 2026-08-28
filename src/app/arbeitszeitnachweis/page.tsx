@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, Clock3, FileCheck2, History } from "lucide-react";
 import {
   FactCard,
+  GuideAuthor,
   GuideFaq,
   GuideNotice,
   SourceLink,
@@ -56,7 +57,8 @@ const JSON_LD = {
       dateModified: UPDATED_DATE,
       inLanguage: "de-DE",
       mainEntityOfPage: `${site.url}${PAGE_PATH}`,
-      author: { "@id": `${site.url}/#organization` },
+      isPartOf: { "@id": `${site.url}/#website` },
+      author: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
       publisher: { "@id": `${site.url}/#organization` },
       citation: Object.values(SOURCES),
     },
@@ -76,6 +78,7 @@ export const metadata: Metadata = {
   title: "Arbeitszeitnachweis 2026: Inhalt, Fristen und Beispiel",
   description:
     "Arbeitszeitnachweis richtig führen: Welche Angaben wichtig sind, welche Zwei-Jahres-Fristen gelten und wie ein nachvollziehbarer Nachweis aussieht.",
+  authors: [{ name: "Oskar Kuiper", url: "/ueber-uns#oskar-kuiper" }],
   alternates: { canonical: PAGE_PATH },
 };
 
@@ -98,6 +101,12 @@ export default function WorkTimeRecordPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
+
+      <GuideAuthor
+        reviewedOn="19. August 2026"
+        reviewedOnIso={UPDATED_DATE}
+        sourceCount={Object.keys(SOURCES).length}
       />
 
       <section className="bg-white">

@@ -126,7 +126,7 @@ export function TimesheetCalculator({ initialMonth }: { initialMonth: string }) 
 
         <section data-timesheet-print-sheet className="hidden" aria-label="Druckansicht des Stundenzettels">
           <header className="timesheet-print-title">
-            <h1>Stundenzettel · {monthTitle(month)}</h1>
+            <p className="timesheet-print-heading">Stundenzettel · {monthTitle(month)}</p>
             <dl>
               <div><dt>Unternehmen</dt><dd>{company.trim() || "—"}</dd></div>
               <div><dt>Mitarbeitende Person</dt><dd>{employee.trim() || "—"}</dd></div>

@@ -81,7 +81,6 @@ function ProductPreview() {
       <DevicePhone
         src="/product/mobile-clock.png"
         alt="Mobile Stempeluhr von Quoska mit Tagesfortschritt und Pause"
-        priority
         sizes="(max-width: 640px) 120px, 205px"
         className="absolute bottom-[3%] right-[1.5%] z-10 w-[32%] rotate-[2deg] sm:bottom-[1%] sm:right-[1%] sm:w-[28%]"
       />

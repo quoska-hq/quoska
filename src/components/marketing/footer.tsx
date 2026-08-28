@@ -8,6 +8,7 @@ const FOOTER_LINKS = [
     title: "Produkt",
     links: [
       { href: "/funktionen", label: "Funktionen" },
+      { href: "/ueber-uns", label: "Über Quoska" },
       { href: "/#ablauf", label: "Ablauf" },
       { href: "/preise", label: "Preise" },
       { href: "/alternativen", label: "Alternativen" },

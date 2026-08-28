@@ -260,10 +260,36 @@ body {
     margin-bottom: 3mm;
   }
 
-  [data-timesheet-print-sheet] h1 {
+  [data-timesheet-print-sheet] .timesheet-print-heading {
     margin: 0;
     font-size: 16pt;
     line-height: 1;
+  }
+
+  body:has([data-worktime-checklist-print]) * {
+    visibility: hidden;
+  }
+
+  body:has([data-worktime-checklist-print]) [data-worktime-checklist-print],
+  body:has([data-worktime-checklist-print]) [data-worktime-checklist-print] * {
+    visibility: visible;
+  }
+
+  [data-worktime-checklist-print] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: white !important;
+  }
+
+  [data-worktime-checklist-print] > div {
+    display: block;
+    max-width: none;
+    padding: 16mm;
+  }
+
+  [data-worktime-checklist-print] [data-checklist-print-hide] {
+    display: none !important;
   }
 
   [data-timesheet-print-sheet] dl {

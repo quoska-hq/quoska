@@ -34,6 +34,7 @@ ${standardPrices}
 
 - Startseite: ${site.url}
 - Funktionen: ${site.url}/funktionen
+- Über Quoska und Redaktion: ${site.url}/ueber-uns
 - Chrome-Erweiterung: ${site.url}/browser-erweiterung
 - Preise: ${site.url}/preise
 - Sicherheit und Datenschutz: ${site.url}/sicherheit

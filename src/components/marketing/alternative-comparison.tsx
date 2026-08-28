@@ -128,6 +128,32 @@ export function AlternativeComparisonContent({
         </div>
       </section>
 
+      <section className="border-y border-slate-900/10 bg-[#e7e3da]">
+        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+          <SectionHeading eyebrow="Vor dem Wechsel" title="Vier Fragen für einen belastbaren Praxistest.">
+            <p>
+              Eine Vergleichstabelle ersetzt keinen Test mit den eigenen
+              Arbeitsmodellen. Diese Punkte sollten vor einer Entscheidung mit
+              echten Buchungen geprüft werden.
+            </p>
+          </SectionHeading>
+          <ol className="grid gap-px border border-slate-900/15 bg-slate-900/15 sm:grid-cols-2">
+            {[
+              ["01", "Erfassungswege", "Kommen Mitarbeitende im Browser, mobil oder an einem gemeinsamen Gerät zuverlässig zum Ziel?"],
+              ["02", "Regeln und Rollen", "Passen Teilzeit, Pausen, Freigaben und Sichtrechte zum tatsächlichen Betriebsablauf?"],
+              ["03", "Datenübernahme", "Welche Altbestände müssen exportiert, aufbewahrt oder in das neue System übernommen werden?"],
+              ["04", "Monatsabschluss", "Lassen sich Korrekturen, fehlende Zeiten und der benötigte Export ohne Nebenlisten abschließen?"],
+            ].map(([number, title, body]) => (
+              <li key={number} className="bg-white p-6">
+                <span className="font-mono text-xs text-[#5145ad]">{number}</span>
+                <h2 className="mt-5 font-semibold text-slate-950">{title}</h2>
+                <p className="mt-2 text-sm leading-7 text-slate-600">{body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
       <section className="border-y border-slate-900/10 bg-[#f5f3ee]">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
           <SectionHeading eyebrow="Methodik" title="Quellen statt Scheingenauigkeit.">
@@ -175,6 +201,11 @@ export function AlternativeComparisonContent({
             <p className="mt-8 text-xs leading-6 text-slate-600">
               Produktnamen und Marken gehören den jeweiligen Inhabern. Quoska
               steht in keiner geschäftlichen Verbindung zu {comparison.competitor}.
+              Hinweise auf geänderte Preise oder Funktionen können über die{" "}
+              <Link href="/ueber-uns#oskar-kuiper" className="underline underline-offset-4 hover:text-[#5145ad]">
+                Redaktion
+              </Link>{" "}
+              gemeldet werden.
             </p>
           </div>
         </div>

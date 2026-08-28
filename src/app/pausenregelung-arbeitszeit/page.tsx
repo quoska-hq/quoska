@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, BellRing, Check, Coffee, History } from "lucide-react";
 import {
   FactCard,
+  GuideAuthor,
   GuideFaq,
   GuideNotice,
   SourceLink,
@@ -53,7 +54,8 @@ const JSON_LD = {
       dateModified: UPDATED_DATE,
       inLanguage: "de-DE",
       mainEntityOfPage: `${site.url}${PAGE_PATH}`,
-      author: { "@id": `${site.url}/#organization` },
+      isPartOf: { "@id": `${site.url}/#website` },
+      author: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
       publisher: { "@id": `${site.url}/#organization` },
       citation: [ARBZG_SOURCE],
     },
@@ -73,6 +75,7 @@ export const metadata: Metadata = {
   title: "Pausenregelung Arbeitszeit: 6 und 9 Stunden erklärt",
   description:
     "Pausenregelung nach § 4 ArbZG: Wann 30 oder 45 Minuten nötig sind, wie 15-Minuten-Blöcke funktionieren und was bei genau 6 Stunden gilt.",
+  authors: [{ name: "Oskar Kuiper", url: "/ueber-uns#oskar-kuiper" }],
   alternates: { canonical: PAGE_PATH },
 };
 
@@ -86,6 +89,12 @@ export default function BreakRulesPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
+
+      <GuideAuthor
+        reviewedOn="19. August 2026"
+        reviewedOnIso={UPDATED_DATE}
+        sourceCount={1}
       />
 
       <section className="bg-white">
