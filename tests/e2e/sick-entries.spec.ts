@@ -341,7 +341,12 @@ test.describe("Sick Day Tracking — Epic 10", () => {
     // The calendar day buttons have data-day attribute with locale date
     await page.waitForSelector('[data-slot="calendar"]', { timeout: 5_000 });
     // Click today using the today modifier (shadcn marks today specially)
-    await page.locator('[data-slot="calendar"]').locator('button').filter({ hasText: new RegExp(`^${new Date().getDate()}$`) }).first().click();
+    await page
+      .locator('[data-slot="calendar"]')
+      .locator('button:not([disabled])')
+      .filter({ hasText: new RegExp(`^${new Date().getDate()}$`) })
+      .first()
+      .click();
 
     // Save
     await editDialog.getByRole("button", { name: /^speichern$/i }).click();
