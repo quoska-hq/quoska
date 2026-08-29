@@ -86,7 +86,7 @@ test.describe("Clock In / Out — Story 2.1", () => {
 
     // Should show daily progress (format: "Xm / Yh Soll")
     await expect(
-      page.getByTestId("clock-day-progress").getByText(/soll/i),
+      page.getByTestId("clock-day-progress").getByText(/^Soll:/i),
     ).toBeVisible({ timeout: 5_000 });
 
     // "Pause starten" button should appear
