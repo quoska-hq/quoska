@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { isAbsolute, join, relative, resolve } from "node:path";
 
 export const READONLY_SCOPE = "https://www.googleapis.com/auth/webmasters.readonly";
+export const WRITE_SCOPE = "https://www.googleapis.com/auth/webmasters";
 export const DEFAULT_PROPERTY = "sc-domain:quoska.de";
 
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
@@ -28,11 +29,18 @@ function requireAbsolutePath(value, label) {
   return resolve(value);
 }
 
-export function resolveSearchConsolePaths(env = process.env, cwd = process.cwd()) {
+export function resolveSearchConsolePaths(env = process.env, cwd = process.cwd(), permission = "read-only") {
+  if (!["read-only", "write"].includes(permission)) {
+    throw new Error("Search Console permission must be read-only or write.");
+  }
   const defaultConfigRoot = join(env.XDG_CONFIG_HOME || join(homedir(), ".config"), "quoska", "search-console");
   const configDir = requireAbsolutePath(env.GOOGLE_SEARCH_CONSOLE_CONFIG_DIR || defaultConfigRoot, "GOOGLE_SEARCH_CONSOLE_CONFIG_DIR");
   const clientFile = requireAbsolutePath(env.GOOGLE_SEARCH_CONSOLE_OAUTH_CLIENT_FILE || join(configDir, "oauth-client.json"), "GOOGLE_SEARCH_CONSOLE_OAUTH_CLIENT_FILE");
-  const tokenFile = requireAbsolutePath(env.GOOGLE_SEARCH_CONSOLE_TOKEN_FILE || join(configDir, "token.json"), "GOOGLE_SEARCH_CONSOLE_TOKEN_FILE");
+  const tokenEnvironmentKey = permission === "write"
+    ? "GOOGLE_SEARCH_CONSOLE_WRITE_TOKEN_FILE"
+    : "GOOGLE_SEARCH_CONSOLE_TOKEN_FILE";
+  const defaultTokenName = permission === "write" ? "write-token.json" : "token.json";
+  const tokenFile = requireAbsolutePath(env[tokenEnvironmentKey] || join(configDir, defaultTokenName), tokenEnvironmentKey);
 
   for (const [label, path] of [["OAuth client file", clientFile], ["token file", tokenFile]]) {
     if (pathIsInside(cwd, path)) {
@@ -166,7 +174,7 @@ async function refreshAccessToken({ token, client }, fetchImpl = fetch) {
   }, fetchImpl);
 }
 
-function normalizeToken(token, previousToken, clientId) {
+function normalizeToken(token, previousToken, clientId, defaultScope = READONLY_SCOPE) {
   if (typeof token.access_token !== "string" || token.access_token === "") {
     throw new Error("Google did not return an access token.");
   }
@@ -174,34 +182,37 @@ function normalizeToken(token, previousToken, clientId) {
   return {
     access_token: token.access_token,
     refresh_token: token.refresh_token || previousToken?.refresh_token,
-    scope: token.scope || previousToken?.scope || READONLY_SCOPE,
+    scope: token.scope || previousToken?.scope || defaultScope,
     token_type: token.token_type || previousToken?.token_type || "Bearer",
     expiry_date: Date.now() + expiresIn * 1000,
     client_id: clientId,
   };
 }
 
-function assertReadOnlyToken(token, clientId) {
+function assertTokenScope(token, clientId, requiredScope) {
   if (token.client_id && token.client_id !== clientId) {
     throw new Error("The stored token belongs to a different OAuth client. Run `auth` again.");
   }
   const scopes = String(token.scope || "").split(/\s+/);
-  if (!scopes.includes(READONLY_SCOPE)) {
-    throw new Error("The stored Google token does not include the required read-only Search Console scope.");
+  const hasRequiredScope = scopes.includes(requiredScope)
+    || (requiredScope === READONLY_SCOPE && scopes.includes(WRITE_SCOPE));
+  if (!hasRequiredScope) {
+    const permission = requiredScope === WRITE_SCOPE ? "write" : "read-only";
+    throw new Error(`The stored Google token does not include the required ${permission} Search Console scope.`);
   }
 }
 
-async function loadAccessToken(paths, fetchImpl = fetch) {
+async function loadAccessToken(paths, requiredScope = READONLY_SCOPE, fetchImpl = fetch) {
   const client = await loadOAuthClient(paths);
   const token = await readSecureJson(paths.tokenFile, "Google Search Console token");
-  assertReadOnlyToken(token, client.clientId);
+  assertTokenScope(token, client.clientId, requiredScope);
   if (typeof token.access_token === "string" && Number(token.expiry_date) > Date.now() + 60_000) {
     return token.access_token;
   }
 
   const refreshed = await refreshAccessToken({ token, client }, fetchImpl);
-  const updatedToken = normalizeToken(refreshed, token, client.clientId);
-  assertReadOnlyToken(updatedToken, client.clientId);
+  const updatedToken = normalizeToken(refreshed, token, client.clientId, requiredScope);
+  assertTokenScope(updatedToken, client.clientId, requiredScope);
   await writeSecureJson(paths.tokenFile, updatedToken, paths.configDir);
   return updatedToken.access_token;
 }
@@ -209,6 +220,19 @@ async function loadAccessToken(paths, fetchImpl = fetch) {
 export function buildSiteApiUrl(property, resource = "") {
   const suffix = resource === "" ? "" : `/${resource.replace(/^\/+/, "")}`;
   return `${WEBMASTERS_API}/sites/${encodeURIComponent(property)}${suffix}`;
+}
+
+export function buildSitemapApiUrl(property, sitemapUrl) {
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(sitemapUrl);
+  } catch {
+    throw new Error("sitemap URL must be an absolute http or https URL.");
+  }
+  if (!["http:", "https:"].includes(parsedUrl.protocol) || parsedUrl.username || parsedUrl.password || parsedUrl.hash) {
+    throw new Error("sitemap URL must be an absolute http or https URL without credentials or a fragment.");
+  }
+  return `${buildSiteApiUrl(property, "sitemaps")}/${encodeURIComponent(parsedUrl.toString())}`;
 }
 
 const PERFORMANCE_DIMENSIONS = new Set(["date", "hour", "query", "page", "country", "device", "searchAppearance"]);
@@ -260,8 +284,8 @@ export function buildPerformanceRequest(options) {
   };
 }
 
-async function authorizedRequest(paths, url, init = {}, fetchImpl = fetch) {
-  const accessToken = await loadAccessToken(paths, fetchImpl);
+async function authorizedRequest(paths, url, init = {}, fetchImpl = fetch, requiredScope = READONLY_SCOPE) {
+  const accessToken = await loadAccessToken(paths, requiredScope, fetchImpl);
   return requestJson(url, {
     ...init,
     headers: {
@@ -279,6 +303,12 @@ export async function listSites(paths, fetchImpl = fetch) {
 
 export async function listSitemaps(paths, property, fetchImpl = fetch) {
   return authorizedRequest(paths, buildSiteApiUrl(property, "sitemaps"), {}, fetchImpl);
+}
+
+export async function submitSitemap(paths, property, sitemapUrl, fetchImpl = fetch) {
+  return authorizedRequest(paths, buildSitemapApiUrl(property, sitemapUrl), {
+    method: "PUT",
+  }, fetchImpl, WRITE_SCOPE);
 }
 
 export async function queryPerformance(paths, property, options, fetchImpl = fetch) {
@@ -300,7 +330,15 @@ export async function inspectUrl(paths, property, inspectionUrl, fetchImpl = fet
   }, fetchImpl);
 }
 
-export async function authorize(paths, { onAuthorizationUrl = console.log, timeoutMs = 300_000, fetchImpl = fetch } = {}) {
+export async function authorize(paths, {
+  onAuthorizationUrl = console.log,
+  timeoutMs = 300_000,
+  fetchImpl = fetch,
+  scope = READONLY_SCOPE,
+} = {}) {
+  if (![READONLY_SCOPE, WRITE_SCOPE].includes(scope)) {
+    throw new Error("Unsupported Search Console OAuth scope.");
+  }
   const client = await loadOAuthClient(paths);
   const state = base64Url(randomBytes(32));
   const codeVerifier = base64Url(randomBytes(64));
@@ -341,7 +379,8 @@ export async function authorize(paths, { onAuthorizationUrl = console.log, timeo
       return;
     }
     response.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
-    response.end("Quoska now has read-only Search Console access. You can close this tab.");
+    const permission = scope === WRITE_SCOPE ? "sitemap write" : "read-only";
+    response.end(`Quoska now has ${permission} Search Console access. You can close this tab.`);
     resolveCallback(code);
   });
 
@@ -358,7 +397,7 @@ export async function authorize(paths, { onAuthorizationUrl = console.log, timeo
     client_id: client.clientId,
     redirect_uri: redirectUri,
     response_type: "code",
-    scope: READONLY_SCOPE,
+    scope,
     access_type: "offline",
     prompt: "consent",
     state,
@@ -371,18 +410,18 @@ export async function authorize(paths, { onAuthorizationUrl = console.log, timeo
   try {
     const code = await callback;
     const tokenResponse = await exchangeAuthorizationCode({ code, codeVerifier, redirectUri, client }, fetchImpl);
-    const token = normalizeToken(tokenResponse, null, client.clientId);
-    assertReadOnlyToken(token, client.clientId);
+    const token = normalizeToken(tokenResponse, null, client.clientId, scope);
+    assertTokenScope(token, client.clientId, scope);
     if (!token.refresh_token) throw new Error("Google did not return a refresh token. Revoke the prior grant and run `auth` again.");
     await writeSecureJson(paths.tokenFile, token, paths.configDir);
-    return { tokenFile: paths.tokenFile, scope: READONLY_SCOPE };
+    return { tokenFile: paths.tokenFile, scope };
   } finally {
     clearTimeout(timeout);
     await new Promise((resolvePromise) => server.close(resolvePromise));
   }
 }
 
-export async function connectionStatus(paths) {
+export async function connectionStatus(paths, scope = READONLY_SCOPE) {
   async function fileStatus(path) {
     try {
       const info = await lstat(path);
@@ -393,8 +432,8 @@ export async function connectionStatus(paths) {
     }
   }
   return {
-    permission: "read-only",
-    scope: READONLY_SCOPE,
+    permission: scope === WRITE_SCOPE ? "write" : "read-only",
+    scope,
     property: process.env.GOOGLE_SEARCH_CONSOLE_PROPERTY || DEFAULT_PROPERTY,
     oauthClient: await fileStatus(paths.clientFile),
     token: await fileStatus(paths.tokenFile),

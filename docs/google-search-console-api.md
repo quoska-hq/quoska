@@ -1,14 +1,21 @@
-# Read-only Google Search Console API access
+# Google Search Console API access
 
 Quoska includes a local command-line client for Search Console analysis. It can
 read properties, search performance, submitted sitemaps, and Google's indexed
-URL inspection result. It cannot submit or delete sitemaps, change properties,
-or request indexing.
+URL inspection result. An explicit, separately stored write grant can submit a
+sitemap. It cannot delete sitemaps, change properties, or request indexing.
 
-The client requests only this OAuth scope:
+Analysis commands request only this OAuth scope:
 
 ```text
 https://www.googleapis.com/auth/webmasters.readonly
+```
+
+Sitemap submission requires a separate authorization with Google's read/write
+scope. The CLI uses it only for `submit-sitemap`:
+
+```text
+https://www.googleapis.com/auth/webmasters
 ```
 
 OAuth credentials and tokens must stay outside the repository. By default the
@@ -17,9 +24,10 @@ client uses:
 ```text
 ~/.config/quoska/search-console/oauth-client.json
 ~/.config/quoska/search-console/token.json
+~/.config/quoska/search-console/write-token.json
 ```
 
-Both files must be readable only by the current user (`chmod 600`), and the
+All credential files must be readable only by the current user (`chmod 600`), and the
 directory is maintained with mode `700`. The token is written atomically.
 
 ## One-time Google Cloud setup
@@ -63,6 +71,15 @@ npm run search-console -- status
 npm run search-console -- sites
 ```
 
+For sitemap submissions, create the separate write token explicitly:
+
+```bash
+npm run search-console -- auth --write --open
+```
+
+Google's consent screen must show read/write Search Console access. The default
+read-only token is not replaced.
+
 ## Analysis commands
 
 List submitted sitemaps:
@@ -98,6 +115,19 @@ not a live page test and cannot submit an indexing request.
 For another property, set `GOOGLE_SEARCH_CONSOLE_PROPERTY` or pass
 `--property`. Domain properties use the exact `sc-domain:example.com` form.
 
+## Submit a sitemap
+
+After the explicit write authorization, submit an absolute sitemap URL:
+
+```bash
+npm run search-console -- submit-sitemap \
+  --property sc-domain:quoska.de \
+  --sitemap https://quoska.de/sitemap.xml
+```
+
+This is the client's only write operation. A successful API response confirms
+submission, not that Google has crawled or indexed every URL.
+
 ## Disconnect
 
 Revoke Quoska's grant from the Google account's third-party connections page,
@@ -108,5 +138,6 @@ Official references:
 
 - [Authorize Search Console API requests](https://developers.google.com/webmaster-tools/v1/how-tos/authorizing)
 - [Search Console API reference](https://developers.google.com/webmaster-tools/v1/api_reference_index)
+- [Submit a sitemap](https://developers.google.com/webmaster-tools/v1/sitemaps/submit)
 - [Search Analytics query](https://developers.google.com/webmaster-tools/v1/searchanalytics/query)
 - [URL Inspection API](https://developers.google.com/webmaster-tools/v1/urlInspection.index/inspect)

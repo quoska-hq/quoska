@@ -2,6 +2,8 @@
 import { spawn } from "node:child_process";
 import {
   DEFAULT_PROPERTY,
+  READONLY_SCOPE,
+  WRITE_SCOPE,
   authorize,
   connectionStatus,
   inspectUrl,
@@ -9,6 +11,7 @@ import {
   listSites,
   queryPerformance,
   resolveSearchConsolePaths,
+  submitSitemap,
 } from "./search-console-core.mjs";
 
 function parseArguments(argv) {
@@ -44,13 +47,14 @@ function printJson(value) {
 }
 
 function printHelp() {
-  process.stdout.write(`Read-only Google Search Console client for Quoska
+  process.stdout.write(`Google Search Console client for portfolio properties
 
 Usage:
   npm run search-console -- status
-  npm run search-console -- auth [--open]
+  npm run search-console -- auth [--open] [--write]
   npm run search-console -- sites
   npm run search-console -- sitemaps [--property sc-domain:quoska.de]
+  npm run search-console -- submit-sitemap --sitemap https://quoska.de/sitemap.xml [--property sc-domain:quoska.de]
   npm run search-console -- performance [options]
   npm run search-console -- inspect --url https://quoska.de/path
 
@@ -71,6 +75,7 @@ Environment:
   GOOGLE_SEARCH_CONSOLE_CONFIG_DIR
   GOOGLE_SEARCH_CONSOLE_OAUTH_CLIENT_FILE
   GOOGLE_SEARCH_CONSOLE_TOKEN_FILE
+  GOOGLE_SEARCH_CONSOLE_WRITE_TOKEN_FILE
 `);
 }
 
@@ -84,7 +89,9 @@ async function openBrowser(url) {
 
 export async function main(argv = process.argv.slice(2)) {
   const { command, flags } = parseArguments(argv);
-  const paths = resolveSearchConsolePaths();
+  const writeMode = command === "submit-sitemap" || (command === "auth" && flags.write === true);
+  const scope = writeMode ? WRITE_SCOPE : READONLY_SCOPE;
+  const paths = resolveSearchConsolePaths(process.env, process.cwd(), writeMode ? "write" : "read-only");
   const property = String(flags.property || process.env.GOOGLE_SEARCH_CONSOLE_PROPERTY || DEFAULT_PROPERTY);
 
   if (command === "help" || flags.help) {
@@ -92,17 +99,18 @@ export async function main(argv = process.argv.slice(2)) {
     return;
   }
   if (command === "status") {
-    printJson(await connectionStatus(paths));
+    printJson(await connectionStatus(paths, scope));
     return;
   }
   if (command === "auth") {
     const result = await authorize(paths, {
+      scope,
       onAuthorizationUrl: (url) => {
         process.stdout.write(`Open this Google authorization URL:\n${url}\n`);
         if (flags.open) void openBrowser(url);
       },
     });
-    printJson({ connected: true, permission: "read-only", ...result });
+    printJson({ connected: true, permission: writeMode ? "write" : "read-only", ...result });
     return;
   }
   if (command === "sites") {
@@ -111,6 +119,14 @@ export async function main(argv = process.argv.slice(2)) {
   }
   if (command === "sitemaps") {
     printJson(await listSitemaps(paths, property));
+    return;
+  }
+  if (command === "submit-sitemap") {
+    if (typeof flags.sitemap !== "string" || flags.sitemap === "") {
+      throw new Error("submit-sitemap requires --sitemap https://example.com/sitemap.xml");
+    }
+    await submitSitemap(paths, property, flags.sitemap);
+    printJson({ submitted: true, property, sitemap: flags.sitemap });
     return;
   }
   if (command === "performance") {

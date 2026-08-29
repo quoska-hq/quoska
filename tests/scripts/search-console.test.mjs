@@ -4,12 +4,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   READONLY_SCOPE,
+  WRITE_SCOPE,
   authorize,
   buildPerformanceRequest,
+  buildSitemapApiUrl,
   buildSiteApiUrl,
   listSites,
   parseOAuthClient,
   resolveSearchConsolePaths,
+  submitSitemap,
 } from "../../scripts/search-console-core.mjs";
 
 const temporaryDirectories = [];
@@ -42,6 +45,11 @@ describe("Search Console configuration", () => {
       clientFile: "/tmp/quoska-config-test/quoska/search-console/oauth-client.json",
       tokenFile: "/tmp/quoska-config-test/quoska/search-console/token.json",
     });
+  });
+
+  test("uses a separate token for explicit write access", () => {
+    const paths = resolveSearchConsolePaths({ XDG_CONFIG_HOME: "/tmp/quoska-config-test" }, "/workspace/quoska", "write");
+    expect(paths.tokenFile).toBe("/tmp/quoska-config-test/quoska/search-console/write-token.json");
   });
 
   test("rejects credential paths inside the repository", () => {
@@ -106,6 +114,13 @@ describe("Search Console requests", () => {
       .toBe("https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aquoska.de/sitemaps");
   });
 
+  test("encodes the complete sitemap URL as one path parameter", () => {
+    expect(buildSitemapApiUrl("sc-domain:quoska.de", "https://quoska.de/sitemap.xml"))
+      .toBe("https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aquoska.de/sitemaps/https%3A%2F%2Fquoska.de%2Fsitemap.xml");
+    expect(() => buildSitemapApiUrl("sc-domain:quoska.de", "file:///tmp/sitemap.xml"))
+      .toThrow("http or https");
+  });
+
   test("builds a bounded read-only performance query", () => {
     expect(buildPerformanceRequest({
       startDate: "2026-07-01",
@@ -157,6 +172,43 @@ describe("Search Console requests", () => {
     const result = await listSites(paths, fetchMock);
     expect(result.siteEntry[0].siteUrl).toBe("sc-domain:quoska.de");
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("submits a sitemap only with the explicit write scope", async () => {
+    const paths = await privateFixture();
+    await writeFile(paths.tokenFile, JSON.stringify({
+      access_token: "private-write-token",
+      refresh_token: "private-refresh-token",
+      scope: WRITE_SCOPE,
+      expiry_date: Date.now() + 600_000,
+      client_id: "client-id",
+    }), { mode: 0o600 });
+    const fetchMock = vi.fn(async (url, init) => {
+      expect(url).toBe("https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aquoska.de/sitemaps/https%3A%2F%2Fquoska.de%2Fsitemap.xml");
+      expect(init.method).toBe("PUT");
+      expect(init.body).toBeUndefined();
+      expect(init.headers.authorization).toBe("Bearer private-write-token");
+      return new Response(null, { status: 204 });
+    });
+
+    await expect(submitSitemap(paths, "sc-domain:quoska.de", "https://quoska.de/sitemap.xml", fetchMock))
+      .resolves.toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("refuses sitemap submission with a read-only token", async () => {
+    const paths = await privateFixture();
+    await writeFile(paths.tokenFile, JSON.stringify({
+      access_token: "private-read-token",
+      scope: READONLY_SCOPE,
+      expiry_date: Date.now() + 600_000,
+      client_id: "client-id",
+    }), { mode: 0o600 });
+    const fetchMock = vi.fn();
+
+    await expect(submitSitemap(paths, "sc-domain:quoska.de", "https://quoska.de/sitemap.xml", fetchMock))
+      .rejects.toThrow("required write");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   test("refreshes an expired token and preserves private file permissions", async () => {
