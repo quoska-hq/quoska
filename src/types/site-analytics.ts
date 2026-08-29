@@ -33,6 +33,25 @@ export interface AnalyticsDailyPoint {
   visitors: number;
 }
 
+export type MarketingEventName =
+  | "marketing_signup_start"
+  | "marketing_account_created"
+  | "marketing_setup_completed";
+
+export type MarketingPlacement = "hero" | "pricing" | "final_cta";
+
+export interface MarketingEventInput {
+  marketingEvent: MarketingEventName;
+  sourcePath: string;
+  placement: MarketingPlacement;
+}
+
+export interface MarketingAnalyticsEvent extends MarketingEventInput {
+  occurredAt: string;
+  eventKey: string;
+  visitorHash: string;
+}
+
 export interface SiteAnalyticsSummary {
   days: 7 | 30 | 90;
   from: string;
@@ -49,6 +68,7 @@ export interface SiteAnalyticsSummary {
   regions: AnalyticsCount[];
   devices: AnalyticsCount[];
   campaigns: AnalyticsCount[];
+  marketingConversions: AnalyticsCount[];
   toolActivity: AnalyticsCount[];
   toolConversions: AnalyticsCount[];
 }

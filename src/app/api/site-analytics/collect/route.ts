@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { getNowIso } from "@/config/server/timestamps";
 import { isSiteAnalyticsEnabled } from "@/config/server/site-analytics-access";
-import { recordFreeToolEvent, recordSitePageview } from "@/repos/siteAnalyticsRepo";
+import { recordFreeToolEvent, recordMarketingEvent, recordSitePageview } from "@/repos/siteAnalyticsRepo";
 import {
   buildFreeToolEvent,
+  buildMarketingEvent,
   buildSitePageview,
   extractClientIp,
   isLikelyBot,
 } from "@/services/siteAnalyticsService";
-import type { SiteAnalyticsEventInput } from "@/types/site-analytics";
+import type { MarketingEventInput, SiteAnalyticsEventInput } from "@/types/site-analytics";
 import type { FreeToolEventInput } from "@/types/free-tools";
 
 export const runtime = "nodejs";
@@ -31,11 +32,19 @@ export async function POST(request: Request) {
     const ip = extractClientIp(request.headers);
     if (!ip) return response;
 
-    const input = await request.json() as Partial<SiteAnalyticsEventInput & FreeToolEventInput>;
+    const input = await request.json() as Record<string, unknown>;
     const nowIso = getNowIso();
-    if (typeof input.path === "string") {
+    if (typeof input.marketingEvent === "string") {
+      const marketingEvent = buildMarketingEvent({
+        input: input as unknown as MarketingEventInput,
+        ip,
+        userAgent,
+        nowIso,
+      });
+      if (marketingEvent) recordMarketingEvent(marketingEvent);
+    } else if (typeof input.path === "string") {
       const pageview = buildSitePageview({
-        input: input as SiteAnalyticsEventInput,
+        input: input as unknown as SiteAnalyticsEventInput,
         ip,
         userAgent,
         nowIso,
@@ -43,7 +52,7 @@ export async function POST(request: Request) {
       if (pageview) recordSitePageview(pageview);
     } else if (typeof input.event === "string" && typeof input.tool === "string") {
       const toolEvent = buildFreeToolEvent({
-        input: input as FreeToolEventInput,
+        input: input as unknown as FreeToolEventInput,
         ip,
         userAgent,
         nowIso,

@@ -3,6 +3,7 @@ import { getSiteAnalyticsDb } from "@/config/server/site-analytics-db";
 import type {
   AnalyticsCount,
   AnalyticsDailyPoint,
+  MarketingAnalyticsEvent,
   SiteAnalyticsPageview,
   SiteAnalyticsSummary,
 } from "@/types/site-analytics";
@@ -36,6 +37,20 @@ export function recordSitePageview(
       @utmSource, @utmMedium, @utmCampaign
     )
   `).run(pageview);
+  return result.changes === 1;
+}
+
+export function recordMarketingEvent(
+  event: MarketingAnalyticsEvent,
+  db: Sqlite = getSiteAnalyticsDb(),
+): boolean {
+  const result = db.prepare(`
+    INSERT OR IGNORE INTO marketing_events (
+      occurred_at, event_key, visitor_hash, event, source_path, placement
+    ) VALUES (
+      @occurredAt, @eventKey, @visitorHash, @marketingEvent, @sourcePath, @placement
+    )
+  `).run(event);
   return result.changes === 1;
 }
 
@@ -117,6 +132,7 @@ export function getSiteAnalyticsSummary(
     regions: regionCounts(db, fromIso, toIso),
     devices: topCounts(db, "device", fromIso, toIso),
     campaigns: topCounts(db, "utm_campaign", fromIso, toIso, true),
+    marketingConversions: marketingEventCounts(db, fromIso, toIso),
     toolActivity: toolEventCounts(db, fromIso, toIso, false),
     toolConversions: toolEventCounts(db, fromIso, toIso, true),
   };
@@ -128,9 +144,22 @@ export function pruneSiteAnalytics(
 ): number {
   const pageviews = db.prepare("DELETE FROM site_pageviews WHERE occurred_at < ?")
     .run(cutoffIso).changes;
+  const marketing = db.prepare("DELETE FROM marketing_events WHERE occurred_at < ?")
+    .run(cutoffIso).changes;
   const toolEvents = db.prepare("DELETE FROM free_tool_events WHERE occurred_at < ?")
     .run(cutoffIso).changes;
-  return pageviews + toolEvents;
+  return pageviews + marketing + toolEvents;
+}
+
+function marketingEventCounts(db: Sqlite, fromIso: string, toIso: string): AnalyticsCount[] {
+  return db.prepare(`
+    SELECT source_path || ' · ' || event || ' · ' || placement AS label, COUNT(*) AS count
+    FROM marketing_events
+    WHERE occurred_at >= ? AND occurred_at <= ?
+    GROUP BY source_path, event, placement
+    ORDER BY count DESC, label ASC
+    LIMIT 16
+  `).all(fromIso, toIso) as AnalyticsCount[];
 }
 
 function toolEventCounts(

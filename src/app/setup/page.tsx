@@ -24,6 +24,7 @@ import { SetupScheduleStep } from "@/components/setup-schedule-step";
 import { InviteStep } from "@/components/setup-invite-step";
 import { SetupReviewStep } from "@/components/setup-review-step";
 import { SetupVerifyEmailStep } from "@/components/setup-verify-email-step";
+import { trackMarketingSignupProgress } from "@/lib/marketing-analytics";
 import { SetupProgress } from "@/components/setup-progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -260,6 +261,7 @@ export default function SetupPage() {
       if (!response.ok || result.error) {
         throw new Error(result.error || "Einrichtung konnte nicht abgeschlossen werden.");
       }
+      trackMarketingSignupProgress("marketing_setup_completed");
       clearOnboardingDraft();
       goTo("done");
     } catch (caught) {

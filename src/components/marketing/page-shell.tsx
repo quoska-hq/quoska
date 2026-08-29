@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { MarketingNav } from "@/components/marketing/nav";
 import { MarketingFooter } from "@/components/marketing/footer";
 import { FinalCtaSection } from "@/components/marketing/sections/final-cta";
+import { MarketingSignupLink } from "@/components/marketing/marketing-signup-link";
 
 export function MarketingPageShell({
   eyebrow,
@@ -11,12 +12,14 @@ export function MarketingPageShell({
   intro,
   children,
   cta = true,
+  heroCtaLabel,
 }: {
   eyebrow: string;
   title: string;
   intro: string;
   children: ReactNode;
   cta?: boolean;
+  heroCtaLabel?: string;
 }) {
   return (
     <div className="flex min-h-full flex-col bg-[#f5f3ee]">
@@ -36,6 +39,14 @@ export function MarketingPageShell({
               {title}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">{intro}</p>
+            {heroCtaLabel && (
+              <MarketingSignupLink
+                placement="hero"
+                className="mt-8 inline-flex items-center bg-slate-950 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#5145ad]"
+              >
+                {heroCtaLabel}
+              </MarketingSignupLink>
+            )}
           </div>
         </header>
         {children}

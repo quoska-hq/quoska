@@ -5,9 +5,10 @@ import {
   getSiteAnalyticsSummary,
   pruneSiteAnalytics,
   recordFreeToolEvent,
+  recordMarketingEvent,
   recordSitePageview,
 } from "@/repos/siteAnalyticsRepo";
-import type { SiteAnalyticsPageview } from "@/types/site-analytics";
+import type { MarketingAnalyticsEvent, SiteAnalyticsPageview } from "@/types/site-analytics";
 import type { FreeToolAnalyticsEvent } from "@/types/free-tools";
 
 describe("site analytics repository", () => {
@@ -78,6 +79,22 @@ describe("site analytics repository", () => {
     ]);
   });
 
+  it("summarizes signup progress by landing page and placement", () => {
+    addMarketingEvent({ eventKey: "start", marketingEvent: "marketing_signup_start" });
+    addMarketingEvent({ eventKey: "created", marketingEvent: "marketing_account_created" });
+    const summary = getSiteAnalyticsSummary(
+      7,
+      "2026-08-06T00:00:00.000Z",
+      "2026-08-12T23:59:59.999Z",
+      "2026-08-12",
+      db,
+    );
+    expect(summary.marketingConversions).toEqual([
+      { label: "/zeiterfassung-kleinbetriebe · marketing_account_created · hero", count: 1 },
+      { label: "/zeiterfassung-kleinbetriebe · marketing_signup_start · hero", count: 1 },
+    ]);
+  });
+
   function add(overrides: Partial<SiteAnalyticsPageview>): boolean {
     return recordSitePageview({
       occurredAt: "2026-08-12T10:00:00.000Z",
@@ -104,6 +121,18 @@ describe("site analytics repository", () => {
       tool: "arbeitszeitrechner",
       format: null,
       placement: null,
+      ...overrides,
+    }, db);
+  }
+
+  function addMarketingEvent(overrides: Partial<MarketingAnalyticsEvent>): boolean {
+    return recordMarketingEvent({
+      occurredAt: "2026-08-12T10:00:00.000Z",
+      eventKey: "marketing-key",
+      visitorHash: "visitor-a",
+      marketingEvent: "marketing_signup_start",
+      sourcePath: "/zeiterfassung-kleinbetriebe",
+      placement: "hero",
       ...overrides,
     }, db);
   }

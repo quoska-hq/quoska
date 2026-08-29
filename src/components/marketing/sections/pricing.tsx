@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MarketingSignupLink } from "@/components/marketing/marketing-signup-link";
 import { FOUNDER_OFFERS, PLANS, PLAN_ORDER } from "@/config/plans";
 
 const INCLUDED = [
@@ -80,19 +79,17 @@ export function PricingSection() {
                   ))}
                 </ul>
 
-                <Link href="/register" className="mt-auto pt-6">
-                  <Button
-                    variant={key === "team" ? "default" : "outline"}
-                    className={`w-full rounded-none ${
+                <MarketingSignupLink
+                  placement="pricing"
+                  className={`mt-auto inline-flex h-10 w-full items-center justify-center gap-1.5 text-sm font-semibold ${
                       key === "team"
                         ? "bg-slate-950 text-white hover:bg-[#5145ad]"
-                        : "border-slate-400 bg-transparent text-slate-900 hover:bg-slate-950 hover:text-white"
+                        : "border border-slate-400 bg-transparent text-slate-900 hover:bg-slate-950 hover:text-white"
                     }`}
-                  >
-                    {key === "free" ? "Kostenlos starten" : `${plan.label} wählen`}
-                    <ArrowUpRight className="ml-1.5 size-4" />
-                  </Button>
-                </Link>
+                >
+                  {key === "free" ? "Kostenlos starten" : `${plan.label} wählen`}
+                  <ArrowUpRight className="size-4" />
+                </MarketingSignupLink>
               </article>
             );
           })}

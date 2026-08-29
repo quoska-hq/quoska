@@ -29,6 +29,22 @@ export function initializeSiteAnalyticsSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_site_pageviews_visitor
       ON site_pageviews (visitor_hash, occurred_at);
 
+    CREATE TABLE IF NOT EXISTS marketing_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      occurred_at TEXT NOT NULL,
+      event_key TEXT NOT NULL UNIQUE,
+      visitor_hash TEXT NOT NULL,
+      event TEXT NOT NULL CHECK (event IN (
+        'marketing_signup_start', 'marketing_account_created',
+        'marketing_setup_completed'
+      )),
+      source_path TEXT NOT NULL,
+      placement TEXT NOT NULL CHECK (placement IN ('hero', 'pricing', 'final_cta'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_marketing_events_funnel
+      ON marketing_events (source_path, event, occurred_at);
+
     CREATE TABLE IF NOT EXISTS free_tool_events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       occurred_at TEXT NOT NULL,

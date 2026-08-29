@@ -67,6 +67,7 @@ export default function SmallBusinessPage() {
       eyebrow="Für Kleinbetriebe"
       title="Zeiterfassung für Kleinbetriebe, nicht für IT-Abteilungen."
       intro="Kleine Betriebe brauchen eine verlässliche Arbeitszeiterfassung, aber selten ein monatelanges Softwareprojekt. Quoska ist kostenlos für bis zu drei Personen und für einen direkten Start im Browser gebaut."
+      heroCtaLabel="Kostenlos mit bis zu 3 Personen starten"
     >
       <script
         type="application/ld+json"

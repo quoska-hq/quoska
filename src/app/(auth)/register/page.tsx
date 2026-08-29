@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createOnboardingDraft, saveOnboardingDraft } from "@/lib/onboarding-draft";
+import { trackMarketingSignupProgress } from "@/lib/marketing-analytics";
 
 export default function RegisterPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -78,6 +79,7 @@ export default function RegisterPage() {
       // user can complete it before confirming their email; local Supabase
       // auto-confirms accounts so the same flow remains easy to test.
       saveOnboardingDraft(createOnboardingDraft(values.email));
+      trackMarketingSignupProgress("marketing_account_created");
 
       // Full navigation ensures a locally auto-confirmed session cookie is
       // visible to middleware. Hosted signups continue as a public draft.

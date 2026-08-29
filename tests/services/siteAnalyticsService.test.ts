@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { isSiteAnalyticsAdmin, isSiteAnalyticsEnabled } from "@/config/server/site-analytics-access";
 import {
   buildFreeToolEvent,
+  buildMarketingEvent,
   buildSitePageview,
   extractClientIp,
   isLikelyBot,
@@ -84,5 +85,31 @@ describe("site analytics privacy and normalization", () => {
       placement: "result",
     });
     expect(JSON.stringify(event)).not.toContain("8.8.8.8");
+  });
+
+  it("attributes the signup funnel to a public landing page without personal data", () => {
+    vi.stubEnv("ANALYTICS_HASH_SECRET", "d".repeat(32));
+    const event = buildMarketingEvent({
+      input: {
+        marketingEvent: "marketing_signup_start",
+        sourcePath: "/zeiterfassung-kleinbetriebe?ignored=yes",
+        placement: "hero",
+      },
+      ip: "8.8.8.8",
+      userAgent: "Mozilla/5.0 Firefox/142",
+      nowIso: "2026-08-29T10:00:00.000Z",
+    });
+    expect(event).toMatchObject({
+      marketingEvent: "marketing_signup_start",
+      sourcePath: "/zeiterfassung-kleinbetriebe",
+      placement: "hero",
+    });
+    expect(JSON.stringify(event)).not.toContain("8.8.8.8");
+    expect(buildMarketingEvent({
+      input: { marketingEvent: "marketing_signup_start", sourcePath: "/register", placement: "hero" },
+      ip: "8.8.8.8",
+      userAgent: "Mozilla/5.0 Firefox/142",
+      nowIso: "2026-08-29T10:00:00.000Z",
+    })).toBeNull();
   });
 });

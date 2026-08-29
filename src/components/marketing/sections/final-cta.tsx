@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MarketingSignupLink } from "@/components/marketing/marketing-signup-link";
 
 export function FinalCtaSection() {
   return (
@@ -20,12 +20,10 @@ export function FinalCtaSection() {
         </div>
 
         <div className="flex flex-col items-start gap-4 lg:items-end">
-          <Link href="/register">
-            <Button className="h-12 rounded-none bg-[#a99ff3] px-7 text-base text-slate-950 hover:bg-white">
-              Account anlegen
-              <ArrowRight className="ml-2 size-4" />
-            </Button>
-          </Link>
+          <MarketingSignupLink placement="final_cta" className="inline-flex h-12 items-center bg-[#a99ff3] px-7 text-base font-semibold text-slate-950 hover:bg-white">
+            Account anlegen
+            <ArrowRight className="ml-2 size-4" />
+          </MarketingSignupLink>
           <Link
             href="/login"
             className="text-sm text-slate-300 underline decoration-slate-600 underline-offset-4 hover:text-white"

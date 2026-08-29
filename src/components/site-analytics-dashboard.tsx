@@ -40,6 +40,15 @@ const TOOL_EVENT_NAMES: Record<string, string> = {
   free_tool_signup_start: "Registrierung",
 };
 
+const MARKETING_EVENT_NAMES: Record<string, string> = {
+  marketing_signup_start: "Registrierung gestartet",
+  marketing_account_created: "Account erstellt",
+  marketing_setup_completed: "Einrichtung abgeschlossen",
+  hero: "Einstieg",
+  pricing: "Preise",
+  final_cta: "Abschluss-CTA",
+};
+
 export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSummary }) {
   const maxDaily = Math.max(...summary.daily.map((point) => point.pageviews), 1);
 
@@ -123,6 +132,10 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
         <RankingCard title="Kampagnen" icon={<MousePointerClick />} rows={summary.campaigns} empty="Noch keine Kampagnen" />
       )}
 
+      {summary.marketingConversions.length > 0 && (
+        <RankingCard title="Registrierungs-Funnel" icon={<MousePointerClick />} rows={translateMarketingEvents(summary.marketingConversions)} empty="Noch keine Registrierungsereignisse" />
+      )}
+
       {(summary.toolActivity.length > 0 || summary.toolConversions.length > 0) && (
         <div className="grid gap-4 lg:grid-cols-2">
           <RankingCard title="Kostenlose Tools" icon={<Activity />} rows={translateToolEvents(summary.toolActivity)} empty="Noch keine Tool-Nutzung" />
@@ -187,6 +200,16 @@ function translateToolEvents(rows: AnalyticsCount[]): AnalyticsCount[] {
     label: row.label
       .split(" · ")
       .map((part) => TOOL_EVENT_NAMES[part] ?? part)
+      .join(" · "),
+  }));
+}
+
+function translateMarketingEvents(rows: AnalyticsCount[]): AnalyticsCount[] {
+  return rows.map((row) => ({
+    ...row,
+    label: row.label
+      .split(" · ")
+      .map((part) => MARKETING_EVENT_NAMES[part] ?? part)
       .join(" · "),
   }));
 }

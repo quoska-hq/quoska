@@ -6,6 +6,10 @@ import { analyticsRetentionCutoff } from "@/config/server/site-analytics-time";
 import { pruneSiteAnalytics } from "@/repos/siteAnalyticsRepo";
 import type {
   AnalyticsDevice,
+  MarketingAnalyticsEvent,
+  MarketingEventInput,
+  MarketingEventName,
+  MarketingPlacement,
   SiteAnalyticsEventInput,
   SiteAnalyticsPageview,
 } from "@/types/site-analytics";
@@ -30,6 +34,10 @@ const TOOL_IDS: readonly FreeToolId[] = [
   "arbeitszeitrechner", "stundenzettel", "ueberstundenrechner",
   "monatsarbeitszeit-rechner",
 ];
+const MARKETING_EVENTS: readonly MarketingEventName[] = [
+  "marketing_signup_start", "marketing_account_created", "marketing_setup_completed",
+];
+const MARKETING_PLACEMENTS: readonly MarketingPlacement[] = ["hero", "pricing", "final_cta"];
 
 export function isTrackablePublicPath(pathname: string): boolean {
   if (!pathname.startsWith("/") || pathname.length > 180) return false;
@@ -117,6 +125,40 @@ export function buildFreeToolEvent(params: {
     tool: params.input.tool,
     format,
     placement,
+  };
+}
+
+export function buildMarketingEvent(params: {
+  input: MarketingEventInput;
+  ip: string;
+  userAgent: string;
+  nowIso: string;
+}): MarketingAnalyticsEvent | null {
+  const secret = serverEnv.ANALYTICS_HASH_SECRET;
+  const sourcePath = normalizePath(params.input.sourcePath);
+  if (
+    !secret
+    || !MARKETING_EVENTS.includes(params.input.marketingEvent)
+    || !MARKETING_PLACEMENTS.includes(params.input.placement)
+    || !sourcePath
+    || !isTrackablePublicPath(sourcePath)
+  ) {
+    return null;
+  }
+  const visitorHash = digest(
+    secret,
+    `${params.nowIso.slice(0, 10)}|${params.ip}|${params.userAgent}`,
+  );
+  return {
+    occurredAt: params.nowIso,
+    eventKey: digest(
+      secret,
+      [visitorHash, params.input.marketingEvent, sourcePath, params.input.placement, params.nowIso].join("|"),
+    ),
+    visitorHash,
+    marketingEvent: params.input.marketingEvent,
+    sourcePath,
+    placement: params.input.placement,
   };
 }
 
