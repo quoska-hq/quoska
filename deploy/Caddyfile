@@ -13,5 +13,5 @@ www.{$QUOSKA_DOMAIN} {
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 
-	reverse_proxy app:3000
+	reverse_proxy quoska-app:3000
 }
