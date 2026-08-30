@@ -21,14 +21,26 @@ export const metadata: Metadata = {
 
 const JSON_LD = {
   "@context": "https://schema.org",
-  "@type": "AboutPage",
-  "@id": `${site.url}${PATH}#seite`,
-  url: `${site.url}${PATH}`,
-  name: "Über Quoska",
-  inLanguage: "de-DE",
-  about: { "@id": `${site.url}/#organization` },
-  mainEntity: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
-  isPartOf: { "@id": `${site.url}/#website` },
+  "@graph": [
+    {
+      "@type": "AboutPage",
+      "@id": `${site.url}${PATH}#seite`,
+      url: `${site.url}${PATH}`,
+      name: "Über Quoska",
+      inLanguage: "de-DE",
+      about: { "@id": `${site.url}/#organization` },
+      mainEntity: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
+      isPartOf: { "@id": `${site.url}/#website` },
+    },
+    {
+      "@type": "Person",
+      "@id": `${site.url}/ueber-uns#oskar-kuiper`,
+      name: legalInfo.operatorName,
+      url: `${site.url}/ueber-uns#oskar-kuiper`,
+      jobTitle: "Gründer, Entwickler und Betreiber von Quoska",
+      worksFor: { "@id": `${site.url}/#organization` },
+    },
+  ],
 };
 
 const EDITORIAL_PRINCIPLES = [

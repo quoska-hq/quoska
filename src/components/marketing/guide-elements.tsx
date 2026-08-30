@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-import { ArrowUpRight, Info, UserRound } from "lucide-react";
+import { ArrowUpRight, Info } from "lucide-react";
 
 export function SourceLink({
   href,
@@ -27,42 +26,6 @@ export function GuideNotice({ children }: { children: ReactNode }) {
       <Info className="mt-1 size-4 shrink-0 text-[#5145ad]" />
       <div>{children}</div>
     </aside>
-  );
-}
-
-export function GuideAuthor({
-  reviewedOn,
-  reviewedOnIso,
-  sourceCount,
-  sourceLabel,
-}: {
-  reviewedOn: string;
-  reviewedOnIso: string;
-  sourceCount: number;
-  sourceLabel?: string;
-}) {
-  return (
-    <section className="border-b border-slate-900/10 bg-white" aria-label="Redaktion und Quellenprüfung">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-7 sm:flex-row sm:items-center sm:px-6">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#e7e3da] text-[#5145ad]">
-          <UserRound className="size-5" aria-hidden="true" />
-        </div>
-        <div className="max-w-3xl">
-          <p className="text-sm font-semibold text-slate-950">
-            Recherchiert und verantwortet von{" "}
-            <Link rel="author" href="/ueber-uns#oskar-kuiper" className="underline decoration-slate-400 underline-offset-4 hover:text-[#5145ad]">
-              Oskar Kuiper
-            </Link>
-          </p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            Gründer, Entwickler und Betreiber von Quoska. Die Darstellung stützt
-            sich auf {sourceLabel ?? `${sourceCount} ${sourceCount === 1 ? "amtliche Primärquelle" : "amtliche Primärquellen"}`};
-            Quellen zuletzt geprüft am <time dateTime={reviewedOnIso}>{reviewedOn}</time>.
-            Sie ersetzt keine Rechtsberatung.
-          </p>
-        </div>
-      </div>
-    </section>
   );
 }
 

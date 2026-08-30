@@ -72,7 +72,6 @@ export const JSON_LD = {
       inLanguage: "de-DE",
       mainEntityOfPage: `${site.url}${PAGE_PATH}`,
       isPartOf: { "@id": `${site.url}/#website` },
-      author: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
       publisher: { "@id": `${site.url}/#organization` },
       citation: Object.values(SOURCES),
     },

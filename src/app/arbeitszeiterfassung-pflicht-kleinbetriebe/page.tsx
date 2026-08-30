@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
 import { MarketingPageShell } from "@/components/marketing/page-shell";
 import { site } from "@/lib/site";
-import { GuideAuthor } from "@/components/marketing/guide-elements";
 import { GuideFinalSections } from "./guide-final-sections";
 import { GuideIntroSections } from "./guide-intro-sections";
 import { GuideMainSections } from "./guide-main-sections";
-import { JSON_LD, PAGE_PATH, PUBLISHED_DATE, SOURCES } from "./guide-data";
+import { JSON_LD, PAGE_PATH, PUBLISHED_DATE } from "./guide-data";
 
 export const metadata: Metadata = {
   title: "Arbeitszeiterfassung: Pflicht für Kleinbetriebe 2026",
   description:
     "Arbeitszeiterfassung im Kleinbetrieb: Was 2026 gilt, welche Zeiten erfasst werden müssen und wann besondere Fristen greifen — mit amtlichen Quellen.",
-  authors: [{ name: "Oskar Kuiper", url: "/ueber-uns#oskar-kuiper" }],
   alternates: { canonical: PAGE_PATH },
   openGraph: {
     title: "Arbeitszeiterfassung: Pflicht für Kleinbetriebe 2026",
@@ -37,11 +35,6 @@ export default function TimeRecordingDutyGuidePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
       <article>
-        <GuideAuthor
-          reviewedOn="14. August 2026"
-          reviewedOnIso={PUBLISHED_DATE}
-          sourceCount={Object.keys(SOURCES).length}
-        />
         <GuideIntroSections />
         <GuideMainSections />
         <GuideFinalSections />

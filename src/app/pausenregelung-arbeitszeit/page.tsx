@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import {
   FactCard,
-  GuideAuthor,
   GuideFaq,
   GuideNotice,
   SourceLink,
@@ -71,7 +70,6 @@ const JSON_LD = {
       inLanguage: "de-DE",
       mainEntityOfPage: `${site.url}${PAGE_PATH}`,
       isPartOf: { "@id": `${site.url}/#website` },
-      author: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
       publisher: { "@id": `${site.url}/#organization` },
       articleSection: "Arbeitszeit und Pausen",
       about: [
@@ -114,7 +112,6 @@ const JSON_LD = {
 export const metadata: Metadata = {
   title: SEO_TITLE,
   description: SEO_DESCRIPTION,
-  authors: [{ name: "Oskar Kuiper", url: "/ueber-uns#oskar-kuiper" }],
   alternates: { canonical: PAGE_PATH },
   openGraph: {
     type: "article",
@@ -125,7 +122,6 @@ export const metadata: Metadata = {
     description: SEO_DESCRIPTION,
     publishedTime: PUBLISHED_DATE,
     modifiedTime: UPDATED_DATE,
-    authors: [`${site.url}/ueber-uns#oskar-kuiper`],
     section: "Arbeitszeit und Pausen",
     tags: ["Automatischer Pausenabzug", "Pausenregelung", "Arbeitszeitgesetz"],
   },
@@ -146,13 +142,6 @@ export default function BreakRulesPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
-      />
-
-      <GuideAuthor
-        reviewedOn="30. August 2026"
-        reviewedOnIso={UPDATED_DATE}
-        sourceCount={3}
-        sourceLabel="drei geprüfte Quellen, darunter zwei Primärquellen"
       />
 
       <section className="bg-white">

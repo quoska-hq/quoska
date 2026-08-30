@@ -256,10 +256,8 @@ test.describe("Marketing and SEO", () => {
     ).toBeVisible();
     await expect(page.getByText(/keine rechtsberatung für den einzelfall/i)).toBeVisible();
     await expect(page.getByText(/noch nicht zwingend sein/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: "Oskar Kuiper" })).toHaveAttribute(
-      "href",
-      "/ueber-uns#oskar-kuiper",
-    );
+    await expect(page.getByText(/recherchiert und verantwortet von/i)).toHaveCount(0);
+    expect(await page.content()).not.toContain("Oskar Kuiper");
     await expect(
       page.getByRole("button", { name: /checkliste drucken oder als pdf speichern/i }),
     ).toBeVisible();
@@ -277,6 +275,7 @@ test.describe("Marketing and SEO", () => {
   test("supporting guides cite primary sources and explain their limits", async ({ page }) => {
     await page.goto("/arbeitszeitnachweis");
     await expect(page.getByText(/keine rechtsberatung für den einzelfall/i)).toBeVisible();
+    expect(await page.content()).not.toContain("Oskar Kuiper");
     await expect(page.getByRole("link", { name: /§ 16 ArbZG/i })).toHaveAttribute(
       "href",
       "https://www.gesetze-im-internet.de/arbzg/__16.html",
@@ -284,6 +283,7 @@ test.describe("Marketing and SEO", () => {
 
     await page.goto("/pausenregelung-arbeitszeit");
     await expect(page.getByText(/ist keine rechtsberatung/i)).toBeVisible();
+    expect(await page.content()).not.toContain("Oskar Kuiper");
     await expect(page.getByRole("link", { name: /§ 4 Arbeitszeitgesetz/i })).toHaveAttribute(
       "href",
       "https://www.gesetze-im-internet.de/arbzg/__4.html",

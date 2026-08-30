@@ -20,16 +20,7 @@ const SITE_STRUCTURED_DATA = {
         height: 512,
       },
       sameAs: [site.githubUrl],
-      founder: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
       ...(publicEmail ? { email: publicEmail } : {}),
-    },
-    {
-      "@type": "Person",
-      "@id": `${site.url}/ueber-uns#oskar-kuiper`,
-      name: legalInfo.operatorName,
-      url: `${site.url}/ueber-uns#oskar-kuiper`,
-      jobTitle: "Gründer, Entwickler und Betreiber von Quoska",
-      worksFor: { "@id": `${site.url}/#organization` },
     },
     {
       "@type": "WebSite",
