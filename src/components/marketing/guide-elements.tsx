@@ -34,10 +34,12 @@ export function GuideAuthor({
   reviewedOn,
   reviewedOnIso,
   sourceCount,
+  sourceLabel,
 }: {
   reviewedOn: string;
   reviewedOnIso: string;
   sourceCount: number;
+  sourceLabel?: string;
 }) {
   return (
     <section className="border-b border-slate-900/10 bg-white" aria-label="Redaktion und Quellenprüfung">
@@ -54,7 +56,7 @@ export function GuideAuthor({
           </p>
           <p className="mt-1 text-sm leading-6 text-slate-600">
             Gründer, Entwickler und Betreiber von Quoska. Die Darstellung stützt
-            sich auf {sourceCount} {sourceCount === 1 ? "amtliche Primärquelle" : "amtliche Primärquellen"};
+            sich auf {sourceLabel ?? `${sourceCount} ${sourceCount === 1 ? "amtliche Primärquelle" : "amtliche Primärquellen"}`};
             Quellen zuletzt geprüft am <time dateTime={reviewedOnIso}>{reviewedOn}</time>.
             Sie ersetzt keine Rechtsberatung.
           </p>

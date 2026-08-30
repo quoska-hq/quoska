@@ -61,6 +61,7 @@ export type CockpitActionKind =
   | "missing_clock_out"
   | "long_shift"
   | "break_violation"
+  | "missing_manual_break"
   | "missing_entry"
   | "pending_correction";
 

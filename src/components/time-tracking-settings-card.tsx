@@ -49,7 +49,9 @@ export function TimeTrackingSettingsCard() {
             <p className="text-sm font-medium">Gesetzliche Mindestpause automatisch ergänzen</p>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
               Beim Ausstempeln ergänzt Quoska fehlende Pausenminuten auf 30 Minuten
-              bei mehr als 6 Stunden und 45 Minuten bei mehr als 9 Stunden.
+              bei mehr als 6 Stunden und 45 Minuten bei mehr als 9 Stunden. Die
+              Einstellung gilt für das gesamte Team und kann jederzeit ausgeschaltet
+              werden.
             </p>
           </div>
           <button
@@ -73,7 +75,9 @@ export function TimeTrackingSettingsCard() {
           <Info className="mt-0.5 size-3.5 shrink-0" />
           Automatisch ergänzte Minuten werden am Eintrag gekennzeichnet, im Verlauf
           protokolliert und der betroffenen Person per Benachrichtigung erklärt.
-          Die tatsächliche Pause muss trotzdem genommen werden.
+          Die tatsächliche Pause muss trotzdem genommen werden. Fehlt an fünf
+          relevanten Tagen innerhalb einer Woche jede manuelle Pausenbuchung, erinnert
+          das Cockpit an eine gemeinsame Prüfung.
         </div>
         {mutation.error && <p className="text-sm text-destructive">{mutation.error.message}</p>}
       </CardContent>

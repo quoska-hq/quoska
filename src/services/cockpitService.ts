@@ -28,7 +28,7 @@ import {
   getCockpitActiveEntries,
   getCockpitProjects,
   getCockpitTenantState,
-  getCockpitTimeEntries,
+  getCockpitTimeEntryScopes,
   type CockpitAuditRecord,
 } from "@/repos/cockpitRepo";
 
@@ -36,6 +36,7 @@ interface CockpitBuildInput {
   employees: Employee[];
   scopedEmployees: Employee[];
   entries: TimeEntry[];
+  recentBreakEntries: TimeEntry[];
   projects: Project[];
   audits: CockpitAuditRecord[];
   absences: CockpitAbsences;
@@ -231,6 +232,7 @@ export function buildCockpitData(input: CockpitBuildInput): CockpitData {
     actions: buildCockpitActions({
       employees: input.scopedEmployees,
       entries: input.entries,
+      recentBreakEntries: input.recentBreakEntries,
       corrections: input.corrections,
       absences: input.absences,
       holidaysByState: input.holidaysByState,
@@ -253,7 +255,7 @@ export async function getAdminCockpit(
 ): Promise<ApiResponse<CockpitData>> {
   const [
     employees,
-    entries,
+    entryScopes,
     activeEntries,
     projects,
     audits,
@@ -263,7 +265,7 @@ export async function getAdminCockpit(
     corrections,
   ] = await Promise.all([
     getEmployeesByTenant(supabase, tenantId),
-    getCockpitTimeEntries(supabase, tenantId, startDate, endDate, employeeId),
+    getCockpitTimeEntryScopes(supabase, tenantId, startDate, endDate, employeeId),
     getCockpitActiveEntries(supabase, tenantId, employeeId),
     getCockpitProjects(supabase, tenantId),
     getCockpitAuditRecords(supabase, tenantId, `${startDate}T00:00:00.000Z`, employeeId),
@@ -279,8 +281,9 @@ export async function getAdminCockpit(
     return failure("Mitarbeiter nicht gefunden.");
   }
   const allEntries = [
-    ...entries,
-    ...activeEntries.filter((active) => !entries.some((entry) => entry.id === active.id)),
+    ...entryScopes.periodEntries,
+    ...activeEntries.filter((active) =>
+      !entryScopes.periodEntries.some((entry) => entry.id === active.id)),
   ];
   const states = [...new Set(employees.map((employee) => employee.bundesland ?? tenantState))];
   const holidayRows = await Promise.all(states.map(async (state) => [
@@ -291,6 +294,7 @@ export async function getAdminCockpit(
     employees,
     scopedEmployees,
     entries: allEntries,
+    recentBreakEntries: entryScopes.recentBreakEntries,
     projects,
     audits,
     absences: { leaves, sicknesses },

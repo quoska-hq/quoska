@@ -11,6 +11,13 @@ import {
 
 const GUIDES = [
   {
+    icon: Coffee,
+    href: "/pausenregelung-arbeitszeit",
+    eyebrow: "§ 4 ArbZG und BAG",
+    title: "Automatischer Pausenabzug",
+    body: "Wann 30 oder 45 Minuten nötig sind, warum ein automatischer Abzug keine echte Pause beweist und wie Quoska damit umgeht.",
+  },
+  {
     icon: Building2,
     href: "/zeiterfassung-kleinbetriebe",
     eyebrow: "Für kleine Teams",
@@ -44,13 +51,6 @@ const GUIDES = [
     eyebrow: "Inhalt und Fristen",
     title: "Arbeitszeitnachweis 2026",
     body: "Welche Angaben einen Nachweis prüfbar machen und für welche Regeln Zwei-Jahres-Fristen gelten.",
-  },
-  {
-    icon: Coffee,
-    href: "/pausenregelung-arbeitszeit",
-    eyebrow: "§ 4 ArbZG",
-    title: "Pausenregelung Arbeitszeit",
-    body: "Die Schwellen bei sechs und neun Stunden, 15-Minuten-Blöcke und konkrete Rechenbeispiele.",
   },
 ] as const;
 

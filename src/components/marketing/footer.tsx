@@ -29,7 +29,7 @@ const FOOTER_LINKS = [
       },
       { href: "/open-source-zeiterfassung", label: "Open Source" },
       { href: "/arbeitszeitnachweis", label: "Arbeitszeitnachweis" },
-      { href: "/pausenregelung-arbeitszeit", label: "Pausenregelung" },
+      { href: "/pausenregelung-arbeitszeit", label: "Automatischer Pausenabzug" },
     ],
   },
   {

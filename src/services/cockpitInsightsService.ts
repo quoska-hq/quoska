@@ -11,6 +11,9 @@ import { scheduledMinutesForDate } from "@/services/workScheduleService";
 import { correctionChangeSummary } from "@/lib/correction-format";
 import { employmentStartDate } from "@/services/overtimeService";
 
+const MANUAL_BREAK_LOOKBACK_DAYS = 6 + 1;
+const MANUAL_BREAK_WARNING_DAYS = 5;
+
 export interface CockpitAbsences {
   leaves: LeaveRequest[];
   sicknesses: SickEntry[];
@@ -116,6 +119,59 @@ function entryActions(input: CockpitActionInput): CockpitActionItem[] {
   return actions;
 }
 
+function missingManualBreakActions(input: CockpitActionInput): CockpitActionItem[] {
+  const firstDate = addDays(input.endDate, -(MANUAL_BREAK_LOOKBACK_DAYS - 1));
+  const employeeMap = new Map(input.employees.map((employee) => [employee.id, employee]));
+  const days = new Map<string, Map<string, { grossMinutes: number; manualBreakMinutes: number }>>();
+
+  for (const entry of input.recentBreakEntries) {
+    if (
+      entry.status !== "completed" ||
+      !entry.clock_out ||
+      entry.date < firstDate ||
+      entry.date > input.endDate ||
+      !employeeMap.has(entry.employee_id)
+    ) continue;
+
+    const employeeDays = days.get(entry.employee_id) ?? new Map();
+    const day = employeeDays.get(entry.date) ?? { grossMinutes: 0, manualBreakMinutes: 0 };
+    const elapsed = (Date.parse(entry.clock_out) - Date.parse(entry.clock_in)) / 60_000;
+    day.grossMinutes += Math.max(0, Math.round(elapsed));
+    day.manualBreakMinutes += Math.max(
+      0,
+      (entry.break_minutes ?? 0) - (entry.automatic_break_minutes ?? 0),
+    );
+    employeeDays.set(entry.date, day);
+    days.set(entry.employee_id, employeeDays);
+  }
+
+  const actions: CockpitActionItem[] = [];
+  for (const [employeeId, employeeDays] of days) {
+    const affectedDates = [...employeeDays]
+      .filter(([, day]) => day.grossMinutes > 6 * 60 && day.manualBreakMinutes === 0)
+      .map(([date]) => date)
+      .sort();
+    if (affectedDates.length < MANUAL_BREAK_WARNING_DAYS) continue;
+
+    const employee = employeeMap.get(employeeId);
+    if (!employee) continue;
+    const name = employeeName(employee);
+    actions.push({
+      id: `missing-manual-break-${employeeId}`,
+      kind: "missing_manual_break",
+      severity: "warning",
+      title: "Pausenerfassung gemeinsam prüfen",
+      description: `${name} · ${affectedDates.length} Tage ohne manuell erfasste Pause in den letzten 7 Tagen`,
+      detail: "Bitte klären, ob die Pausen tatsächlich genommen und korrekt erfasst wurden.",
+      employeeId,
+      employeeName: name,
+      date: affectedDates.at(-1) ?? input.endDate,
+      href: null,
+    });
+  }
+  return actions;
+}
+
 function correctionActions(input: CockpitActionInput): CockpitActionItem[] {
   const names = new Map(input.employees.map((employee) => [employee.id, employeeName(employee)]));
   return input.corrections
@@ -138,6 +194,7 @@ function correctionActions(input: CockpitActionInput): CockpitActionItem[] {
 interface CockpitActionInput {
   employees: Employee[];
   entries: TimeEntry[];
+  recentBreakEntries: TimeEntry[];
   corrections: CorrectionRequestWithEntry[];
   absences: CockpitAbsences;
   holidaysByState: Map<string, ReadonlyMap<string, string>>;
@@ -152,6 +209,7 @@ export function buildCockpitActions(input: CockpitActionInput): CockpitActionIte
   return [
     ...entryActions(input),
     ...correctionActions(input),
+    ...missingManualBreakActions(input),
     ...missingEntryActions(input),
   ].sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity] || b.date.localeCompare(a.date));
 }

@@ -103,6 +103,7 @@ function build(overrides: Partial<Parameters<typeof buildCockpitData>[0]> = {}) 
     employees: [employee],
     scopedEmployees: [employee],
     entries: [completedEntry],
+    recentBreakEntries: [completedEntry],
     projects: [project],
     audits: [audit],
     absences: { leaves: [], sicknesses: [] },
@@ -115,6 +116,18 @@ function build(overrides: Partial<Parameters<typeof buildCockpitData>[0]> = {}) 
     nowIso: "2026-08-10T18:00:00.000Z",
     ...overrides,
   });
+}
+
+function automaticPauseEntries(manualPauseIndex?: number): TimeEntry[] {
+  return ["04", "05", "06", "07", "08"].map((day, index) => ({
+    ...completedEntry,
+    id: `automatic-${index}`,
+    date: `2026-08-${day}`,
+    clock_in: `2026-08-${day}T07:00:00.000Z`,
+    clock_out: `2026-08-${day}T15:30:00.000Z`,
+    break_minutes: 30,
+    automatic_break_minutes: index === manualPauseIndex ? 0 : 30,
+  }));
 }
 
 describe("CockpitService", () => {
@@ -276,6 +289,28 @@ describe("CockpitService", () => {
     expect(data.actions.map((item) => item.kind)).toEqual(
       expect.arrayContaining(["long_shift", "break_violation"]),
     );
+  });
+
+  it("suggests a conversation after five relevant days without a manual pause", () => {
+    const automaticOnlyEntries = automaticPauseEntries();
+    const data = build({ entries: automaticOnlyEntries, recentBreakEntries: automaticOnlyEntries });
+
+    expect(data.actions).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        kind: "missing_manual_break",
+        severity: "warning",
+        title: "Pausenerfassung gemeinsam prüfen",
+        description: expect.stringContaining("5 Tage ohne manuell erfasste Pause"),
+      }),
+    ]));
+  });
+
+  it("does not warn when a relevant day contains a manually recorded pause", () => {
+    const entries = automaticPauseEntries(0);
+    const data = build({ entries, recentBreakEntries: entries });
+    expect(data.actions).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "missing_manual_break" }),
+    ]));
   });
 
   it("does not treat time without a project as an Action Center issue", () => {

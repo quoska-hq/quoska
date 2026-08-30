@@ -41,6 +41,7 @@ ${standardPrices}
 - Alternativen und Vergleiche: ${site.url}/alternativen
 - Digitale Zeiterfassung: ${site.url}/digitale-zeiterfassung
 - Arbeitszeiterfassung für Kleinbetriebe: ${site.url}/zeiterfassung-kleinbetriebe
+- Automatischer Pausenabzug und Pausenregelung: ${site.url}/pausenregelung-arbeitszeit
 - Open Source: ${site.url}/open-source-zeiterfassung
 - GitHub: https://github.com/quoska-hq/quoska
 

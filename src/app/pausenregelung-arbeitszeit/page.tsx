@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowUpRight, BellRing, Check, Coffee, History } from "lucide-react";
+import { Check } from "lucide-react";
 import {
   FactCard,
   GuideAuthor,
@@ -13,10 +12,20 @@ import {
   SectionHeading,
 } from "@/components/marketing/page-shell";
 import { site } from "@/lib/site";
+import {
+  AutomaticBreakExplanationSection,
+  QuoskaBreakAutomationSection,
+} from "./automatic-break-sections";
 
 const PAGE_PATH = "/pausenregelung-arbeitszeit";
-const UPDATED_DATE = "2026-08-19";
+const PUBLISHED_DATE = "2026-08-19";
+const UPDATED_DATE = "2026-08-30";
+const SEO_TITLE = "Automatischer Pausenabzug: Regeln und Quoska-Pause";
+const SEO_DESCRIPTION =
+  "Automatischer Pausenabzug verständlich erklärt: Pausen nach § 4 ArbZG, BAG-Urteil 5 AZR 51/24 und die optionale Quoska-Pausenautomatik.";
 const ARBZG_SOURCE = "https://www.gesetze-im-internet.de/arbzg/__4.html";
+const BAG_SOURCE = "https://www.bundesarbeitsgericht.de/entscheidung/5-azr-51-24/";
+const ANWALT_DE_SOURCE = "https://www.anwalt.de/rechtstipps/pause-du-hast-das-recht-auf-auszeit-231648.html";
 
 const FAQ = [
   {
@@ -37,7 +46,15 @@ const FAQ = [
   },
   {
     q: "Reicht ein automatischer Pausenabzug?",
-    a: "§ 4 ArbZG verlangt eine tatsächliche Unterbrechung der Arbeit. Eine rechnerische Ergänzung kann einen Datensatz transparent vervollständigen, ersetzt aber nicht die Planung und das tatsächliche Nehmen der Ruhepause.",
+    a: "Nein. § 4 ArbZG verlangt eine tatsächliche Unterbrechung der Arbeit. Auch das BAG stellte im Urteil 5 AZR 51/24 klar, dass ein automatischer Abzug für sich nicht zeigt, ob wirklich pausiert oder durchgearbeitet wurde. Eine rechnerische Ergänzung kann einen Datensatz transparent kennzeichnen, ersetzt aber weder die Pausenorganisation noch die tatsächliche Erholung.",
+  },
+  {
+    q: "Wie funktioniert die automatische Pause in Quoska?",
+    a: "Wenn die Option aktiviert ist, ergänzt Quoska beim Abschluss eines Zeiteintrags fehlende Minuten bis zur hinterlegten Mindestpause. Die automatisch ergänzten Minuten bleiben vom manuell erfassten Anteil unterscheidbar, werden protokolliert und der betroffenen Person mitgeteilt. Administratoren können die Funktion in den Einstellungen für das Team ausschalten.",
+  },
+  {
+    q: "Wann erscheint der Pausenhinweis im Quoska-Cockpit?",
+    a: "Der Hinweis erscheint, wenn bei einer Person innerhalb der letzten sieben Kalendertage an mindestens fünf abgeschlossenen Tagen mit mehr als sechs Stunden keine Pause manuell erfasst wurde. Er ist ein Anlass, die tatsächlichen Pausen und den betrieblichen Ablauf gemeinsam zu prüfen – keine automatische Feststellung eines Rechtsverstoßes.",
   },
 ] as const;
 
@@ -47,17 +64,40 @@ const JSON_LD = {
     {
       "@type": "Article",
       "@id": `${site.url}${PAGE_PATH}#artikel`,
-      headline: "Pausenregelung bei der Arbeitszeit: 6 Stunden, 9 Stunden und Mindestpausen",
-      description:
-        "Quellenbasierter Leitfaden zu Ruhepausen nach § 4 Arbeitszeitgesetz.",
-      datePublished: UPDATED_DATE,
+      headline: SEO_TITLE,
+      description: SEO_DESCRIPTION,
+      datePublished: PUBLISHED_DATE,
       dateModified: UPDATED_DATE,
       inLanguage: "de-DE",
       mainEntityOfPage: `${site.url}${PAGE_PATH}`,
       isPartOf: { "@id": `${site.url}/#website` },
       author: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
       publisher: { "@id": `${site.url}/#organization` },
-      citation: [ARBZG_SOURCE],
+      articleSection: "Arbeitszeit und Pausen",
+      about: [
+        { "@type": "Thing", name: "Automatischer Pausenabzug" },
+        { "@type": "Thing", name: "Pausenregelung nach § 4 ArbZG" },
+        { "@type": "SoftwareApplication", name: "Quoska" },
+      ],
+      citation: [ARBZG_SOURCE, BAG_SOURCE, ANWALT_DE_SOURCE],
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${site.url}${PAGE_PATH}#brotkrumen`,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Startseite",
+          item: site.url,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Automatischer Pausenabzug",
+          item: `${site.url}${PAGE_PATH}`,
+        },
+      ],
     },
     {
       "@type": "FAQPage",
@@ -72,19 +112,36 @@ const JSON_LD = {
 };
 
 export const metadata: Metadata = {
-  title: "Pausenregelung Arbeitszeit: 6 und 9 Stunden erklärt",
-  description:
-    "Pausenregelung nach § 4 ArbZG: Wann 30 oder 45 Minuten nötig sind, wie 15-Minuten-Blöcke funktionieren und was bei genau 6 Stunden gilt.",
+  title: SEO_TITLE,
+  description: SEO_DESCRIPTION,
   authors: [{ name: "Oskar Kuiper", url: "/ueber-uns#oskar-kuiper" }],
   alternates: { canonical: PAGE_PATH },
+  openGraph: {
+    type: "article",
+    locale: "de_DE",
+    url: PAGE_PATH,
+    siteName: site.name,
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
+    publishedTime: PUBLISHED_DATE,
+    modifiedTime: UPDATED_DATE,
+    authors: [`${site.url}/ueber-uns#oskar-kuiper`],
+    section: "Arbeitszeit und Pausen",
+    tags: ["Automatischer Pausenabzug", "Pausenregelung", "Arbeitszeitgesetz"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
+  },
 };
 
 export default function BreakRulesPage() {
   return (
     <MarketingPageShell
       eyebrow="Pausenregelung"
-      title="Pausenregelung bei der Arbeitszeit: die Schwellen richtig lesen."
-      intro="Mehr als sechs Stunden, mehr als neun Stunden und mindestens 15 Minuten je Pausenabschnitt: § 4 Arbeitszeitgesetz ist kurz, wird im Arbeitsalltag aber häufig ungenau wiedergegeben."
+      title="Automatischer Pausenabzug und Pausenregelung: Was wirklich zählt."
+      intro="Mehr als sechs Stunden, mehr als neun Stunden und mindestens 15 Minuten je Pausenabschnitt: Dieser Leitfaden erklärt § 4 Arbeitszeitgesetz, die Grenzen automatischer Abzüge und die optionale Quoska-Pausenautomatik."
     >
       <script
         type="application/ld+json"
@@ -92,16 +149,17 @@ export default function BreakRulesPage() {
       />
 
       <GuideAuthor
-        reviewedOn="19. August 2026"
+        reviewedOn="30. August 2026"
         reviewedOnIso={UPDATED_DATE}
-        sourceCount={1}
+        sourceCount={3}
+        sourceLabel="drei geprüfte Quellen, darunter zwei Primärquellen"
       />
 
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-20">
           <GuideNotice>
             <p>
-              <strong>Stand 19. August 2026.</strong> Die Übersicht beschreibt
+              <strong>Stand 30. August 2026.</strong> Die Übersicht beschreibt
               die allgemeine Regel des § 4 ArbZG und ist keine Rechtsberatung.
               Tarifverträge, Sonderregelungen und der konkrete Einzelfall können
               zusätzliche Anforderungen enthalten.
@@ -207,46 +265,8 @@ export default function BreakRulesPage() {
         </div>
       </section>
 
-      <section className="bg-[#e7e3da]">
-        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24">
-          <SectionHeading eyebrow="Mit Quoska" title="Pausen sichtbar im selben Zeitverlauf.">
-            <p>
-              Mitarbeitende starten und beenden Pausen direkt in der
-              Stempeluhr. Optional kann Quoska beim Ausstempeln fehlende
-              Mindestpausen transparent ergänzen; ergänzte Minuten werden
-              gekennzeichnet, protokolliert und erklärt. Die tatsächliche Pause
-              muss trotzdem genommen werden.
-            </p>
-          </SectionHeading>
-          <div className="mt-12 grid border-l border-t border-slate-900/15 bg-white md:grid-cols-3">
-            <FactCard number="01" title="Aktiv pausieren">
-              <Coffee className="mb-4 size-5 text-[#5145ad]" />
-              Start und Ende einer Pause werden als eigene Ereignisse erfasst.
-            </FactCard>
-            <FactCard number="02" title="Früh erkennen">
-              <BellRing className="mb-4 size-5 text-[#5145ad]" />
-              Hinweise und das Cockpit machen auffällige Pausen im laufenden
-              Arbeitsalltag sichtbar.
-            </FactCard>
-            <FactCard number="03" title="Änderungen erklären">
-              <History className="mb-4 size-5 text-[#5145ad]" />
-              Automatische Ergänzungen und spätere Korrekturen erscheinen im
-              Aktivitätsverlauf.
-            </FactCard>
-          </div>
-          <div className="mt-8 flex flex-wrap gap-6 text-sm font-semibold">
-            <Link href="/arbeitszeitrechner" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
-              Arbeitszeit und Pausen berechnen <ArrowUpRight className="size-4" />
-            </Link>
-            <Link href="/arbeitszeitnachweis" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
-              Arbeitszeitnachweis ansehen <ArrowUpRight className="size-4" />
-            </Link>
-            <Link href="/funktionen" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
-              Alle Funktionen <ArrowUpRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <AutomaticBreakExplanationSection />
+      <QuoskaBreakAutomationSection />
 
       <section id="fragen" className="border-t border-slate-900/10 bg-white">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
@@ -257,14 +277,17 @@ export default function BreakRulesPage() {
 
       <section className="border-t border-slate-900/10 bg-[#f5f3ee]">
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6">
-          <h2 className="font-semibold text-slate-950">Amtliche Quelle</h2>
-          <p className="mt-4 text-sm leading-7 text-slate-700">
-            <SourceLink href={ARBZG_SOURCE}>§ 4 Arbeitszeitgesetz: Ruhepausen</SourceLink>
-          </p>
+          <h2 className="font-semibold text-slate-950">Quellen und Vertiefung</h2>
+          <ul className="mt-4 space-y-3 text-sm leading-7 text-slate-700">
+            <li><SourceLink href={ARBZG_SOURCE}>§ 4 Arbeitszeitgesetz: Ruhepausen</SourceLink></li>
+            <li><SourceLink href={BAG_SOURCE}>Bundesarbeitsgericht, Urteil vom 12. Februar 2025 – 5 AZR 51/24</SourceLink></li>
+            <li><SourceLink href={ANWALT_DE_SOURCE}>anwalt.de: „PAUSE – du hast das Recht auf Auszeit!“</SourceLink></li>
+          </ul>
           <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600">
-            Der Gesetzestext ist die Grundlage dieser Übersicht. Für Jugendliche,
+            Der Gesetzestext und die BAG-Entscheidung sind die Primärquellen;
+            der anwalt.de-Beitrag dient als ergänzender Überblick. Für Jugendliche,
             besondere Tätigkeiten, Tarifregelungen oder behördlich zugelassene
-            Abweichungen können andere Vorschriften hinzukommen.
+            Abweichungen können weitere Vorschriften hinzukommen.
           </p>
         </div>
       </section>

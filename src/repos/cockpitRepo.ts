@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { format, parseISO, subDays } from "date-fns";
 import type {
   Project,
   TimeEntry,
@@ -10,24 +11,30 @@ export interface CockpitAuditRecord extends TimeEntryAudit {
   timeEntry: Pick<TimeEntry, "employee_id" | "date" | "project_id">;
 }
 
-export async function getCockpitTimeEntries(
+export async function getCockpitTimeEntryScopes(
   supabase: SupabaseClient,
   tenantId: string,
   startDate: string,
   endDate: string,
   employeeId?: string,
-): Promise<TimeEntry[]> {
+): Promise<{ periodEntries: TimeEntry[]; recentBreakEntries: TimeEntry[] }> {
+  const breakLookbackStart = format(subDays(parseISO(endDate), 6), "yyyy-MM-dd");
+  const queryStart = startDate < breakLookbackStart ? startDate : breakLookbackStart;
   let query = supabase
     .from("time_entries")
     .select("*")
     .eq("tenant_id", tenantId)
-    .gte("date", startDate)
+    .gte("date", queryStart)
     .lte("date", endDate)
     .is("deleted_at", null);
 
   if (employeeId) query = query.eq("employee_id", employeeId);
   const { data } = await query.order("clock_in", { ascending: true });
-  return data ?? [];
+  const entries = data ?? [];
+  return {
+    periodEntries: entries.filter((entry) => entry.date >= startDate),
+    recentBreakEntries: entries.filter((entry) => entry.date >= breakLookbackStart),
+  };
 }
 
 export async function getCockpitActiveEntries(
