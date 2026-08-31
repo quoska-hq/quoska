@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { epochToDate, getCurrentEpochDays } from "@/config/client/date-utils";
+import { getWeekMonday } from "@/services/holidayService";
 import {
   adminClient,
   cleanupTestUser,
@@ -67,7 +68,10 @@ test.describe("Admin Cockpit", () => {
     });
     let absenceDate = getCurrentEpochDays() - 1;
     while ([0, 6].includes((absenceDate + 4) % 7)) absenceDate--;
-    const leaveDate = epochToDate(absenceDate);
+    const previousWorkday = epochToDate(absenceDate);
+    const leaveDate = previousWorkday < getWeekMonday(today)
+      ? today
+      : previousWorkday;
     await adminClient.from("leave_requests").insert({
       tenant_id: tenantId,
       employee_id: employee?.id,
