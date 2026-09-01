@@ -38,7 +38,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/alternativen/crewmeister`, lastModified: "2026-08-20" },
     { url: `${base}/agb`, lastModified: "2026-08-11" },
     { url: `${base}/datenschutz`, lastModified: "2026-08-12" },
-    { url: `${base}/impressum`, lastModified: "2026-08-11" },
     { url: `${base}/widerruf`, lastModified: "2026-06-20" },
   ];
 }
