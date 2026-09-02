@@ -29,6 +29,7 @@ test.describe("free working-time tools", () => {
   });
 
   test("Stundenzettel totals rows and provides local CSV and print exports", async ({ page }) => {
+    await page.clock.setFixedTime(new Date("2026-08-01T12:00:00+02:00"));
     await page.goto("/stundenzettel");
     await page.getByLabel("Unternehmen").fill("Musterbetrieb");
     await page.getByLabel("Mitarbeitende Person").fill("Erika Beispiel");
