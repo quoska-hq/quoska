@@ -3,6 +3,7 @@ import { getNowIso } from "@/config/server/timestamps";
 import type { ApiResponse } from "@/types/api";
 import { failure, success } from "@/types/api";
 import type { BrowserExtensionConnection } from "@/types/browser-extension";
+import type { BrowserExtensionPromotionStatus } from "@/types/browser-extension";
 
 interface ConnectionAccessContext {
   tenantId: string;
@@ -95,4 +96,90 @@ export async function revokeManagedBrowserExtensionConnection(
   return data
     ? success(true)
     : failure("Browser-Verbindung nicht gefunden.");
+}
+
+export async function getBrowserExtensionPromotionStatus(
+  admin: SupabaseClient,
+  context: ConnectionAccessContext,
+): Promise<ApiResponse<BrowserExtensionPromotionStatus>> {
+  const nowIso = getNowIso();
+  const [employeeResult, entryResult, tokenResult] = await Promise.all([
+    admin
+      .from("employees")
+      .select("browser_extension_promo_dismissed_at")
+      .eq("id", context.employeeId)
+      .eq("tenant_id", context.tenantId)
+      .is("deleted_at", null)
+      .maybeSingle(),
+    admin
+      .from("time_entries")
+      .select("id")
+      .eq("tenant_id", context.tenantId)
+      .eq("employee_id", context.employeeId)
+      .eq("entry_source", "clock")
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle(),
+    admin
+      .from("browser_extension_tokens")
+      .select("id")
+      .eq("tenant_id", context.tenantId)
+      .eq("employee_id", context.employeeId)
+      .gt("expires_at", nowIso)
+      .is("revoked_at", null)
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  if (employeeResult.error || entryResult.error || tokenResult.error || !employeeResult.data) {
+    console.error("Browser extension promotion status failed", {
+      employee: employeeResult.error,
+      entry: entryResult.error,
+      token: tokenResult.error,
+    });
+    return failure("Browser-Erweiterungshinweis konnte nicht geladen werden.");
+  }
+
+  const hasClockEntry = Boolean(entryResult.data);
+  const connected = Boolean(tokenResult.data);
+  const dismissed = Boolean(employeeResult.data.browser_extension_promo_dismissed_at);
+  return success(buildBrowserExtensionPromotionStatus({
+    hasClockEntry,
+    connected,
+    dismissed,
+  }));
+}
+
+export function buildBrowserExtensionPromotionStatus(input: {
+  hasClockEntry: boolean;
+  connected: boolean;
+  dismissed: boolean;
+}): BrowserExtensionPromotionStatus {
+  return {
+    eligible: input.hasClockEntry && !input.connected && !input.dismissed,
+    ...input,
+  };
+}
+
+export async function dismissBrowserExtensionPromotion(
+  admin: SupabaseClient,
+  context: ConnectionAccessContext,
+): Promise<ApiResponse<boolean>> {
+  const { data, error } = await admin
+    .from("employees")
+    .update({ browser_extension_promo_dismissed_at: getNowIso() })
+    .eq("id", context.employeeId)
+    .eq("tenant_id", context.tenantId)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("Browser extension promotion dismissal failed", error);
+    return failure("Browser-Erweiterungshinweis konnte nicht geschlossen werden.");
+  }
+  return data
+    ? success(true)
+    : failure("Mitarbeiterprofil nicht gefunden.");
 }

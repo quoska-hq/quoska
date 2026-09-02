@@ -199,11 +199,24 @@ export default function DatenschutzPage() {
         IP-Adresse und der vollständige User-Agent werden nicht gespeichert.
       </p>
       <p>
-        Die Auswertung läuft ausschließlich auf unserem Hetzner-Server. Wir
-        setzen dafür keine Analyse-Cookies, kein Local Storage, keine
-        Werbeprofile und keinen externen Analysedienst ein. „Do Not Track“ und
-        „Global Privacy Control“ werden berücksichtigt. Die Messdaten werden
-        nach 180 Tagen automatisch gelöscht.
+        Die reine Reichweitenmessung läuft ausschließlich auf unserem
+        Hetzner-Server. Wir setzen dafür keine Analyse-Cookies, keinen lokalen
+        Browserspeicher, keine Werbeprofile und keinen externen Analysedienst
+        ein. „Do Not Track“ und „Global Privacy Control“ werden berücksichtigt.
+        Die Messdaten werden nach 180 Tagen automatisch gelöscht.
+      </p>
+      <p>
+        Wenn du eine Registrierung beginnst und „Do Not Track“ nicht aktiviert
+        ist, speichern wir zusätzlich eine datensparsame Herkunftsangabe für
+        höchstens 90 Tage im lokalen Speicher deines Browsers. Sie enthält die
+        erste und letzte Herkunfts-Domain beziehungsweise UTM-Quelle, den
+        Einstiegspfad, vorhandene UTM-Parameter sowie den verwendeten
+        Registrierungsbutton. Eine IP-Adresse, die vollständige Referrer-URL
+        oder Seiteninhalte werden darin nicht gespeichert. Beim Anlegen des
+        Kontos wird diese Angabe dem Konto und nach abgeschlossener Einrichtung
+        dem Unternehmen zugeordnet; die lokale Kopie wird anschließend
+        gelöscht. Die serverseitige Angabe wird zusammen mit den Kontodaten
+        gelöscht.
       </p>
       <p>
         Rechtsgrundlage ist Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO. Unser

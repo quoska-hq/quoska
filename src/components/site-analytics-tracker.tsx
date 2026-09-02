@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { captureSignupAttribution } from "@/lib/signup-attribution";
 
 const PRIVATE_PREFIXES = [
   "/_next", "/api", "/app", "/auth", "/setup", "/login",
@@ -14,6 +15,7 @@ export function SiteAnalyticsTracker() {
   useEffect(() => {
     if (!isPublicPath(pathname) || navigator.doNotTrack === "1") return;
 
+    captureSignupAttribution(pathname);
     const query = new URLSearchParams(window.location.search);
     const payload = {
       path: pathname,

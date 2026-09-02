@@ -1,9 +1,12 @@
 import type { SetupCompanyInput, SetupProfileInput } from "@/types/setup";
+import { clearSignupAttribution, loadSignupAttribution } from "@/lib/signup-attribution";
 import {
   DEFAULT_WORK_SCHEDULE,
   normalizeWorkSchedule,
   type WorkSchedule,
 } from "@/types/work-schedule";
+
+export { loadSignupAttribution };
 
 export interface OnboardingInvite {
   firstName: string;
@@ -98,4 +101,5 @@ export function saveOnboardingDraft(draft: OnboardingDraft): void {
 export function clearOnboardingDraft(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(STORAGE_KEY);
+  clearSignupAttribution();
 }

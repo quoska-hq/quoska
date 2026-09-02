@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { calculateTodayWorkedSeconds } from "@/services/browserExtensionClockService";
+import { buildBrowserExtensionPromotionStatus } from "@/services/browserExtensionConnectionService";
 import type { BreakSession, TimeEntry } from "@/types/database";
 
 function entry(input: Partial<TimeEntry>): TimeEntry {
@@ -48,5 +49,33 @@ describe("browser extension daily progress", () => {
     );
 
     expect(seconds).toBe(90 * 60);
+  });
+});
+
+describe("browser extension promotion", () => {
+  test("appears only after clocking when no connection or dismissal exists", () => {
+    expect(buildBrowserExtensionPromotionStatus({
+      hasClockEntry: true,
+      connected: false,
+      dismissed: false,
+    }).eligible).toBe(true);
+    expect(buildBrowserExtensionPromotionStatus({
+      hasClockEntry: false,
+      connected: false,
+      dismissed: false,
+    }).eligible).toBe(false);
+  });
+
+  test("stays hidden for connected and dismissed employees", () => {
+    expect(buildBrowserExtensionPromotionStatus({
+      hasClockEntry: true,
+      connected: true,
+      dismissed: false,
+    }).eligible).toBe(false);
+    expect(buildBrowserExtensionPromotionStatus({
+      hasClockEntry: true,
+      connected: false,
+      dismissed: true,
+    }).eligible).toBe(false);
   });
 });

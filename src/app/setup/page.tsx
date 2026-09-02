@@ -12,7 +12,7 @@ import {
 } from "@/types/work-schedule";
 import {
   clearOnboardingDraft,
-  loadOnboardingDraft,
+  loadOnboardingDraft, loadSignupAttribution,
   saveOnboardingDraft,
   type OnboardingDraft,
   type OnboardingDraftStep,
@@ -212,6 +212,7 @@ export default function SetupPage() {
           companyName: company.companyName,
           firstName: profile.firstName,
           lastName: profile.lastName,
+          signupAttribution: loadSignupAttribution(),
         }),
       });
       const registerResult = await registerResponse.json();

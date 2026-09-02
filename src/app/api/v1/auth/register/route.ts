@@ -19,11 +19,13 @@ import { z } from "zod";
 import { createAdminClient, createClient } from "@/config/supabase/server";
 import { serverEnv } from "@/config/env";
 import type { ApiResponse } from "@/types/api";
+import { signupAttributionSchema } from "@/lib/signup-attribution";
 
 const registerRequestSchema = z.object({
   companyName: z.string().min(1, "Firmenname ist erforderlich"),
   firstName: z.string().trim().min(1, "Vorname ist erforderlich"),
   lastName: z.string().trim().min(1, "Nachname ist erforderlich"),
+  signupAttribution: signupAttributionSchema.nullable().optional(),
 });
 
 interface RegisterResponse {
@@ -70,6 +72,11 @@ export async function POST(request: Request) {
     }
 
     const adminClient = createAdminClient();
+    const metadataAttribution = signupAttributionSchema.safeParse(
+      user.user_metadata?.signup_attribution,
+    );
+    const signupAttribution = parsed.data.signupAttribution
+      ?? (metadataAttribution.success ? metadataAttribution.data : null);
 
     // The signup trigger may already have provisioned this account. Returning
     // the existing IDs keeps retries safe and prevents duplicate tenants.
@@ -81,6 +88,16 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (existingEmployee) {
+      if (signupAttribution) {
+        const { error: attributionError } = await adminClient
+          .from("tenants")
+          .update({ signup_attribution: signupAttribution })
+          .eq("id", existingEmployee.tenant_id)
+          .is("signup_attribution", null);
+        if (attributionError) {
+          console.warn("Failed to persist signup attribution:", attributionError);
+        }
+      }
       return NextResponse.json<ApiResponse<RegisterResponse>>({
         data: {
           tenantId: existingEmployee.tenant_id,
@@ -97,6 +114,7 @@ export async function POST(request: Request) {
         name: companyName,
         plan: "free",
         setup_complete: false,
+        signup_attribution: signupAttribution,
       })
       .select("id")
       .single();

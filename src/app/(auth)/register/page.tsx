@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +24,10 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createOnboardingDraft, saveOnboardingDraft } from "@/lib/onboarding-draft";
 import { trackMarketingSignupProgress } from "@/lib/marketing-analytics";
+import {
+  captureSignupAttribution,
+  loadSignupAttribution,
+} from "@/lib/signup-attribution";
 
 export default function RegisterPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -41,12 +45,17 @@ export default function RegisterPage() {
     },
   });
 
+  useEffect(() => {
+    captureSignupAttribution("/register");
+  }, []);
+
   async function onSubmit(values: RegisterInput) {
     setServerError(null);
     setIsSubmitting(true);
 
     try {
       const supabase = createClient();
+      const signupAttribution = loadSignupAttribution();
 
       // Step 1: Create Supabase Auth user
       const { data: authData, error: authError } =
@@ -55,6 +64,9 @@ export default function RegisterPage() {
           password: values.password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback?next=/setup`,
+            data: signupAttribution
+              ? { signup_attribution: signupAttribution }
+              : undefined,
           },
         });
 

@@ -28,6 +28,32 @@ test.describe("Setup Wizard", () => {
 
   test("completes onboarding without an Admin placeholder or team invites", async ({ page }) => {
     const email = testEmail("setup");
+    await page.addInitScript(() => {
+      window.localStorage.setItem("quoska:signup-attribution:v1", JSON.stringify({
+        version: 1,
+        firstTouch: {
+          source: "google",
+          path: "/preise",
+          referrerHost: "google.com",
+          utmSource: "google",
+          utmMedium: "organic",
+          utmCampaign: "e2e-attribution",
+          occurredAt: new Date().toISOString(),
+        },
+        lastTouch: {
+          source: "google",
+          path: "/preise",
+          referrerHost: "google.com",
+          utmSource: "google",
+          utmMedium: "organic",
+          utmCampaign: "e2e-attribution",
+          occurredAt: new Date().toISOString(),
+        },
+        signupSourcePath: "/preise",
+        signupPlacement: "pricing",
+        signupStartedAt: new Date().toISOString(),
+      }));
+    });
     await registerFounder(page, email);
 
     // Access credentials are the only fields on registration; identity starts here.
@@ -72,7 +98,7 @@ test.describe("Setup Wizard", () => {
 
     const { data: employee, error } = await adminClient
       .from("employees")
-      .select("first_name, last_name, bundesland, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, tenant_id, tenants(setup_complete, bundesland, default_work_schedule)")
+      .select("first_name, last_name, bundesland, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, tenant_id, tenants(setup_complete, bundesland, default_work_schedule, signup_attribution)")
       .eq("email", email)
       .is("deleted_at", null)
       .single();
@@ -91,10 +117,18 @@ test.describe("Setup Wizard", () => {
       setup_complete: boolean;
       bundesland: string;
       default_work_schedule: { friday: number };
+      signup_attribution: { firstTouch: { source: string; path: string } };
     };
     expect(tenant.setup_complete).toBe(true);
     expect(tenant.bundesland).toBe("nordrhein-westfalen");
     expect(tenant.default_work_schedule.friday).toBe(0);
+    expect(tenant.signup_attribution.firstTouch).toMatchObject({
+      source: "google",
+      path: "/preise",
+    });
+    expect(await page.evaluate(() => (
+      window.localStorage.getItem("quoska:signup-attribution:v1")
+    ))).toBeNull();
   });
 
   test("requires a Bundesland before continuing", async ({ page }) => {

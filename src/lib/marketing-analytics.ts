@@ -1,11 +1,13 @@
 "use client";
 
 import type { MarketingEventInput, MarketingEventName, MarketingPlacement } from "@/types/site-analytics";
+import { recordSignupAttributionCta } from "@/lib/signup-attribution";
 
 const STORAGE_KEY = "quoska-marketing-signup-source";
 
 export function trackMarketingSignupStart(sourcePath: string, placement: MarketingPlacement): void {
   if (typeof window === "undefined" || navigator.doNotTrack === "1") return;
+  recordSignupAttributionCta(sourcePath, placement);
   const source = { sourcePath, placement };
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(source));

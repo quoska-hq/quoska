@@ -2,6 +2,7 @@
 // Reference: supabase/migrations/
 
 import type { WorkSchedule } from "@/types/work-schedule";
+import type { SignupAttribution } from "@/lib/signup-attribution";
 
 export interface Tenant {
   id: string;
@@ -11,6 +12,7 @@ export interface Tenant {
   bundesland: string | null;
   default_work_schedule?: WorkSchedule;
   automatic_breaks_enabled?: boolean;
+  signup_attribution?: SignupAttribution | null;
   setup_complete: boolean;
   created_at: string;
   updated_at: string;
@@ -36,6 +38,7 @@ export interface Employee {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  browser_extension_promo_dismissed_at?: string | null;
 }
 
 export interface TimeEntry {

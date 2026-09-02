@@ -1,75 +1,88 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Puzzle, ShieldCheck } from "lucide-react";
-import { getChromeWebStoreUrl } from "@/config/browser-extension-store";
+import { ArrowRight, Puzzle, ShieldCheck, X } from "lucide-react";
 import type { ApiResponse } from "@/types/api";
-import type { BrowserExtensionConnection } from "@/types/browser-extension";
+import type { BrowserExtensionPromotionStatus } from "@/types/browser-extension";
 
-const QUERY_KEY = ["browserExtensionConnections"] as const;
+const QUERY_KEY = ["browserExtensionPromotion"] as const;
 
 export function BrowserExtensionDashboardPromo() {
-  const connections = useQuery({
+  const [closed, setClosed] = useState(false);
+  const promotion = useQuery({
     queryKey: QUERY_KEY,
     queryFn: async () => {
-      const response = await fetch("/api/v1/browser-extension/connections");
-      const json: ApiResponse<BrowserExtensionConnection[]> = await response.json();
+      const response = await fetch("/api/v1/browser-extension/promotion");
+      const json: ApiResponse<BrowserExtensionPromotionStatus> = await response.json();
       if (!response.ok || !json.data) {
-        throw new Error(json.error ?? "Browser-Verbindungen konnten nicht geladen werden.");
+        throw new Error(json.error ?? "Browser-Erweiterungshinweis konnte nicht geladen werden.");
       }
       return json.data;
     },
   });
 
-  if (!connections.data || connections.data.length > 0) return null;
+  function dismiss() {
+    setClosed(true);
+    void fetch("/api/v1/browser-extension/promotion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    }).catch(() => undefined);
+  }
+
+  if (closed || !promotion.data?.eligible) return null;
 
   return (
-    <section
+    <aside
       aria-labelledby="browser-extension-promo-title"
-      className="border border-[#6658d3]/30 bg-[#eeebff] p-5 sm:flex sm:items-center sm:justify-between sm:gap-8"
+      data-testid="browser-extension-promo"
+      className="fixed inset-x-3 bottom-20 z-30 border border-[#6658d3]/35 bg-[#f7f5ff] shadow-[0_18px_55px_rgba(38,31,90,0.20)] sm:inset-x-auto sm:right-5 sm:w-[22rem] md:bottom-5 md:right-6"
     >
-      <div className="flex gap-4">
-        <div className="flex size-10 shrink-0 items-center justify-center bg-[#6658d3] text-white">
-          <Puzzle className="size-5" />
+      <button
+        type="button"
+        onClick={dismiss}
+        aria-label="Hinweis zur Chrome-Erweiterung dauerhaft schließen"
+        className="absolute right-2 top-2 inline-flex size-8 items-center justify-center text-slate-400 transition-colors hover:bg-white hover:text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6658d3]"
+      >
+        <X className="size-4" />
+      </button>
+
+      <Link
+        href="/browser-erweiterung"
+        className="group block p-5 pr-11 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6658d3]"
+      >
+        <div className="flex items-start gap-3.5">
+          <span className="flex size-10 shrink-0 items-center justify-center bg-[#6658d3] text-white">
+            <Puzzle className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#5145ad]">
+              Quoska für Chrome
+            </p>
+            <h2
+              id="browser-extension-promo-title"
+              className="mt-1 text-base font-semibold leading-snug text-slate-950"
+            >
+              Stempeln, ohne den Quoska-Tab zu suchen.
+            </h2>
+          </div>
         </div>
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#5145ad]">
-            Neu für Chrome
-          </p>
-          <h2
-            id="browser-extension-promo-title"
-            className="mt-1 text-base font-semibold text-slate-950"
-          >
-            Stempeln, ohne Quoska offen zu halten.
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
-            Arbeitszeit und Pausen direkt über die Browserleiste erfassen – ohne
-            Zugriff auf deinen Browserverlauf.
-          </p>
-          <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Arbeitszeit, Pausen und Tagesfortschritt direkt in der Browserleiste –
+          ohne Zugriff auf deinen Browserverlauf.
+        </p>
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#6658d3]/15 pt-3">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
             <ShieldCheck className="size-3.5" />
-            Verbindung jederzeit widerrufbar
-          </p>
+            Sicher &amp; widerrufbar
+          </span>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#5145ad] group-hover:text-slate-950">
+            Vorteile ansehen
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </span>
         </div>
-      </div>
-      <div className="mt-5 flex shrink-0 flex-wrap items-center gap-4 sm:mt-0 sm:flex-col sm:items-end sm:gap-2">
-        <a
-          href={getChromeWebStoreUrl("dashboard")}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex h-9 items-center justify-center gap-2 bg-slate-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#5145ad]"
-        >
-          In Chrome hinzufügen
-          <ArrowUpRight className="size-4" />
-        </a>
-        <Link
-          href="/browser-erweiterung"
-          className="text-xs font-semibold text-slate-600 hover:text-[#5145ad]"
-        >
-          Mehr erfahren
-        </Link>
-      </div>
-    </section>
+      </Link>
+    </aside>
   );
 }

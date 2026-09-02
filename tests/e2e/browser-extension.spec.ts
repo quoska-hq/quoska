@@ -44,11 +44,26 @@ test.describe("Browser extension API cycle", () => {
     await page.getByLabel("Passwort").fill(TEST_PASSWORD);
     await page.getByRole("button", { name: /anmelden/i }).click();
     await expect(page).toHaveURL(/\/app\/dashboard/);
-    await expect(page.getByText("Stempeln, ohne Quoska offen zu halten.")).toBeVisible();
-    await expect(page.getByRole("link", { name: "In Chrome hinzufügen" })).toHaveAttribute(
-      "href",
-      /chromewebstore\.google\.com\/detail\/quoska-zeiterfassung\/nkjalipmbhbgbbclhmghlhglljlkdclh/,
-    );
+    await expect(page.getByTestId("browser-extension-promo")).toHaveCount(0);
+
+    const regularClockIn = await page.request.post("/api/v1/clock/in", {
+      data: { notes: "Erster Stempelvorgang vor Extension-Hinweis" },
+    });
+    expect(regularClockIn.status()).toBe(201);
+    const regularEntryId = (await regularClockIn.json()).data.id as string;
+    const regularClockOut = await page.request.post("/api/v1/clock/out", {
+      data: { timeEntryId: regularEntryId },
+    });
+    expect(regularClockOut.status()).toBe(200);
+
+    await page.reload();
+    const promotion = page.getByTestId("browser-extension-promo");
+    await expect(promotion).toBeVisible();
+    await expect(promotion.getByRole("link")).toHaveAttribute("href", "/browser-erweiterung");
+    await promotion.getByRole("button", { name: /dauerhaft schließen/i }).click();
+    await expect(promotion).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByTestId("browser-extension-promo")).toHaveCount(0);
 
     const verifier = secret();
     const state = secret();

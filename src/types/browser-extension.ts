@@ -95,6 +95,13 @@ export interface BrowserExtensionConnection {
   expiresAt: string;
 }
 
+export interface BrowserExtensionPromotionStatus {
+  eligible: boolean;
+  hasClockEntry: boolean;
+  connected: boolean;
+  dismissed: boolean;
+}
+
 export type BrowserExtensionClockAction = z.infer<
   typeof browserExtensionClockActionSchema
 >;
