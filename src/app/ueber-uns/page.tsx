@@ -7,12 +7,12 @@ import { legalInfo, site } from "@/lib/site";
 const PATH = "/ueber-uns";
 
 export const metadata: Metadata = {
-  title: "Über Quoska – Produkt, Betreiber und Redaktion",
+  title: "Über Quoska – Produkt und redaktionelle Grundsätze",
   description:
-    "Wer Quoska entwickelt, wie das Produkt betrieben wird und nach welchen Grundsätzen Ratgeber und Vergleiche recherchiert und aktualisiert werden.",
+    "Wie Quoska entwickelt und betrieben wird und nach welchen Grundsätzen Ratgeber und Vergleiche recherchiert und aktualisiert werden.",
   alternates: { canonical: PATH },
   openGraph: {
-    title: "Über Quoska – Produkt, Betreiber und Redaktion",
+    title: "Über Quoska – Produkt und redaktionelle Grundsätze",
     description:
       "Offene Codebasis, transparenter Betrieb und nachvollziehbare redaktionelle Grundsätze.",
     url: PATH,
@@ -29,16 +29,8 @@ const JSON_LD = {
       name: "Über Quoska",
       inLanguage: "de-DE",
       about: { "@id": `${site.url}/#organization` },
-      mainEntity: { "@id": `${site.url}/ueber-uns#oskar-kuiper` },
+      mainEntity: { "@id": `${site.url}/#organization` },
       isPartOf: { "@id": `${site.url}/#website` },
-    },
-    {
-      "@type": "Person",
-      "@id": `${site.url}/ueber-uns#oskar-kuiper`,
-      name: legalInfo.operatorName,
-      url: `${site.url}/ueber-uns#oskar-kuiper`,
-      jobTitle: "Gründer, Entwickler und Betreiber von Quoska",
-      worksFor: { "@id": `${site.url}/#organization` },
     },
   ],
 };
@@ -66,17 +58,17 @@ export default function AboutPage() {
     <MarketingPageShell
       eyebrow="Über Quoska"
       title="Ein kleines Produkt mit einer überprüfbaren Grundlage."
-      intro="Quoska wird von Oskar Kuiper entwickelt und betrieben. Produktcode, technische Entscheidungen und zentrale Aussagen der Ratgeber sollen so weit wie möglich nachvollziehbar sein."
+      intro="Quoska wird unabhängig entwickelt und betrieben. Produktcode, technische Entscheidungen und zentrale Aussagen der Ratgeber sollen so weit wie möglich nachvollziehbar sein."
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
 
-      <section id="oskar-kuiper" className="bg-white scroll-mt-24">
+      <section id="redaktion" className="bg-white scroll-mt-24">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
-          <SectionHeading eyebrow="Betreiber" title={legalInfo.operatorName}>
+          <SectionHeading eyebrow="Produkt und Betrieb" title="Unabhängig entwickelt. Offen nachvollziehbar.">
             <p>
-              Oskar ist Gründer, Entwickler und Betreiber von Quoska. Er
-              verantwortet die Anwendung, die öffentliche Dokumentation und die
-              redaktionellen Inhalte dieser Website.
+              Anwendung, öffentliche Dokumentation und redaktionelle Inhalte
+              dieser Website werden gemeinsam und mit denselben transparenten
+              Qualitätsmaßstäben gepflegt.
             </p>
           </SectionHeading>
           <div className="border-t-2 border-slate-950 pt-6 text-sm leading-7 text-slate-700">

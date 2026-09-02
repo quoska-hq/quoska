@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: base, lastModified: "2026-08-20" },
     { url: `${base}/funktionen`, lastModified: "2026-08-19" },
-    { url: `${base}/ueber-uns`, lastModified: "2026-08-28" },
+    { url: `${base}/ueber-uns`, lastModified: "2026-09-02" },
     { url: `${base}/browser-erweiterung`, lastModified: "2026-08-25" },
     { url: `${base}/preise`, lastModified: "2026-08-19" },
     { url: `${base}/sicherheit`, lastModified: "2026-08-11" },
@@ -36,8 +36,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/alternativen/clockodo`, lastModified: "2026-08-20" },
     { url: `${base}/alternativen/clockin`, lastModified: "2026-08-20" },
     { url: `${base}/alternativen/crewmeister`, lastModified: "2026-08-20" },
-    { url: `${base}/agb`, lastModified: "2026-08-11" },
-    { url: `${base}/datenschutz`, lastModified: "2026-08-12" },
-    { url: `${base}/widerruf`, lastModified: "2026-06-20" },
   ];
 }

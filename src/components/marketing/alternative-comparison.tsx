@@ -202,7 +202,7 @@ export function AlternativeComparisonContent({
               Produktnamen und Marken gehören den jeweiligen Inhabern. Quoska
               steht in keiner geschäftlichen Verbindung zu {comparison.competitor}.
               Hinweise auf geänderte Preise oder Funktionen können über die{" "}
-              <Link href="/ueber-uns#oskar-kuiper" className="underline underline-offset-4 hover:text-[#5145ad]">
+              <Link href="/ueber-uns#redaktion" className="underline underline-offset-4 hover:text-[#5145ad]">
                 Redaktion
               </Link>{" "}
               gemeldet werden.

@@ -38,10 +38,16 @@ test.describe("Marketing and SEO", () => {
     }
   });
 
-  test("auth and setup routes are excluded from indexing", async ({ page, request }) => {
+  test("auth, setup and legal routes are excluded from indexing", async ({ page, request }) => {
     for (const path of ["/login", "/register", "/forgot-password", "/setup", "/auth/set-password"]) {
       await page.goto(path);
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+    }
+
+    for (const path of ["/impressum", "/datenschutz", "/agb", "/widerruf"]) {
+      const response = await page.goto(path);
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+      expect(response?.headers()["x-robots-tag"]).toBe("noindex, follow");
     }
 
     const sitemap = await (await request.get("/sitemap.xml")).text();
@@ -51,6 +57,21 @@ test.describe("Marketing and SEO", () => {
     }
     expect(sitemap).not.toContain("/register</loc>");
     expect(sitemap).not.toContain("/login</loc>");
+    for (const path of ["/impressum", "/datenschutz", "/agb", "/widerruf"]) {
+      expect(sitemap).not.toContain(`${path}</loc>`);
+    }
+  });
+
+  test("about page presents Quoska without a personal entity", async ({ page }) => {
+    await page.goto("/ueber-uns");
+    await expect(page.locator("#redaktion")).toBeVisible();
+    expect(await page.content()).not.toContain("Oskar Kuiper");
+    const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const entities = jsonLd.flatMap((block) => {
+      const parsed = JSON.parse(block) as { "@graph"?: Array<{ "@type"?: string }> };
+      return parsed["@graph"] ?? [];
+    });
+    expect(entities.some((entity) => entity["@type"] === "Person")).toBe(false);
   });
 
   test("sitemap contains only direct canonical responses", async ({ request }) => {

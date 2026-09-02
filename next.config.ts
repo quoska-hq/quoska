@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   // Produce the minimal self-contained server copied into the production
   // Docker image. Static assets are added by the Dockerfile.
   output: "standalone",
+  async headers() {
+    return ["/impressum", "/datenschutz", "/agb", "/widerruf"].map(
+      (source) => ({
+        source,
+        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
+      }),
+    );
+  },
   // DSGVO: no telemetry
   // typedRoutes disabled during scaffold; enable once all routes exist
   // Allow an isolated build dir for parallel dev servers (e.g. e2e runs that
