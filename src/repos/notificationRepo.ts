@@ -195,12 +195,17 @@ export async function getEmployeesWithActiveEntries(
   supabase: SupabaseClient,
   tenantId: string,
 ): Promise<(Notification & { clock_in: string; break_minutes: number; first_name: string; last_name: string })[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("time_entries")
-    .select("employee_id, clock_in, break_minutes, employees!inner(first_name, last_name)")
+    .select("employee_id, clock_in, break_minutes, employees!time_entries_employee_id_fkey!inner(first_name, last_name)")
     .eq("tenant_id", tenantId)
     .in("status", ["running", "paused"])
     .is("deleted_at", null);
+
+  if (error) {
+    console.error("Failed to load active time entries:", error);
+    throw new Error("Aktive Zeiteinträge konnten nicht geladen werden");
+  }
 
   if (!data) return [];
 

@@ -91,6 +91,24 @@ describe("employeeService", () => {
       expect(result.data).not.toBeNull();
     });
 
+    test("unbans an Auth user reused by a re-invite", async () => {
+      const { getTenantPlan, countActiveEmployees, getEmployeeByEmail } = await import("@/repos/employeeRepo");
+      const { inviteEmployee } = await import("@/services/employeeService");
+      vi.mocked(getTenantPlan).mockResolvedValueOnce("free");
+      vi.mocked(countActiveEmployees).mockResolvedValueOnce(1);
+      vi.mocked(getEmployeeByEmail).mockResolvedValueOnce(null);
+      const admin = createAdminMock();
+
+      const result = await inviteEmployee(createRegularMock(), admin, "t-1", {
+        firstName: "Bob", lastName: "Test", email: "bob@test.com", role: "employee",
+      });
+
+      expect(result.data).not.toBeNull();
+      expect(admin.auth.admin.updateUserById).toHaveBeenCalledWith("u-new", {
+        ban_duration: "none",
+      });
+    });
+
     test("allows invite on team plan regardless of count", async () => {
       const { getTenantPlan, getEmployeeByEmail } = await import("@/repos/employeeRepo");
       const { inviteEmployee } = await import("@/services/employeeService");

@@ -204,22 +204,23 @@ describe("runComplianceNotifications", () => {
   test("detects forgot clock-out for entries >10h", async () => {
     const { runComplianceNotifications } = await import("@/services/notificationService");
 
+    const timeEntries = createTableMock({
+      selectResolver: async () => {
+        return {
+          data: [{
+            employee_id: "e-1",
+            clock_in: "2026-06-03T22:00:00.000Z", // 12 hours ago
+            break_minutes: 0,
+            employees: { first_name: "Max", last_name: "Müller" },
+          }],
+        };
+      },
+    });
     const supabase = createMockSupabase({
       tenants: createTableMock({
         selectResolver: async () => ({ data: [{ id: "t-1" }] }),
       }),
-      time_entries: createTableMock({
-        selectResolver: async () => {
-          return {
-            data: [{
-              employee_id: "e-1",
-              clock_in: "2026-06-03T22:00:00.000Z", // 12 hours ago
-              break_minutes: 0,
-              employees: { first_name: "Max", last_name: "Müller" },
-            }],
-          };
-        },
-      }),
+      time_entries: timeEntries,
       notifications: createTableMock({
         selectResolver: async () => ({ data: [] }), // No existing → no dedup
         insertResolver: async () => ({
@@ -233,7 +234,10 @@ describe("runComplianceNotifications", () => {
       supabase, "2026-06-04T10:00:00.000Z",
     );
 
-    expect(result.forgotClockOuts).toBeGreaterThanOrEqual(0);
+    expect(result.forgotClockOuts).toBe(1);
+    expect(timeEntries.select).toHaveBeenCalledWith(
+      "employee_id, clock_in, break_minutes, employees!time_entries_employee_id_fkey!inner(first_name, last_name)",
+    );
   });
 
   test("detects break reminder for entries >5h45m without break", async () => {
@@ -266,6 +270,26 @@ describe("runComplianceNotifications", () => {
       supabase, "2026-06-04T10:00:00.000Z",
     );
 
-    expect(result.breakReminders).toBeGreaterThanOrEqual(0);
+    expect(result.breakReminders).toBe(1);
+  });
+
+  test("fails visibly when active entries cannot be loaded", async () => {
+    const { runComplianceNotifications } = await import("@/services/notificationService");
+
+    const supabase = createMockSupabase({
+      tenants: createTableMock({
+        selectResolver: async () => ({ data: [{ id: "t-1" }] }),
+      }),
+      time_entries: createTableMock({
+        selectResolver: async () => ({
+          data: null,
+          error: { message: "ambiguous relationship" },
+        }),
+      }),
+    });
+
+    await expect(
+      runComplianceNotifications(supabase, "2026-06-04T10:00:00.000Z"),
+    ).rejects.toThrow("Aktive Zeiteinträge konnten nicht geladen werden");
   });
 });

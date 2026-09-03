@@ -119,6 +119,24 @@ export async function inviteEmployee(
     return failure("Fehler beim Anlegen des Mitarbeiters");
   }
 
+  // A re-invite can reuse an Auth user that was banned during deactivation.
+  // Only unban after the new active employee row exists so a stale account
+  // cannot regain access without an active tenant membership.
+  const { error: unbanError } = await adminClient.auth.admin.updateUserById(
+    userId,
+    { ban_duration: "none" },
+  );
+
+  if (unbanError) {
+    console.error("Auth user reactivation failed:", unbanError);
+    await adminClient
+      .from("employees")
+      .update({ deleted_at: getNowIso() })
+      .eq("id", employee.id)
+      .eq("tenant_id", tenantId);
+    return failure("Fehler beim Reaktivieren des Mitarbeiterkontos");
+  }
+
   // 6. Set JWT claims (trigger handles this too, but call explicitly)
   if (userId) {
     await adminClient.rpc("set_employee_claims", {
