@@ -150,6 +150,7 @@ export function EmployeeEntryList({
                     {entry.entry_source === "manual" && (
                       <Badge variant="outline">Manuell</Badge>
                     )}
+                    {entry.entry_source === "import" && <Badge variant="outline">Importiert</Badge>}
                   </div>
                   <p className="break-words text-sm text-muted-foreground">
                     {formatTimeLocal(entry.clock_in)}

@@ -44,6 +44,7 @@ const FIELD_LABELS: Record<string, string> = {
   break_minutes: "Pause (Min)",
   automatic_break_minutes: "Automatische Pause (Min)",
   manual_entry: "Manueller Eintrag",
+  import_entry: "Importierter Eintrag",
   notes: "Notizen",
   status: "Status",
 };

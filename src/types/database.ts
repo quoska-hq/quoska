@@ -50,7 +50,7 @@ export interface TimeEntry {
   clock_out: string | null;
   break_minutes: number;
   automatic_break_minutes?: number;
-  entry_source?: "clock" | "manual";
+  entry_source?: "clock" | "manual" | "import";
   status: "running" | "paused" | "completed";
   notes: string | null;
   // Optional: a time entry may have no project assigned (DB column defaults to NULL).

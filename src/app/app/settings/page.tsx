@@ -13,6 +13,7 @@ import { getWeekBoundsForOffset } from "@/config/client/date-utils";
 import { BillingCard } from "@/components/billing-card";
 import { BrowserExtensionConnectionsCard } from "@/components/browser-extension-connections-card";
 import { TimeTrackingSettingsCard } from "@/components/time-tracking-settings-card";
+import { TimeImportCard } from "@/components/time-import-card";
 import type { ApiResponse } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,13 +113,15 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Einstellungen" description="Export, DSGVO und Account" />
+      <PageHeader title="Einstellungen" description="Import, Export, DSGVO und Account" />
 
       <div className="space-y-8">
         {/* Billing (only renders on the hosted/commercial build) */}
         <BillingCard />
 
         {isAdmin && <TimeTrackingSettingsCard />}
+
+        {(isAdmin || authInfo?.role === "manager") && <TimeImportCard />}
 
         <BrowserExtensionConnectionsCard />
 

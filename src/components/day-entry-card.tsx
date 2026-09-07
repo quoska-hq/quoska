@@ -133,6 +133,9 @@ export function DayEntryCard({
                         Manuell
                       </Badge>
                     )}
+                    {entry.entry_source === "import" && (
+                      <Badge variant="outline" className="rounded-full px-1.5 py-0 text-[9px] text-muted-foreground">Importiert</Badge>
+                    )}
                     {entry.project_id && (
                       <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
                         <Briefcase className="size-2.5" />
