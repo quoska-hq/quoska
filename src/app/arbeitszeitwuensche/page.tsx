@@ -61,7 +61,7 @@ export default function WorkTimePreferencesPage() {
       <div className="bg-white">
         <article id="artikel" className="mx-auto max-w-3xl px-5 py-12 sm:px-6 sm:py-16">
           <div className="border-b border-slate-900/15 pb-6 text-sm leading-6 text-slate-600">
-            <p><Link href="/ueber-uns#redaktion" className="underline underline-offset-4 hover:text-[#5145ad]">Quoska Redaktion</Link> · Mit KI-Unterstützung erstellt</p>
+            <p><Link href="/ueber-uns#redaktion" className="underline underline-offset-4 hover:text-[#5145ad]">Quoska Redaktion</Link></p>
             <p>Veröffentlicht und Quellen geprüft am <time dateTime={DATE}>7. September 2026</time></p>
           </div>
           <nav aria-label="In diesem Artikel" className="my-8 border-l-2 border-[#5145ad] pl-5 text-sm leading-7">
