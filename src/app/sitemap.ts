@@ -26,6 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     { url: `${base}/open-source-zeiterfassung`, lastModified: "2026-08-19" },
     { url: `${base}/arbeitszeitnachweis`, lastModified: "2026-08-19" },
+    { url: `${base}/arbeitszeitwuensche`, lastModified: "2026-09-07" },
     { url: `${base}/pausenregelung-arbeitszeit`, lastModified: "2026-08-30" },
     { url: `${base}/projektzeiterfassung`, lastModified: "2026-08-19" },
     { url: `${base}/arbeitszeitrechner`, lastModified: "2026-08-20" },

@@ -103,6 +103,7 @@ export default function OvertimeCalculatorPage() {
           <div>
             <GuideNotice><p>Ein positiver Rechenwert beweist weder die Anordnung noch die arbeitsrechtliche Anerkennung von Überstunden. Vertrag, Tarifvertrag, Betriebsvereinbarung und dokumentierte Freigaben können entscheidend sein.</p></GuideNotice>
             <p className="mt-6 text-sm leading-7 text-slate-700">Für eine belastbare Grundlage sollten Beginn, Ende, Pausen und spätere Korrekturen nachvollziehbar bleiben. Mehr dazu im <Link href="/arbeitszeitnachweis" className="font-semibold text-slate-950 underline underline-offset-4 hover:text-[#5145ad]">Arbeitszeitnachweis-Leitfaden</Link>.</p>
+            <p className="mt-5 text-sm leading-7 text-slate-700">Möchte jemand seine Wochenstunden ändern, hilft der individuelle Soll-/Ist-Vergleich bei der Vorbereitung. Welche Aufgaben und Arbeitstage dabei zu klären sind, zeigt der Ratgeber <Link href="/arbeitszeitwuensche" className="font-semibold text-slate-950 underline underline-offset-4 hover:text-[#5145ad]">Arbeitszeitwünsche von Mitarbeitenden besprechen</Link>.</p>
           </div>
         </div>
       </section>

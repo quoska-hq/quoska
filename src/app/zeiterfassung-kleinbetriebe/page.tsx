@@ -92,6 +92,7 @@ export default function SmallBusinessPage() {
               </li>
             ))}
           </ul>
+          <p className="text-sm leading-7 text-slate-700 lg:col-start-2">Wenn Mitarbeitende ihren Stundenumfang ändern möchten, gehören Aufgaben und Vertretung mit auf den Tisch. Unser Ratgeber zu <Link href="/arbeitszeitwuensche" className="font-semibold text-[#5145ad] underline underline-offset-4">Arbeitszeitwünschen im kleinen Betrieb</Link> hilft bei der Vorbereitung.</p>
         </div>
       </section>
 
