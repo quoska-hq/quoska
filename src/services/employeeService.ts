@@ -13,6 +13,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Employee } from "@/types/database";
+import { LAST_ADMIN_ERROR } from "@/types/employee";
 import type { ApiResponse } from "@/types/api";
 import { success, failure } from "@/types/api";
 import { employeeLimitForPlan } from "@/config/plans";
@@ -183,6 +184,9 @@ export async function updateEmployee(
     .single();
 
   if (updateError || !updated) {
+    if (updateError?.code === "P0001" && updateError.message === "last_active_admin") {
+      return failure(LAST_ADMIN_ERROR);
+    }
     console.error("Employee update failed:", updateError);
     return failure("Fehler beim Aktualisieren des Mitarbeiters");
   }
@@ -231,6 +235,9 @@ export async function deactivateEmployee(
     .eq("tenant_id", tenantId);
 
   if (deleteError) {
+    if (deleteError.code === "P0001" && deleteError.message === "last_active_admin") {
+      return failure(LAST_ADMIN_ERROR);
+    }
     console.error("Employee deactivation failed:", deleteError);
     return failure("Fehler beim Deaktivieren des Mitarbeiters");
   }

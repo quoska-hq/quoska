@@ -23,6 +23,8 @@ test.describe("Historical time import", () => {
     const supportUrl = new URL((await supportLink.getAttribute("href"))!);
     expect(supportUrl.protocol).toBe("mailto:");
     expect(supportUrl.searchParams.get("body")).toContain("Download-Link");
+    await card.getByLabel("CSV-Datei auswählen").setInputFiles({ name: "arbeitszeiten.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: Buffer.from("PK") });
+    await expect(card.getByRole("alert")).toContainText("Excel-Dateien lassen sich hier nicht direkt hochladen");
     await card.getByLabel("CSV-Datei auswählen").setInputFiles({ name: "unsupported.csv", mimeType: "text/csv", buffer: Buffer.from("Nur eine Kopfzeile") });
     await expect(card.getByRole("alert")).toBeVisible();
     await expect(supportLink).toBeVisible();

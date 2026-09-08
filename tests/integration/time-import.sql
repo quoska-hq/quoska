@@ -72,6 +72,8 @@ BEGIN
     RAISE EXCEPTION 'employee role was authorized';
   EXCEPTION WHEN insufficient_privilege THEN NULL;
   END;
+  -- Transfer administration before testing the former admin's import access.
+  UPDATE public.employees SET role = 'admin' WHERE id = employee;
   UPDATE public.employees SET role = 'employee' WHERE id = actor;
   BEGIN
     PERFORM public.import_time_entries(tenant, actor, batch, true);

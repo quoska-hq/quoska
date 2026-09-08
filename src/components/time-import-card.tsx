@@ -59,6 +59,10 @@ export function TimeImportCard() {
     setCsv("");
     setAssignments({});
     if (!file) return;
+    if (/\.(xlsx?|ods)$/i.test(file.name)) {
+      setError("Excel-Dateien lassen sich hier nicht direkt hochladen. Speichere einzelne Zeiteinträge als CSV UTF-8 oder schicke uns die Excel-Datei über die Importhilfe unten.");
+      return;
+    }
     if (file.size > MAX_IMPORT_BYTES) { setError("Die Datei darf höchstens 2 MB groß sein."); return; }
     setBusy(true);
     try {
@@ -102,6 +106,7 @@ export function TimeImportCard() {
         <p className="text-sm text-muted-foreground">
           Übernimm einzelne Zeiteinträge aus einem CSV-Detailbericht, etwa von Clockify oder Toggl Track.
           Exportiere Datum, Beginn und Ende oder Arbeitsdauer mit ungerundeten Zeiten. Bis zu 2.000 Einträge und 2 MB pro Datei.
+          {" "}Excel-Dateien (.xlsx oder .xls) kannst du uns über die Importhilfe unten schicken.
         </p>
         <p className="text-sm text-muted-foreground">
           Pausen werden unverändert übernommen; ohne Pausenspalte sind es 0 Minuten. Projekte werden als Notiz übernommen.
