@@ -8,7 +8,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { createAdminClient } from "@/config/supabase/server";
-import { updateEmployeeSchema } from "@/types/employee";
+import { LAST_ADMIN_ERROR, updateEmployeeSchema } from "@/types/employee";
 import {
   updateEmployee,
   deactivateEmployee,
@@ -69,7 +69,7 @@ export async function PATCH(
     if (!result.data) {
       return NextResponse.json<ApiResponse<Employee>>(
         { data: null, error: result.error },
-        { status: 500 },
+        { status: result.error === LAST_ADMIN_ERROR ? 409 : 500 },
       );
     }
 
@@ -121,6 +121,7 @@ export async function PUT(
 
     if (!result.data) {
       const status =
+        result.error === LAST_ADMIN_ERROR ? 409 :
         result.error?.includes("nicht gefunden") ? 404 :
         result.error?.includes("selbst") ? 400 : 500;
       return NextResponse.json<ApiResponse<{ id: string }>>(

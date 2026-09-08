@@ -12,6 +12,8 @@ export const ROLE_LABELS: Record<Role, string> = {
 
 export const ROLE_OPTIONS: readonly Role[] = ["employee", "manager", "admin"];
 
+export const LAST_ADMIN_ERROR = "Mindestens ein aktiver Admin muss erhalten bleiben. Vergib zuerst einem anderen Mitarbeiter die Admin-Rolle.";
+
 /** Free plan employee limit (for plan enforcement) */
 export const FREE_PLAN_EMPLOYEE_LIMIT = 3;
 
