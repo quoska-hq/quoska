@@ -1,0 +1,65 @@
+name: Support release image
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Full commit SHA already reviewed and tested by CI
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: support-image-${{ inputs.revision }}
+  cancel-in-progress: false
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Validate immutable revision and public build configuration
+        env:
+          REVISION: ${{ inputs.revision }}
+          SUPABASE_URL: ${{ vars.CLOUD_NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.CLOUD_NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          APP_URL: ${{ vars.CLOUD_NEXT_PUBLIC_APP_URL }}
+        run: |
+          [[ "$REVISION" =~ ^[a-f0-9]{40}$ ]]
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_ANON_KEY"
+          test -n "$APP_URL"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.revision }}
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build immutable image with public configuration only
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          outputs: type=docker,dest=/tmp/quoska-image.tar
+          tags: quoska:${{ inputs.revision }}
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ vars.CLOUD_NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ vars.CLOUD_NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_APP_URL=${{ vars.CLOUD_NEXT_PUBLIC_APP_URL }}
+            NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED=${{ vars.CLOUD_NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED }}
+            GOOGLE_SITE_VERIFICATION=${{ vars.CLOUD_GOOGLE_SITE_VERIFICATION }}
+            APP_REVISION=${{ inputs.revision }}
+
+      - name: Compress image for authenticated download
+        run: gzip -1 /tmp/quoska-image.tar
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: support-image-${{ inputs.revision }}
+          path: /tmp/quoska-image.tar.gz
+          compression-level: 0
+          retention-days: 2
