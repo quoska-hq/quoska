@@ -8,7 +8,7 @@ import { getNowIso } from "@/config/server/timestamps";
 import { recordProductAction } from "@/repos/productEventRepo";
 
 export async function POST(request: Request) {
-  if (!isSiteAnalyticsEnabled()) return new NextResponse(null, { status: 204 });
+  if (!isSiteAnalyticsEnabled() || request.headers.get("sec-gpc") === "1" || request.headers.get("dnt") === "1") return new NextResponse(null, { status: 204 });
   if (request.headers.get("sec-fetch-site") === "cross-site") return new NextResponse(null, { status: 403 });
   const auth = await getEmployeeFromAuth(await createClient());
   if (!auth.data) return new NextResponse(null, { status: 401 });

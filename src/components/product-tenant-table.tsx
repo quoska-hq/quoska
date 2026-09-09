@@ -21,7 +21,7 @@ export function ProductTenantTable({ tenants }: { tenants: TenantOverview[] }) {
     </div>
     <div className="max-h-[32rem] overflow-auto" tabIndex={0} aria-label="Firmennutzung, horizontal scrollbar">
       <table className="w-full text-left text-sm"><thead className="sticky top-0 bg-white"><tr>{["Firma", "Seit", "Konten", "Tarif", "Live / manuell", "Import", "Erster Eintrag", "Zuletzt aktiv", "Tage diese / letzte Woche"].map(h => <th key={h} className="whitespace-nowrap border-b p-2 font-semibold">{h}</th>)}</tr></thead>
-        <tbody>{rows.map(t => <tr key={t.name + t.created} className="border-b border-slate-100">
+        <tbody>{rows.map((t,index) => <tr key={t.name + t.created + index} className="border-b border-slate-100">
           {[t.name,t.created,`${t.accounts}${t.pending ? ` + ${t.pending} eingeladen` : ""}`,t.plan,t.entries,t.imports,t.firstUse ?? "—",t.lastUse ?? "—",`${t.daysThisWeek} / ${t.daysPreviousWeek}`].map((value,i) => <td key={i} className={`p-2 align-top ${i === 0 ? "min-w-44" : "whitespace-nowrap"}`}>{value}</td>)}
         </tr>)}{rows.length === 0 && <tr><td colSpan={9} className="p-4 text-slate-500">Keine passenden Firmen.</td></tr>}</tbody>
       </table>
