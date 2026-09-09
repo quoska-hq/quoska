@@ -7,6 +7,7 @@ const INCLUDED = [
   "Korrekturen mit Verlauf",
   "Abwesenheiten und Auswertungen",
   "Projekte und CSV-Export",
+  "CSV-Import mit Vorschau",
 ] as const;
 
 export function PricingSection() {

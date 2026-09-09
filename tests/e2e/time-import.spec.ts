@@ -9,21 +9,29 @@ test.describe("Historical time import", () => {
     tenantId = setup.tenantId;
   });
   test.afterAll(async () => { await cleanupTestUser(email); });
-
-  test("upload, map, preview and commit original times; retry skips duplicates", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("E-Mail").fill(email);
     await page.getByLabel("Passwort").fill(TEST_PASSWORD);
     await page.getByRole("button", { name: /anmelden/i }).click();
     await expect(page).toHaveURL(/\/app\/dashboard/);
     await page.goto("/app/settings");
+  });
+
+  test("upload, map, preview and commit original times; retry skips duplicates", async ({ page }) => {
     const card = page.locator("#zeitimport");
     const supportLink = card.getByRole("link", { name: "support@quoska.de" });
     await expect(supportLink).toBeVisible();
     const supportUrl = new URL((await supportLink.getAttribute("href"))!);
     expect(supportUrl.protocol).toBe("mailto:");
     expect(supportUrl.searchParams.get("body")).toContain("Download-Link");
-    await card.getByLabel("CSV-Datei auswählen").setInputFiles({ name: "arbeitszeiten.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: Buffer.from("PK") });
+    const upload = card.getByRole("button", { name: /CSV-Datei auswählen/ });
+    await expect(upload).toHaveCSS("cursor", "pointer");
+    await upload.focus();
+    const chooserPromise = page.waitForEvent("filechooser");
+    await page.keyboard.press("Enter");
+    const chooser = await chooserPromise;
+    await chooser.setFiles({ name: "arbeitszeiten.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: Buffer.from("PK") });
     await expect(card.getByRole("alert")).toContainText("Excel-Dateien lassen sich hier nicht direkt hochladen");
     await card.getByLabel("CSV-Datei auswählen").setInputFiles({ name: "unsupported.csv", mimeType: "text/csv", buffer: Buffer.from("Nur eine Kopfzeile") });
     await expect(card.getByRole("alert")).toBeVisible();
@@ -31,11 +39,18 @@ test.describe("Historical time import", () => {
     const csv = `Email,Start date,Start time,End date,End time,Pause (Min),Description\n${email},2026-01-12,08:00:05,2026-01-12,17:00:05,10,Originalpause\n${email},2026-01-13,22:00:00,2026-01-14,06:00:00,30,Nachtschicht`;
     const file = { name: "historie.csv", mimeType: "text/csv", buffer: Buffer.from(csv) };
     await card.getByLabel("CSV-Datei auswählen").setInputFiles(file);
+    await expect(card.getByRole("button", { name: "Spalten & Dateiformat anpassen" })).toHaveAttribute("aria-expanded", "false");
+    await expect(card.getByRole("combobox")).toHaveCount(0);
+    await expect(card.getByText("Anna Import", { exact: true })).toBeVisible();
+    await expect(card.getByText(/Zeitzone: Deutschland/)).toBeVisible();
+    await expect(card.getByRole("button", { name: "Import prüfen", exact: true })).toHaveCSS("cursor", "pointer");
     await card.getByRole("button", { name: "Import prüfen", exact: true }).click();
     await expect(card.getByText("2 neue Einträge · 0 Duplikate · 0 Fehler")).toBeVisible();
     const { count } = await adminClient.from("time_entries").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId);
     expect(count).toBe(0);
     // Changes invalidate the preview and require a fresh check.
+    await card.getByRole("button", { name: "Angaben ändern" }).click();
+    await card.getByRole("button", { name: "Spalten & Dateiformat anpassen" }).click();
     await card.getByLabel("Zeitzone der Datei").selectOption("UTC");
     await expect(card.getByRole("button", { name: "2 Einträge importieren" })).toHaveCount(0);
     await card.getByLabel("Zeitzone der Datei").selectOption("Europe/Berlin");
@@ -72,5 +87,43 @@ test.describe("Historical time import", () => {
     const results = await Promise.all(responses.map((response) => response.json()));
     expect(results.map((result) => result.data.importedCount).sort()).toEqual([0, 1]);
     expect(results.map((result) => result.data.duplicateCount).sort()).toEqual([0, 1]);
+  });
+
+  test("opens missing mappings and detects German dates after assigning the date column", async ({ page }) => {
+    const card = page.locator("#zeitimport");
+    const csv = `Email;Arbeitstag;Beginn;Ende;Pause\n${email};19.01.2026;08:00;16:30;30`;
+    await card.getByLabel("CSV-Datei auswählen").setInputFiles({ name: "deutsche-zeiten.csv", mimeType: "text/csv", buffer: Buffer.from(csv) });
+    await expect(card.getByRole("button", { name: "Spalten & Dateiformat anpassen" })).toHaveAttribute("aria-expanded", "true");
+    await expect(card.getByRole("button", { name: "Import prüfen", exact: true })).toBeDisabled();
+    await card.getByLabel("Startdatum", { exact: true }).selectOption("1");
+    await expect(card.getByLabel("Datumsformat der Datei")).toHaveValue("DD.MM.YYYY");
+    await expect(card.getByRole("combobox", { name: "Format der Arbeitsdauer", exact: true })).toHaveCount(0);
+    await card.getByRole("button", { name: "Import prüfen", exact: true }).click();
+    await expect(card.getByText("1 neue Einträge · 0 Duplikate · 0 Fehler")).toBeVisible();
+    await expect(card.getByRole("cell", { name: "19.01.26, 08:00:00", exact: true })).toBeVisible();
+  });
+
+  test("asks for ambiguous formats and unknown people, then resets settings for a new file", async ({ page }) => {
+    const card = page.locator("#zeitimport");
+    const csv = "Email;Datum;Beginn;Dauer\nunbekannt@example.com;20/01/2026;08:00;1,5";
+    await card.getByLabel("CSV-Datei auswählen").setInputFiles({ name: "mehrdeutig.csv", mimeType: "text/csv", buffer: Buffer.from(csv) });
+    await expect(card.getByLabel("Datumsformat der Datei")).toHaveValue("");
+    await expect(card.getByRole("combobox", { name: "Format der Arbeitsdauer", exact: true })).toHaveValue("");
+    await expect(card.getByRole("button", { name: "Import prüfen", exact: true })).toBeDisabled();
+    await card.getByLabel("Datumsformat der Datei").selectOption("DD/MM/YYYY");
+    await card.getByRole("combobox", { name: "Format der Arbeitsdauer", exact: true }).selectOption("hours");
+    await card.getByLabel("Zeitzone der Datei").selectOption("UTC");
+    await expect(card.getByRole("button", { name: "Import prüfen", exact: true })).toBeDisabled();
+    await card.getByRole("combobox", { name: "Mitarbeiter für unbekannt@example.com", exact: true }).selectOption({ label: `Anna Import (${email})` });
+    await card.getByRole("button", { name: "Import prüfen", exact: true }).click();
+    await expect(card.getByText("1 neue Einträge · 0 Duplikate · 0 Fehler")).toBeVisible();
+    await expect(card.getByRole("cell", { name: "20.01.26, 10:30:00", exact: true })).toBeVisible();
+    await card.getByLabel("CSV-Datei auswählen").setInputFiles({ name: "neue-datei.csv", mimeType: "text/csv", buffer: Buffer.from(`Email,Datum,Beginn,Ende\n${email},2026-01-21,08:00,09:00`) });
+    await expect(card.getByRole("button", { name: /Einträge importieren/ })).toHaveCount(0);
+    await expect(card.getByRole("combobox")).toHaveCount(0);
+    await expect(card.getByText(/Zeitzone: Deutschland/)).toBeVisible();
+    await expect(card.getByText(/0 Minuten Pause/)).toBeVisible();
+    await card.getByRole("button", { name: "Import prüfen", exact: true }).click();
+    await expect(card.getByRole("cell", { name: "21.01.26, 08:00:00", exact: true })).toBeVisible();
   });
 });

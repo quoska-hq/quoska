@@ -8,6 +8,10 @@ export const FAQ = [
     a: "Bis zu 3 Mitarbeitende sind kostenlos. Für die ersten 100 Buchungen kosten Team 9 €, Business 59 € und Pro 99 € im Monat. Danach gelten 19 €, 69 € und 129 €. Gemäß § 19 UStG wird derzeit keine Umsatzsteuer ausgewiesen.",
   },
   {
+    q: "Kann ich meine bisherigen Arbeitszeiten importieren?",
+    a: "Ja. Lade unter Einstellungen einen CSV-Detailbericht mit einzelnen Arbeitszeiten hoch, ordne ihn bestehenden Mitarbeitenden zu und prüfe die Vorschau. Erst nach deiner Bestätigung werden die Zeiten gespeichert; identische Einträge werden übersprungen. Pro Datei sind bis zu 2.000 Einträge und 2 MB möglich. Der Import ist in jedem Tarif enthalten. Bei Excel-Dateien oder anderen Exportformaten hilft dir unser Support bei der Übernahme.",
+  },
+  {
     q: "Können Mitarbeitende ihre eigenen Zeiten sehen?",
     a: "Ja. Mitarbeitende sehen ihre persönlichen Arbeitszeiten, Pausen und Abwesenheiten in einer eigenen Ansicht. Andere Teamdaten bleiben entsprechend der Rolle geschützt.",
   },
@@ -44,7 +48,7 @@ export function FaqSection() {
         <div className="border-t border-slate-900/20">
           {FAQ.map((item) => (
             <details key={item.q} className="group border-b border-slate-900/20">
-              <summary className="flex list-none items-center justify-between gap-6 py-5 text-left sm:py-6">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left sm:py-6">
                 <span className="font-semibold text-slate-950">{item.q}</span>
                 <span
                   aria-hidden
