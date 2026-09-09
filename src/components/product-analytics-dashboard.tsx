@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ProductOverview } from "@/types/product-analytics";
+import { ProductTenantTable } from "@/components/product-tenant-table";
 import { PageHeader } from "@/components/page-header";
 
 const names: Record<string,string> = { clock_in: "Einstempeln", clock_out: "Ausstempeln", clock_pause: "Pause starten", clock_resume: "Pause beenden", extension_clock: "Browser-Erweiterung", import: "Import / Vorschau", invite: "Einladung", register: "Firma anlegen", setup: "Einrichtung", setup_complete: "Einrichtung abschließen", app_open: "App geöffnet", browser_login: "Anmeldung (Browsermeldung)", browser_signup: "Registrierung (Browsermeldung)" };
@@ -52,8 +53,7 @@ export function ProductAnalyticsDashboard({ summary: s, history, operations }: {
       <p className="mt-3 text-xs text-slate-500">Folgewoche = nächste vollständige Kalenderwoche. Historische Aktivität ist aus Datenänderungen rekonstruiert; reine App-Aufrufe stehen erst ab Messbeginn zur Verfügung.</p>
     </Section>
     <Section title="Firmen und Nutzung">
-      <Table headers={["Firma", "Seit", "Konten", "Tarif", "Live / manuell", "Import", "Erster Eintrag", "Zuletzt aktiv", "Tage diese / letzte Woche"]}
-        rows={s.tenants.map(t => [t.name, t.created, `${t.accounts}${t.pending ? ` + ${t.pending} eingeladen` : ""}`, t.plan, t.entries, t.imports, t.firstUse ?? "—", t.lastUse ?? "—", `${t.daysThisWeek} / ${t.daysPreviousWeek}`])} />
+      <ProductTenantTable tenants={s.tenants} />
     </Section>
     <Section title="Aktionen und Fehler · seit Beginn der Vorwoche">
       <Table headers={["Aktion", "Ergebnis", "Anzahl", "Zugeordnete Firmen"]} rows={[...groups.values()].sort((a,b) => Number(a.outcome === "ok") - Number(b.outcome === "ok") || b.count - a.count)

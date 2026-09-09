@@ -53,6 +53,9 @@ test.describe("owner-only website analytics", () => {
     await expect(page.getByTestId("product-analytics-dashboard")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Produktübersicht", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Kommen neue Firmen in der Folgewoche zurück?" })).toBeVisible();
+    await page.getByLabel("Firma suchen").fill("Quoska Analytics");
+    await expect(page.getByRole("cell", { name: "Quoska Analytics", exact: true })).toBeVisible();
+    await expect(page.getByRole("cell", { name: "Analytics Customer", exact: true })).toHaveCount(0);
     const report = await page.request.get("/api/v1/product-analytics");
     expect(report.status()).toBe(200);
     expect((await report.json()).totals.companies).toBeGreaterThan(0);
