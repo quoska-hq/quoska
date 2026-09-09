@@ -215,6 +215,11 @@ export function ClockView() {
           description="Arbeitszeit starten, pausieren und den Tag im Blick behalten."
         />
 
+        {statusData?.staleActiveEntry && (
+          <Alert className="mb-5 border-amber-300 bg-amber-50 text-amber-950">
+            <AlertDescription>Diese Zeiterfassung ist seit mehr als 24 Stunden offen. Bitte prüfe den Eintrag unter „Meine Zeiten“ und lasse die tatsächlichen Zeiten bei Bedarf korrigieren.</AlertDescription>
+          </Alert>
+        )}
         {error && (
           <Alert variant="destructive" className="mb-5">
             <AlertDescription>{error}</AlertDescription>

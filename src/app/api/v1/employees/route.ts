@@ -1,3 +1,5 @@
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 /**
  * GET /api/v1/employees — List employees (active + deactivated)
  * POST /api/v1/employees — Invite a new employee
@@ -49,6 +51,7 @@ export async function GET() {
     }
 
     const { tenantId, role } = authResult.data;
+    setObservedTenant(tenantId);
 
     if (role !== "admin" && role !== "manager") {
       return NextResponse.json<ApiResponse<EmployeeListResponse>>(
@@ -103,7 +106,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   try {
     const supabase = await createClient();
     const authResult = await getEmployeeFromAuth(supabase);
@@ -116,6 +119,7 @@ export async function POST(request: Request) {
     }
 
     const { tenantId, role } = authResult.data;
+    setObservedTenant(tenantId);
 
     if (role !== "admin") {
       return NextResponse.json<ApiResponse<Employee>>(
@@ -170,3 +174,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = observeProductAction("invite", handlePost);

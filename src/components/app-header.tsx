@@ -19,6 +19,7 @@ import { UserCheck } from "lucide-react";
 
 /** Route prefix → human label, ordered most-specific first. */
 const ROUTE_LABELS: { match: string; label: string }[] = [
+  { match: "/app/product-analytics", label: "Produktübersicht" },
   { match: "/app/site-analytics", label: "Website-Analytics" },
   { match: "/app/dashboard", label: "Cockpit" },
   { match: "/app/clock", label: "Stempeln" },

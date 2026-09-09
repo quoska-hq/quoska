@@ -9,6 +9,13 @@ export function initializeSiteAnalyticsSchema(db: Database.Database): void {
   db.pragma("foreign_keys = ON");
   db.pragma("busy_timeout = 5000");
   db.exec(`
+    CREATE TABLE IF NOT EXISTS product_action_counts (
+      day TEXT NOT NULL, action TEXT NOT NULL, outcome TEXT NOT NULL,
+      tenant_key TEXT NOT NULL, count INTEGER NOT NULL,
+      PRIMARY KEY(day,action,outcome,tenant_key)
+    );
+    CREATE TABLE IF NOT EXISTS product_snapshots (day TEXT PRIMARY KEY, summary TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS product_operations (id INTEGER PRIMARY KEY CHECK(id=1), at TEXT NOT NULL, data TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS site_pageviews (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       occurred_at TEXT NOT NULL,

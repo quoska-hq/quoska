@@ -3,9 +3,9 @@ set -euo pipefail
 
 job="${1:-}"
 case "$job" in
-  notifications|retention) ;;
+  notifications|retention|product-analytics) ;;
   *)
-    echo "Usage: $0 notifications|retention" >&2
+    echo "Usage: $0 notifications|retention|product-analytics" >&2
     exit 64
     ;;
 esac

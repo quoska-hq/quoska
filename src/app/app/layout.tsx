@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/config/supabase/server";
 import { SupabaseProvider } from "@/providers/supabase-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { ProductActivity } from "@/components/product-activity";
 import { AppShell } from "@/components/app-shell";
 import { isSiteAnalyticsAdmin } from "@/config/server/site-analytics-access";
 import type { Role } from "@/types";
@@ -71,6 +72,7 @@ export default async function AppLayout({
   return (
     <SupabaseProvider>
       <QueryProvider>
+        <ProductActivity />
         <AppShell role={role} userName={userName} isAnalyticsAdmin={isAnalyticsAdmin}>
           {children}
         </AppShell>

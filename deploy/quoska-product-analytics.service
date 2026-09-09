@@ -1,0 +1,10 @@
+[Unit]
+Description=Save daily Quoska product overview
+After=network-online.target quoska.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/quoska/deploy/run-cron.sh product-analytics
+TimeoutStartSec=3min
+Nice=10

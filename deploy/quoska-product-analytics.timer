@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Quoska product overview
+
+[Timer]
+OnCalendar=*-*-* 23:50:00 Europe/Berlin
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

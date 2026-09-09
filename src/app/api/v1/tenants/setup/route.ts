@@ -1,3 +1,5 @@
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/config/supabase/server";
@@ -63,7 +65,7 @@ export async function GET() {
   });
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   try {
     const user = await getAuthenticatedUser();
     if (!user) {
@@ -103,6 +105,7 @@ export async function POST(request: Request) {
     }
 
     // Update tenant with company details
+    setObservedTenant(employee.tenant_id);
     const { error } = await admin
       .from("tenants")
       .update({
@@ -149,3 +152,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = observeProductAction("setup", handlePost);

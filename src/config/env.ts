@@ -46,6 +46,7 @@ const serverEnvSchema = publicEnvSchema.extend({
     z.string().min(32).optional(),
   ),
   ANALYTICS_ADMIN_EMAILS: z.string().optional(),
+  PRODUCT_ANALYTICS_EXCLUDED_TENANTS: z.string().optional(),
   GOOGLE_SITE_VERIFICATION: z.string().optional(),
   BROWSER_EXTENSION_IDS: z.string().optional(),
 });
@@ -101,6 +102,7 @@ export const serverEnv: ServerEnv = new Proxy({} as ServerEnv, {
       ANALYTICS_DB_PATH: process.env.ANALYTICS_DB_PATH,
       ANALYTICS_HASH_SECRET: process.env.ANALYTICS_HASH_SECRET,
       ANALYTICS_ADMIN_EMAILS: process.env.ANALYTICS_ADMIN_EMAILS,
+      PRODUCT_ANALYTICS_EXCLUDED_TENANTS: process.env.PRODUCT_ANALYTICS_EXCLUDED_TENANTS,
       GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
       BROWSER_EXTENSION_IDS: process.env.BROWSER_EXTENSION_IDS,
     });

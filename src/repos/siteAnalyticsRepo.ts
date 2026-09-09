@@ -148,7 +148,9 @@ export function pruneSiteAnalytics(
     .run(cutoffIso).changes;
   const toolEvents = db.prepare("DELETE FROM free_tool_events WHERE occurred_at < ?")
     .run(cutoffIso).changes;
-  return pageviews + marketing + toolEvents;
+  const actions = db.prepare("DELETE FROM product_action_counts WHERE day < ?").run(cutoffIso.slice(0, 10)).changes;
+  db.prepare("DELETE FROM product_snapshots WHERE day < ?").run(cutoffIso.slice(0, 10));
+  return pageviews + marketing + toolEvents + actions;
 }
 
 function marketingEventCounts(db: Sqlite, fromIso: string, toIso: string): AnalyticsCount[] {
