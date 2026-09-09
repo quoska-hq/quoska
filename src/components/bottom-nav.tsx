@@ -99,6 +99,13 @@ const MOBILE_NAV_ITEMS: MobileNavItem[] = [
     roles: ["admin", "manager"],
   },
   {
+    href: "/app/product-analytics",
+    label: "Produktübersicht",
+    icon: Globe2,
+    roles: ["admin"],
+    siteAdminOnly: true,
+  },
+  {
     href: "/app/site-analytics",
     label: "Website-Analytics",
     icon: Globe2,

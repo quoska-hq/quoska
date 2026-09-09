@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/config/supabase/server";
 import { analyticsPeriodStart } from "@/config/server/site-analytics-time";
 import { isSiteAnalyticsAdmin } from "@/config/server/site-analytics-access";
-import { getNowIso, getTodayDate } from "@/config/server/timestamps";
+import { getNowIso } from "@/config/server/timestamps";
 import { SiteAnalyticsDashboard } from "@/components/site-analytics-dashboard";
 import { getSiteAnalyticsSummary } from "@/repos/siteAnalyticsRepo";
 
@@ -32,7 +32,7 @@ export default async function SiteAnalyticsPage({
     days,
     analyticsPeriodStart(nowIso, days),
     nowIso,
-    getTodayDate(),
+    nowIso.slice(0, 10),
   );
 
   return <SiteAnalyticsDashboard summary={summary} />;

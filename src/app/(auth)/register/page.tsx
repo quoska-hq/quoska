@@ -10,6 +10,7 @@
  */
 
 "use client";
+import { reportAuthOutcome } from "@/lib/auth-observation";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -71,6 +72,7 @@ export default function RegisterPage() {
         });
 
       if (authError) {
+        reportAuthOutcome("signup", "rejected");
         // Map common Supabase errors to German messages
         if (authError.message.includes("already registered")) {
           setServerError("Diese E-Mail ist bereits registriert.");
@@ -92,12 +94,14 @@ export default function RegisterPage() {
       // auto-confirms accounts so the same flow remains easy to test.
       saveOnboardingDraft(createOnboardingDraft(values.email));
       trackMarketingSignupProgress("marketing_account_created");
+      reportAuthOutcome("signup", "ok");
 
       // Full navigation ensures a locally auto-confirmed session cookie is
       // visible to middleware. Hosted signups continue as a public draft.
       // eslint-disable-next-line react-hooks/immutability -- full navigation needed for cookie propagation
       window.location.href = "/setup";
     } catch {
+      reportAuthOutcome("signup", "network");
       setServerError("Ein Fehler ist aufgetreten. Bitte versuche es erneut.");
     } finally {
       setIsSubmitting(false);

@@ -96,6 +96,14 @@ const NAV_ITEMS: NavItem[] = [
     group: "manage",
   },
   {
+    href: "/app/product-analytics",
+    label: "Produktübersicht",
+    icon: <Globe2 className="size-[18px]" />,
+    roles: ["admin"],
+    group: "manage",
+    siteAdminOnly: true,
+  },
+  {
     href: "/app/site-analytics",
     label: "Website-Analytics",
     icon: <Globe2 className="size-[18px]" />,

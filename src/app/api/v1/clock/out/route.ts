@@ -1,3 +1,5 @@
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 /**
  * POST /api/v1/clock/out
  *
@@ -17,7 +19,7 @@ const clockOutBodySchema = z.object({
   timeEntryId: z.string().uuid("Ungültige Zeiteintrags-ID"),
 });
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   try {
     const supabase = await createClient();
 
@@ -31,6 +33,7 @@ export async function POST(request: Request) {
     }
 
     const { tenantId, employeeId } = authResult.data;
+    setObservedTenant(tenantId);
 
     // Validate input
     const body: unknown = await request.json();
@@ -76,3 +79,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = observeProductAction("clock_out", handlePost);

@@ -8,6 +8,7 @@
  * On failure shows generic German error (no hint which field is wrong).
  */
 
+import { reportAuthOutcome } from "@/lib/auth-observation";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -60,14 +61,17 @@ function LoginForm() {
       });
 
       if (error) {
+        reportAuthOutcome("login", "rejected");
         setServerError("E-Mail oder Passwort falsch");
         return;
       }
 
+      reportAuthOutcome("login", "ok");
       const redirectTo = safeRedirectPath(searchParams.get("redirect"));
       // eslint-disable-next-line react-hooks/immutability -- full navigation needed for cookie propagation
       window.location.href = redirectTo;
     } catch {
+      reportAuthOutcome("login", "network");
       setServerError("Ein Fehler ist aufgetreten. Bitte versuche es erneut.");
     } finally {
       setIsSubmitting(false);

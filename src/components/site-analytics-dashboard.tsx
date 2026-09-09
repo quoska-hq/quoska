@@ -56,9 +56,10 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
     <div className="space-y-6" data-testid="site-analytics-dashboard">
       <PageHeader
         title="Website-Analytics"
-        description="Cookie-frei · täglich neue Besucherkennung · 180 Tage Aufbewahrung"
+        description="Besuchertage, keine eindeutigen Personen über mehrere Tage · Tage in UTC · 180 Tage Aufbewahrung"
         actions={(
         <div className="flex flex-wrap items-center gap-2">
+          <Link href="/app/product-analytics" className="px-3 text-xs underline">Produktübersicht</Link>
           <div className="flex border border-slate-900/15 bg-white p-1">
             {PERIODS.map((days) => (
               <Link
@@ -85,9 +86,9 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
       />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard icon={<Users />} label="Besucher" value={formatNumber(summary.visitors)} note={`${summary.todayVisitors} heute`} />
+        <MetricCard icon={<Users />} label="Besuchertage" value={formatNumber(summary.visitors)} note={`${summary.todayVisitors} heute`} />
         <MetricCard icon={<Eye />} label="Seitenaufrufe" value={formatNumber(summary.pageviews)} note={`${summary.todayPageviews} heute`} />
-        <MetricCard icon={<MousePointerClick />} label="Aufrufe / Besucher" value={summary.viewsPerVisitor.toLocaleString("de-DE", { maximumFractionDigits: 1 })} note="im gewählten Zeitraum" />
+        <MetricCard icon={<MousePointerClick />} label="Aufrufe / Besuchertag" value={summary.viewsPerVisitor.toLocaleString("de-DE", { maximumFractionDigits: 1 })} note="im gewählten Zeitraum" />
         <MetricCard icon={<ArrowDownRight />} label="Direktzugriffe" value={`${Math.round(summary.directShare)} %`} note="ohne Referrer oder Kampagne" />
       </div>
 
@@ -133,7 +134,7 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
       )}
 
       {summary.marketingConversions.length > 0 && (
-        <RankingCard title="Registrierungs-Funnel" icon={<MousePointerClick />} rows={translateMarketingEvents(summary.marketingConversions)} empty="Noch keine Registrierungsereignisse" />
+        <RankingCard title="Marketing-Klicks und optionale Folgeereignisse" icon={<MousePointerClick />} rows={translateMarketingEvents(summary.marketingConversions)} empty="Noch keine Registrierungsereignisse" />
       )}
 
       {(summary.toolActivity.length > 0 || summary.toolConversions.length > 0) && (

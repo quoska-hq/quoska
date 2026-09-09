@@ -1,3 +1,4 @@
+import { isStaleEntry } from "@/config/server/product-analytics-time";
 /**
  * GET /api/v1/clock/status
  *
@@ -202,6 +203,7 @@ export async function GET() {
     }
 
     const response: ClockStatusResponse = {
+      staleActiveEntry: Boolean(activeEntry && isStaleEntry(activeEntry.clock_in, getNowIso())),
       activeEntry,
       activeBreak,
       compliance,

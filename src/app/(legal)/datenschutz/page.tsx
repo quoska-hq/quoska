@@ -206,6 +206,16 @@ export default function DatenschutzPage() {
         Die Messdaten werden nach 180 Tagen automatisch gelöscht.
       </p>
       <p>
+        Für den zuverlässigen Betrieb erfassen wir außerdem zusammengefasste
+        Ergebnisse wichtiger Aktionen wie Anmeldung, Einladung, Import und
+        Zeiterfassung. Gespeichert werden der Tag, eine feste Aktions- und
+        Ergebniskategorie sowie bei angemeldeten Konten eine pseudonymisierte
+        Firmenkennung. Passwörter, Importinhalte und freie Fehlermeldungen werden
+        dabei nicht gespeichert. Optionale Browsermeldungen berücksichtigen
+        Do Not Track. Produktmessdaten werden nach 180 Tagen gelöscht und sind
+        nur für die freigeschalteten Betreiberkonten einsehbar.
+      </p>
+      <p>
         Wenn du eine Registrierung beginnst und „Do Not Track“ nicht aktiviert
         ist, speichern wir zusätzlich eine datensparsame Herkunftsangabe für
         höchstens 90 Tage im lokalen Speicher deines Browsers. Sie enthält die

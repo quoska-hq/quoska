@@ -1,3 +1,5 @@
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 import { NextResponse } from "next/server";
 import { authenticateBrowserExtension } from "@/services/browserExtensionAuthService";
 import { performBrowserExtensionClockAction } from "@/services/browserExtensionClockService";
@@ -7,7 +9,7 @@ import {
   type BrowserExtensionStatus,
 } from "@/types/browser-extension";
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const authResult = await authenticateBrowserExtension(request, "clock:write");
   if (!authResult.data) {
     return NextResponse.json<ApiResponse<BrowserExtensionStatus>>(
@@ -26,6 +28,7 @@ export async function POST(request: Request) {
   }
 
   const context = authResult.data;
+  setObservedTenant(context.tenantId);
   const result = await performBrowserExtensionClockAction(
     context.supabase,
     { tenantId: context.tenantId, employeeId: context.employeeId },
@@ -36,3 +39,5 @@ export async function POST(request: Request) {
     headers: { "Cache-Control": "no-store" },
   });
 }
+
+export const POST = observeProductAction("extension_clock", handlePost);

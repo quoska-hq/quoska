@@ -85,6 +85,7 @@ export interface WeekSummary {
 
 /** Clock status response returned by the API. */
 export interface ClockStatusResponse {
+  staleActiveEntry?: boolean;
   activeEntry: TimeEntry | null;
   activeBreak: BreakSession | null;
   compliance: ComplianceStatus;

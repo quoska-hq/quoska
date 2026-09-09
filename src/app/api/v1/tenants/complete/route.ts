@@ -1,8 +1,10 @@
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/config/supabase/server";
 import { serverEnv } from "@/config/env";
 
-export async function PATCH(request: Request) {
+async function handlePatch(request: Request) {
   try {
     const body = await request.json();
     const { setupComplete } = body;
@@ -48,6 +50,7 @@ export async function PATCH(request: Request) {
       );
     }
 
+    setObservedTenant(employee.tenant_id);
     const { error } = await admin
       .from("tenants")
       .update({ setup_complete: setupComplete })
@@ -68,3 +71,5 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export const PATCH = observeProductAction("setup_complete", handlePatch);

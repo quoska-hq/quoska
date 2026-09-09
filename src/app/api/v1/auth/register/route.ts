@@ -1,3 +1,5 @@
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 /**
  * POST /api/v1/auth/register
  *
@@ -33,7 +35,7 @@ interface RegisterResponse {
   employeeId: string;
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   try {
     // Parse and validate request body
     const body: unknown = await request.json();
@@ -88,6 +90,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (existingEmployee) {
+      setObservedTenant(existingEmployee.tenant_id);
       if (signupAttribution) {
         const { error: attributionError } = await adminClient
           .from("tenants")
@@ -131,6 +134,7 @@ export async function POST(request: Request) {
     }
 
     const tenantId = tenant.id;
+    setObservedTenant(tenantId);
 
     // Step 2: Create admin employee
     const { data: employee, error: employeeError } = await adminClient
@@ -196,3 +200,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = observeProductAction("register", handlePost);

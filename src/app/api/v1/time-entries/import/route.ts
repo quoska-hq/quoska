@@ -1,3 +1,5 @@
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/config/supabase/server";
 import { getNowIso } from "@/config/server/timestamps";
@@ -5,10 +7,11 @@ import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { runTimeImport } from "@/services/timeImportService";
 import { MAX_IMPORT_BYTES, timeImportSchema } from "@/types/time-import";
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const auth = await getEmployeeFromAuth(await createClient());
   if (!auth.data) return NextResponse.json({ data: null, error: auth.error }, { status: 401 });
   const { tenantId, employeeId, role } = auth.data;
+    setObservedTenant(tenantId);
   if (!["admin", "manager"].includes(role)) {
     return NextResponse.json({ data: null, error: "Nur Administratoren und Führungskräfte können Zeiten importieren." }, { status: 403 });
   }
@@ -46,3 +49,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ data: null, error: error instanceof SyntaxError ? "Ungültige Anfrage." : error instanceof Error ? error.message : "Import fehlgeschlagen." }, { status: 400 });
   }
 }
+
+export const POST = observeProductAction("import", handlePost);
