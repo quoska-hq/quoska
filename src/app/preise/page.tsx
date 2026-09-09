@@ -15,7 +15,7 @@ const INCLUDED = [
   "Arbeitszeit und Pausen erfassen",
   "Korrekturen mit Aktivitätsverlauf",
   "Urlaub und Krankheit verwalten",
-  "Cockpit, Projekte und CSV-Export",
+  "Cockpit, Projekte, CSV-Import und Export",
   "Rollen für Mitarbeitende und Verantwortliche",
   "Updates und Hosting inklusive",
 ] as const;

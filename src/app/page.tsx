@@ -6,6 +6,7 @@ import { ProductTourSection } from "@/components/marketing/sections/product-tour
 import { FeaturesSection } from "@/components/marketing/sections/features";
 import { WhyQuoskaSection } from "@/components/marketing/sections/why-quoska";
 import { HowItWorksSection } from "@/components/marketing/sections/how-it-works";
+import { TimeImportSection } from "@/components/marketing/sections/time-import";
 import { TrustSection } from "@/components/marketing/sections/trust";
 import { GuidesSection } from "@/components/marketing/sections/guides";
 import { PricingSection } from "@/components/marketing/sections/pricing";
@@ -62,6 +63,7 @@ const jsonLd = {
         "Urlaub und Krankheit",
         "Projektzeiterfassung",
         "Cockpit, Berichte und CSV-Export",
+        "Vergangene Arbeitszeiten per CSV importieren, mit Vorschau",
       ],
       offers: [
         ...Object.values(FOUNDER_OFFERS).map((offer) => ({
@@ -114,6 +116,7 @@ export default function HomePage() {
         <FeaturesSection />
         <WhyQuoskaSection />
         <HowItWorksSection />
+        <TimeImportSection />
       <TrustSection />
       <GuidesSection />
       <PricingSection />

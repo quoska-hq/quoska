@@ -46,6 +46,9 @@ export function HeroSection() {
             <p className="mt-5 text-sm text-slate-600">
               Keine Kreditkarte · In wenigen Minuten eingerichtet · Direkt im Browser
             </p>
+            <Link href="/#zeitimport" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-[#5145ad] underline underline-offset-4 hover:text-slate-950">
+              Bisherige Zeiten per CSV mitnehmen <ArrowRight aria-hidden="true" className="size-3.5 shrink-0" />
+            </Link>
           </div>
 
           <ProductPreview />

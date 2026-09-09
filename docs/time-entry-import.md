@@ -36,13 +36,27 @@ dokumentierten Felder, keine Exporte aus echten Kundenkonten.
 
 Unter **Einstellungen → Vergangene Arbeitszeiten importieren**:
 
-1. Im bisherigen System einen ungerundeten Detailbericht als UTF-8-CSV exportieren.
-2. Datei hochladen, Datum-/Dauerformat und Quellzeitzone einstellen.
-3. Spalten zuordnen und jede Quellperson einem bestehenden Mitarbeiter zuweisen.
-   Übereinstimmende E-Mail-Adressen werden vorgeschlagen. Namen werden bewusst
-   nicht automatisch zugeordnet. Ohne Personenspalte wird ein Ziel für alle
-   Zeilen gewählt.
-4. Vorschau prüfen, Fehler korrigieren, anschließend Import bestätigen.
+1. **Datei auswählen:** Einen ungerundeten Detailbericht als UTF-8-CSV hochladen.
+   Die gesamte Uploadfläche öffnet die Dateiauswahl, auch per Tastatur.
+2. **Angaben prüfen:** Mitarbeiterzuordnung und Zusammenfassung der übernommenen
+   Spalten prüfen. Übereinstimmende E-Mail-Adressen werden vorgeschlagen und
+   lassen sich über „Ändern“ korrigieren. Namen werden nicht automatisch
+   zugeordnet. Ohne Personenspalte wird ein Ziel für alle Zeilen gewählt.
+   Technische Einstellungen liegen unter „Spalten & Dateiformat anpassen“.
+   Fehlen Pflichtspalten oder eindeutige Formate, öffnet sich dieser Bereich
+   direkt. Eine Vorschau ist erst mit vollständigen Angaben möglich.
+3. **Importieren:** Vorschau prüfen und ausdrücklich bestätigen. „Angaben ändern“
+   führt zurück; Änderungen erfordern eine neue Vorschau. Bereits vorhandene
+   Einträge werden übersprungen.
+
+Trennzeichen und bekannte Spaltenüberschriften werden erkannt. Datumsformate
+`YYYY-MM-DD` und `DD.MM.YYYY` werden nur bei durchgehend passender Schreibweise
+vorgeschlagen. Schrägstrich-Daten erfordern eine bewusste Wahl zwischen Tag/Monat
+und Monat/Tag; numerische Dauern eine Wahl zwischen Dezimalstunden und Minuten.
+Die serverseitige Prüfung entscheidet weiterhin über gültige Datumswerte.
+Die sichtbare Quellzeitzone startet für jede neue Datei mit Europe/Berlin und
+kann auf UTC geändert werden. Aus einer vorherigen Datei bleiben keine
+Format- oder Mitarbeiterzuordnungen erhalten.
 
 Falls der Import nicht klappt, bietet die Importkarte Hilfe durch
 `support@quoska.de` an. Nutzer können den Export als E-Mail-Anhang oder einen
