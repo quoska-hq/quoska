@@ -145,6 +145,30 @@ test.describe("Setup Wizard", () => {
     await expect(page.getByLabel("Bundesland")).toBeVisible();
   });
 
+  test("recovers from an unavailable setup response without losing the saved draft", async ({ page }) => {
+    await registerFounder(page, testEmail("setup-retry"));
+    await page.getByLabel("Vorname").fill("Erika");
+    await page.getByLabel("Nachname").fill("Entwurf");
+    await page.getByRole("button", { name: "Weiter", exact: true }).click();
+    await expect(page.getByLabel("Firmenname")).toBeVisible();
+
+    await page.route("**/api/v1/tenants/setup", (route) => route.fulfill({
+      status: 503,
+      contentType: "text/html",
+      body: "Service unavailable",
+    }));
+    await page.reload();
+    await expect(page.getByRole("alert").filter({ hasText: "Die Einrichtung konnte nicht geladen werden" })).toBeVisible();
+    await expect(page.getByText("Einrichtung wird geladen…")).not.toBeVisible();
+
+    await page.unroute("**/api/v1/tenants/setup");
+    await page.getByRole("button", { name: "Erneut versuchen", exact: true }).click();
+    await expect(page.getByLabel("Firmenname")).toBeVisible();
+    await page.getByRole("button", { name: "Zurück", exact: true }).click();
+    await expect(page.getByLabel("Vorname")).toHaveValue("Erika");
+    await expect(page.getByLabel("Nachname")).toHaveValue("Entwurf");
+  });
+
   test("shows the free-plan team limit after profile, company and schedule", async ({ page }) => {
     const email = testEmail("limit");
     await registerFounder(page, email);

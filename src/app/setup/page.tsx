@@ -24,6 +24,7 @@ import { SetupScheduleStep } from "@/components/setup-schedule-step";
 import { InviteStep } from "@/components/setup-invite-step";
 import { SetupReviewStep } from "@/components/setup-review-step";
 import { SetupVerifyEmailStep } from "@/components/setup-verify-email-step";
+import { SetupLoadingState } from "@/components/setup-loading-state";
 import { trackMarketingSignupProgress } from "@/lib/marketing-analytics";
 import { SetupProgress } from "@/components/setup-progress";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export default function SetupPage() {
   const router = useRouter();
   const [step, setStep] = useState<SetupStep>("profile");
   const [ready, setReady] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -120,7 +122,7 @@ export default function SetupPage() {
         : draft.step);
     }
 
-    void loadSetup();
+    void loadSetup().catch(() => setLoadFailed(true));
   }, [router]);
 
   function persistDraft(
@@ -273,11 +275,7 @@ export default function SetupPage() {
   }
 
   if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f3ee]">
-        <p className="text-sm text-muted-foreground">Einrichtung wird geladen…</p>
-      </div>
-    );
+    return <SetupLoadingState failed={loadFailed} />;
   }
 
   return (

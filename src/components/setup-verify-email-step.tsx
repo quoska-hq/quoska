@@ -45,14 +45,16 @@ export function SetupVerifyEmailStep({ email, onBack }: SetupVerifyEmailStepProp
         <h2 className="text-xl font-semibold">Jetzt noch deine E-Mail bestätigen</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Deine Einrichtung ist vollständig vorbereitet. Öffne den Bestätigungslink, den wir an
-          {" "}<strong className="text-slate-800">{email}</strong> geschickt haben. Erst danach
-          wird deine Firma angelegt und du kommst ins Dashboard.
+          {" "}<strong className="text-slate-800">{email}</strong> geschickt haben.
+          Danach prüfst du die Übersicht und klickst auf „Einrichtung abschließen“.
         </p>
       </div>
 
       <Alert className="text-left">
         <AlertDescription>
-          Du kannst dieses Fenster schließen. Deine Angaben bleiben in diesem Browser gespeichert.
+          Öffne den Link möglichst in diesem Browser. Deine vorbereiteten Angaben sind nur
+          hier gespeichert und werden nicht auf andere Geräte übertragen. Prüfe auch den
+          Spamordner, falls die E-Mail fehlt.
         </AlertDescription>
       </Alert>
       {message && <Alert><AlertDescription>{message}</AlertDescription></Alert>}
