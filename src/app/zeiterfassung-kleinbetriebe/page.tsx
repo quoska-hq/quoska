@@ -101,7 +101,8 @@ export default function SmallBusinessPage() {
           <div className="grid gap-6 md:grid-cols-3">
             <Benefit number="01" title="Schneller Start">
               Betrieb anlegen, Arbeitsmodell wählen und Mitarbeitende per
-              E-Mail einladen.
+              E-Mail einladen.{" "}
+              <Link href="/digitale-zeiterfassung" className="font-semibold text-[#5145ad] underline underline-offset-4">So startet euer Team</Link>.
             </Benefit>
             <Benefit number="02" title="Ein gemeinsamer Ablauf">
               Stempeln, Abwesenheiten und Korrekturen laufen in derselben
@@ -203,7 +204,7 @@ export default function SmallBusinessPage() {
               href="/digitale-zeiterfassung"
               className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]"
             >
-              Zeiterfassung im Browser <ArrowUpRight className="size-4" />
+              Zeiterfassung Schritt für Schritt einrichten <ArrowUpRight className="size-4" />
             </Link>
             <Link
               href="/open-source-zeiterfassung"

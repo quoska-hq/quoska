@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/browser-erweiterung`, lastModified: "2026-08-25" },
     { url: `${base}/preise`, lastModified: "2026-08-19" },
     { url: `${base}/sicherheit`, lastModified: "2026-08-11" },
-    { url: `${base}/digitale-zeiterfassung`, lastModified: "2026-08-19" },
+    { url: `${base}/digitale-zeiterfassung`, lastModified: "2026-09-11" },
     { url: `${base}/zeiterfassung-kleinbetriebe`, lastModified: "2026-08-19" },
     {
       url: `${base}/arbeitszeiterfassung-pflicht-kleinbetriebe`,

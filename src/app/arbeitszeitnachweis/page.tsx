@@ -252,6 +252,7 @@ export default function WorkTimeRecordPage() {
               );
             })}
           </div>
+          <p className="mt-7 max-w-2xl text-sm leading-7 text-slate-700">Ihr möchtet eure Zeiten künftig direkt digital erfassen? Die Anleitung <Link href="/digitale-zeiterfassung" className="font-semibold text-[#5145ad] underline underline-offset-4">Zeiterfassung einführen</Link> zeigt den Weg vom ersten Zugang zur fertigen Buchung.</p>
           <div className="mt-8 flex flex-wrap gap-6 text-sm font-semibold">
             <Link href="/stundenzettel" className="inline-flex items-center gap-2 text-slate-950 hover:text-[#5145ad]">
               Stundenzettel kostenlos ausfüllen <ArrowUpRight className="size-4" />

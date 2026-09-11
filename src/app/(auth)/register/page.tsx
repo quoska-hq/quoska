@@ -118,7 +118,8 @@ export default function RegisterPage() {
       </h1>
 
       <p className="mb-6 text-sm text-slate-500">
-        Zuerst nur die Zugangsdaten. Dein Profil und deine Firma richtest du direkt danach ein.
+        Zuerst nur die Zugangsdaten. Danach bereitest du Profil und Firma vor.
+        Wir senden dir einen Link zur E-Mail-Bestätigung, bevor du die Einrichtung abschließt.
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
