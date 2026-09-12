@@ -1,20 +1,22 @@
 import { createAdminClient } from "@/config/supabase/server";
 import { serverEnv } from "@/config/env";
-import { productTenantKey } from "@/config/server/product-analytics-key";
+import { productTenantKey, productEmployeeKey } from "@/config/server/product-analytics-key";
 import { productDay, productWeek, shiftProductDay, isStaleEntry } from "@/config/server/product-analytics-time";
 import { loadProductData } from "@/repos/productAnalyticsRepo";
 import { getProductActions } from "@/repos/productEventRepo";
-import type { ProductData, ProductOverview, ActionCount } from "@/types/product-analytics";
+import { getAccountActivity } from "@/repos/productAccountActivityRepo";
+import type { ProductData, ProductOverview, ActionCount, AccountActivity, AccountOverview } from "@/types/product-analytics";
 
 export async function getProductOverview(now: string): Promise<ProductOverview> {
   const data = await loadProductData(createAdminClient(), now);
   const excluded = (serverEnv.PRODUCT_ANALYTICS_EXCLUDED_TENANTS ?? "").split("|").map(v => v.trim()).filter(Boolean);
-  return buildProductOverview(data, now, getProductActions(), excluded, productTenantKey);
+  return buildProductOverview(data, now, getProductActions(), excluded, productTenantKey, getAccountActivity(), productEmployeeKey);
 }
 
 export function buildProductOverview(
   data: ProductData, now: string, events: ActionCount[] = [], excluded: string[] = [],
   tenantKey: (id: string) => string = id => id,
+  accountActivity: AccountActivity[] = [], employeeKey: (id: string) => string = id => id,
 ): ProductOverview {
   const today = productDay(now), weekStart = productWeek(today);
   const previousWeekStart = shiftProductDay(weekStart, -7);
@@ -24,6 +26,22 @@ export function buildProductOverview(
   const entries = data.entries.filter(e => tenantIds.has(e.tenant_id));
   const employees = data.employees.filter(e => tenantIds.has(e.tenant_id) && !e.deleted_at);
   const users = new Map(data.accounts.map(u => [u.id, u]));
+  const presence = new Map(accountActivity.map(a => [a.tenantKey + ":" + a.employeeKey, a]));
+  const companies = new Map(tenants.map(t => [t.id, t.name]));
+  const accountRows: AccountOverview[] = data.employees.filter(e => tenantIds.has(e.tenant_id)).map(e => {
+    const account = users.get(e.user_id);
+    const seen = presence.get(tenantKey(e.tenant_id) + ":" + employeeKey(e.id));
+    return {
+      id: e.id, name: `${e.first_name} ${e.last_name}`.trim(), email: account?.email ?? null,
+      company: companies.get(e.tenant_id)!, role: e.role,
+      status: e.deleted_at ? "deactivated" : !account ? "missing" : account.banned ? "blocked" : !account.confirmed ? "invited" : "active",
+      lastSignInAt: account?.last_sign_in_at ?? null,
+      // A login, imported entry or colleague's edit is not evidence of this person's app use.
+      lastActiveAt: seen?.lastActiveAt ?? null,
+      lastActionAt: seen?.lastActionAt ?? null, lastAction: seen?.lastAction ?? null,
+    };
+  });
+  accountRows.sort((a, b) => (b.lastActiveAt ?? "").localeCompare(a.lastActiveAt ?? "") || a.name.localeCompare(b.name, "de"));
   const linked = new Set(data.employees.map(e => e.user_id));
   const internalUsers = new Set(data.employees.filter(e => !tenantIds.has(e.tenant_id)).map(e => e.user_id));
   const accounts = data.accounts.filter(u => !internalUsers.has(u.id));
@@ -90,5 +108,5 @@ export function buildProductOverview(
       inPeriod(weekStart, shiftProductDay(today, 1), "Laufende Woche · unvollständig"),
       inPeriod(previousWeekStart, weekStart, "Letzte vollständige Woche"),
       inPeriod(shiftProductDay(previousWeekStart, -7), previousWeekStart, "Vorherige vollständige Woche")],
-    cohorts, tenants: rows, actions };
+    cohorts, tenants: rows, accounts: accountRows, actions };
 }

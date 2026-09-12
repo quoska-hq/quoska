@@ -31,7 +31,7 @@ async function handlePost(request: Request) {
     }
 
     const { tenantId, employeeId } = authResult.data;
-    setObservedTenant(tenantId);
+    setObservedTenant(tenantId, employeeId);
 
     const body: unknown = await request.json();
     const parsed = pauseBodySchema.safeParse(body);

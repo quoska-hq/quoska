@@ -1,10 +1,12 @@
+import { formatDateFullDE, formatDateTimeDE } from "@/config/client/date-utils";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ProductOverview } from "@/types/product-analytics";
 import { ProductTenantTable } from "@/components/product-tenant-table";
+import { ProductAccountTable } from "@/components/product-account-table";
+import { productActionLabels as names } from "@/config/client/product-action-labels";
 import { PageHeader } from "@/components/page-header";
 
-const names: Record<string,string> = { clock_in: "Einstempeln", clock_out: "Ausstempeln", clock_pause: "Pause starten", clock_resume: "Pause beenden", extension_clock: "Browser-Erweiterung", import: "Import / Vorschau", invite: "Einladung", register: "Firma anlegen", setup: "Einrichtung", setup_complete: "Einrichtung abschließen", app_open: "App geöffnet", browser_login: "Anmeldung (Browsermeldung)", browser_signup: "Registrierung (Browsermeldung)" };
 const outcomes: Record<string,string> = { ok: "Erfolgreich", invalid: "Eingabe abgelehnt", denied: "Zugriff abgelehnt", conflict: "Konflikt", limited: "Begrenzt", error: "Serverfehler", rejected: "Abgelehnt", network: "Verbindungs-/Browserfehler" };
 export function ProductAnalyticsDashboard({ summary: s, history, operations }: {
   summary: ProductOverview;
@@ -21,7 +23,7 @@ export function ProductAnalyticsDashboard({ summary: s, history, operations }: {
   }
   const issues = s.tenants.filter(t => t.stale > 0);
   return <div className="space-y-6" data-testid="product-analytics-dashboard">
-    <PageHeader title="Produktübersicht" description={`Stand ${s.at.replace("T", " ").slice(0,16)} UTC · Produkt-Tage: Europe/Berlin · interne Firmen ausgeschlossen`}
+    <PageHeader title="Produktübersicht" description={`Stand ${formatDateTimeDE(s.at)} Uhr · Produkt-Tage: Europe/Berlin · interne Firmen ausgeschlossen`}
       actions={<div className="flex flex-wrap gap-3 text-sm underline"><Link href="/app/product-analytics">Aktualisieren</Link><a href="/api/v1/product-analytics" download="produktbericht.json">Bericht herunterladen</a><Link href="/app/site-analytics">Website-Analytics</Link></div>} />
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <Metric label="Firmen" value={s.totals.companies} note={`${s.weeks[0].companies} heute neu`} />
@@ -49,11 +51,14 @@ export function ProductAnalyticsDashboard({ summary: s, history, operations }: {
     </Section>
     <Section title="Kommen neue Firmen in der Folgewoche zurück?">
       <Table headers={["Registrierungswoche ab", "Firmen", "Erste Zeiterfassung / Import bis heute", "Aktiv in der Folgewoche"]}
-        rows={s.cohorts.map(c => [c.week, c.companies, c.activated, c.returned === null ? "Noch nicht vollständig beobachtbar" : `${c.returned} / ${c.companies} (${Math.round(c.returned / c.companies * 100)} %)`])} />
+        rows={s.cohorts.map(c => [formatDateFullDE(c.week), c.companies, c.activated, c.returned === null ? "Noch nicht vollständig beobachtbar" : `${c.returned} / ${c.companies} (${Math.round(c.returned / c.companies * 100)} %)`])} />
       <p className="mt-3 text-xs text-slate-500">Folgewoche = nächste vollständige Kalenderwoche. Historische Aktivität ist aus Datenänderungen rekonstruiert; reine App-Aufrufe stehen erst ab Messbeginn zur Verfügung.</p>
     </Section>
     <Section title="Firmen und Nutzung">
       <ProductTenantTable tenants={s.tenants} />
+    </Section>
+    <Section title="Konten und Aktivität">
+      <ProductAccountTable accounts={s.accounts} />
     </Section>
     <Section title="Aktionen und Fehler · seit Beginn der Vorwoche">
       <Table headers={["Aktion", "Ergebnis", "Anzahl", "Zugeordnete Firmen"]} rows={[...groups.values()].sort((a,b) => Number(a.outcome === "ok") - Number(b.outcome === "ok") || b.count - a.count)
@@ -61,7 +66,7 @@ export function ProductAnalyticsDashboard({ summary: s, history, operations }: {
       <p className="mt-3 text-xs text-slate-500">Messung ab Bereitstellung; leere Werte bedeuten keine erfassten Ereignisse. Browsermeldungen sind unbestätigte Hinweise. Eingabe- und Zugriffsablehnungen sind nicht automatisch Programmfehler. App-Aufrufe sind auf eine Meldung pro Firma und Tag begrenzt.</p>
     </Section>
     <Section title="Tägliche Bestandsaufnahmen">
-      <Table headers={["Datum", "Firmen", "Nutzbare Konten"]} rows={history.map(h => [h.day,h.companies,h.usableAccounts])} />
+      <Table headers={["Datum", "Firmen", "Nutzbare Konten"]} rows={history.map(h => [formatDateFullDE(h.day),h.companies,h.usableAccounts])} />
       <p className="mt-3 text-xs text-slate-500">Automatisch täglich gespeichert. Vor dem ersten Lauf ist noch keine Verlaufshistorie vorhanden.</p>
     </Section>
     <Operations value={operations} now={s.at} />
@@ -83,5 +88,5 @@ function Operations({value,now}:{value:{at:string;data:string}|null;now:string})
     if (Array.isArray(parsed)) rows = parsed.filter((r): r is {label:string;value:string} => typeof r?.label === "string" && typeof r?.value === "string").slice(0,30);
   } catch { /* Treat unavailable operational evidence as unknown. */ }
   const old = !value || Date.parse(now) - Date.parse(value.at) > 2 * 3600000;
-  return <Section title="Support und Betrieb"><p className={`mb-3 text-sm ${old ? "text-amber-800" : "text-slate-500"}`}>{old ? "Betriebsstatus fehlt oder ist älter als zwei Stunden." : `Stand ${value!.at.replace("T"," ").slice(0,16)} UTC`}</p><Table headers={["Prüfung","Ergebnis"]} rows={rows.map(r => [r.label,r.value])} /></Section>;
+  return <Section title="Support und Betrieb"><p className={`mb-3 text-sm ${old ? "text-amber-800" : "text-slate-500"}`}>{old ? "Betriebsstatus fehlt oder ist älter als zwei Stunden." : `Stand ${formatDateTimeDE(value!.at)} Uhr`}</p><Table headers={["Prüfung","Ergebnis"]} rows={rows.map(r => [r.label,r.value])} /></Section>;
 }

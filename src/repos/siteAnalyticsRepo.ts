@@ -149,8 +149,10 @@ export function pruneSiteAnalytics(
   const toolEvents = db.prepare("DELETE FROM free_tool_events WHERE occurred_at < ?")
     .run(cutoffIso).changes;
   const actions = db.prepare("DELETE FROM product_action_counts WHERE day < ?").run(cutoffIso.slice(0, 10)).changes;
+  const accounts = db.prepare("DELETE FROM product_account_activity WHERE last_active_at < ?").run(cutoffIso).changes;
+  db.prepare("UPDATE product_account_activity SET last_action_at = NULL, last_action = NULL WHERE last_action_at < ?").run(cutoffIso);
   db.prepare("DELETE FROM product_snapshots WHERE day < ?").run(cutoffIso.slice(0, 10));
-  return pageviews + marketing + toolEvents + actions;
+  return pageviews + marketing + toolEvents + actions + accounts;
 }
 
 function marketingEventCounts(db: Sqlite, fromIso: string, toIso: string): AnalyticsCount[] {

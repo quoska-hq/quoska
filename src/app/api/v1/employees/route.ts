@@ -119,7 +119,7 @@ async function handlePost(request: Request) {
     }
 
     const { tenantId, role } = authResult.data;
-    setObservedTenant(tenantId);
+    setObservedTenant(tenantId, authResult.data.employeeId);
 
     if (role !== "admin") {
       return NextResponse.json<ApiResponse<Employee>>(

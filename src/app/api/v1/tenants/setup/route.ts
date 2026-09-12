@@ -93,7 +93,7 @@ async function handlePost(request: Request) {
     // Get tenant_id from the employee record linked to this user
     const { data: employee } = await admin
       .from("employees")
-      .select("tenant_id")
+      .select("id, tenant_id")
       .eq("user_id", user.id)
       .single();
 
@@ -105,7 +105,7 @@ async function handlePost(request: Request) {
     }
 
     // Update tenant with company details
-    setObservedTenant(employee.tenant_id);
+    setObservedTenant(employee.tenant_id, employee.id);
     const { error } = await admin
       .from("tenants")
       .update({

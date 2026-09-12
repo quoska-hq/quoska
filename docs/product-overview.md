@@ -32,6 +32,37 @@ by `|`. No default exclusions or production company names ship in the repository
 - Open running/paused entries older than 24 hours appear as operator issues and
   as a notice in the affected user's clock screen. No time data is auto-corrected.
 
+## Account activity
+
+The operator-only account table lists employee profiles with name, Auth email,
+company, role and account status, searchable by name, email or company. Deactivated
+profiles remain labelled separately and do not become usable accounts. Internal
+company exclusions also apply to this table and to the JSON export.
+
+`Zuletzt angemeldet` is Auth's `last_sign_in_at`. `Zuletzt aktiv` is the latest
+authenticated app-use observation or successful measured server action.
+`Letzte erfasste Aktion` includes the category and time of the latest successful
+action covered by the diagnostics below. These columns never infer activity from
+another person's edits, imported time entries, employee creation or a login alone.
+Historical per-account app use before this measurement is unavailable, and missing
+observations do not prove inactivity. Dates and times use DD.MM.YYYY, HH:mm in
+Europe/Berlin; API values remain ISO timestamps.
+
+The browser reports visible page opens, navigation, returning to the app and user
+input at most once per minute per mounted app. There is no idle heartbeat. It sends
+no URL, input content, identity or timestamp; the server uses the authenticated
+employee and its own clock. Background polling does not extend account activity.
+Browser and new per-account server observations honor DNT/GPC. Measurements are
+best effort and do not claim continuous online presence.
+
+The existing analytics SQLite file gains an idempotently created
+`product_account_activity` table. It stores only the latest activity time and last
+successful action per HMAC company/employee key, without a session/event history.
+Names and email addresses are joined from the live operator-authorized database
+query, never stored in analytics SQLite or daily snapshots. Existing 180-day
+retention expires old observations and action fields. No Supabase migration or
+new configuration is required; restart the app to initialize the SQLite table.
+
 ## Diagnostics
 
 Fixed server action/outcome counters cover clock start/stop/pause/resume,

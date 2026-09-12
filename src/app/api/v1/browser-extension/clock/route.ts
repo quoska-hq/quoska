@@ -28,7 +28,7 @@ async function handlePost(request: Request) {
   }
 
   const context = authResult.data;
-  setObservedTenant(context.tenantId);
+  setObservedTenant(context.tenantId, context.employeeId);
   const result = await performBrowserExtensionClockAction(
     context.supabase,
     { tenantId: context.tenantId, employeeId: context.employeeId },
