@@ -1,6 +1,7 @@
 import type { CockpitData, CockpitEmployeeRow } from "@/types/cockpit";
-import { formatDateDE } from "@/config/client/date-utils";
 import { formatCockpitMinutes } from "@/components/cockpit-formatters";
+import { CockpitWorkTrend } from "@/components/cockpit-work-trend";
+import { CockpitProjectDistribution } from "@/components/cockpit-project-distribution";
 import { CockpitActionCenter } from "@/components/cockpit-action-center";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, ChevronRight, Clock3, Target, Users } from "lucide-react";
@@ -70,94 +71,13 @@ export function CockpitOverview({
         })}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(16rem,1fr)]">
-        <WorkTrend data={data} />
-        <ProjectDistribution data={data} />
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(20rem,1fr)]">
+        <CockpitWorkTrend key={`${data.period.startDate}-${data.period.endDate}-${data.selectedEmployeeId}`} data={data} />
+        <CockpitProjectDistribution key={`${data.period.days}-${data.selectedEmployeeId}`} data={data} onEmployeeSelect={onEmployeeSelect} />
       </div>
 
       <EmployeeWorkload rows={data.employeeRows} onEmployeeSelect={onEmployeeSelect} />
     </div>
-  );
-}
-
-function WorkTrend({ data }: { data: CockpitData }) {
-  const maximum = Math.max(
-    60,
-    ...data.daily.flatMap((day) => [day.workedMinutes, day.targetMinutes]),
-  );
-  return (
-    <Card className="bg-white">
-      <CardHeader className="flex-row items-center justify-between border-b">
-        <CardTitle>Arbeitszeitverlauf</CardTitle>
-        <div className="flex items-center gap-3 text-[11px] text-slate-500">
-          <Legend color="bg-[#6658d3]" label="Ist" />
-          <Legend color="bg-slate-200" label="Soll" />
-        </div>
-      </CardHeader>
-      <CardContent className="overflow-x-auto pt-2 [contain:inline-size]">
-        <div
-          className={`flex h-52 items-end gap-1.5 ${data.period.days === 30 ? "min-w-[760px]" : "min-w-0"}`}
-          role="img"
-          aria-label="Arbeitszeit und Sollzeit pro Tag"
-        >
-          {data.daily.map((day, index) => {
-            const workedHeight = Math.round((day.workedMinutes / maximum) * 100);
-            const targetHeight = Math.round((day.targetMinutes / maximum) * 100);
-            const showLabel = data.period.days === 7 || index % 5 === 0 || index === data.daily.length - 1;
-            return (
-              <div key={day.date} className="flex h-full min-w-0 flex-1 flex-col justify-end">
-                <div
-                  className="relative mx-auto h-40 w-full max-w-9 border-b border-slate-200"
-                  title={`${formatDateDE(day.date)} · Ist ${formatCockpitMinutes(day.workedMinutes)} · Soll ${formatCockpitMinutes(day.targetMinutes)}`}
-                >
-                  <div
-                    className="absolute inset-x-0 bottom-0 bg-slate-200"
-                    style={{ height: `${targetHeight}%` }}
-                  />
-                  <div
-                    className="absolute inset-x-[22%] bottom-0 bg-[#6658d3] transition-[height] duration-300"
-                    style={{ height: `${workedHeight}%` }}
-                  />
-                </div>
-                <span className="mt-2 h-4 text-center text-[10px] text-slate-500">
-                  {showLabel ? formatDateDE(day.date) : ""}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function Legend({ color, label }: { color: string; label: string }) {
-  return <span className="flex items-center gap-1.5"><i className={`size-2 ${color}`} />{label}</span>;
-}
-
-function ProjectDistribution({ data }: { data: CockpitData }) {
-  return (
-    <Card className="bg-white">
-      <CardHeader className="border-b"><CardTitle>Projekte</CardTitle></CardHeader>
-      <CardContent className="space-y-4 pt-1">
-        {data.projects.length === 0 ? (
-          <p className="py-12 text-center text-sm text-slate-500">Noch keine Projektzeit.</p>
-        ) : data.projects.slice(0, 6).map((project) => (
-          <div key={project.id ?? "none"} className="space-y-1.5">
-            <div className="flex items-center justify-between gap-3 text-xs">
-              <span className="truncate font-medium text-slate-800">{project.name}</span>
-              <span className="shrink-0 text-slate-500">{formatCockpitMinutes(project.minutes)}</span>
-            </div>
-            <div className="h-1.5 overflow-hidden bg-slate-100">
-              <div
-                className="h-full bg-[#6658d3]"
-                style={{ width: `${project.sharePercent}%`, backgroundColor: project.color ?? undefined }}
-              />
-            </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
   );
 }
 

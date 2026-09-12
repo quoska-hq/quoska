@@ -41,6 +41,11 @@ export interface CockpitProjectRow {
   color: string | null;
   minutes: number;
   sharePercent: number;
+  contributors: {
+    employeeId: string;
+    name: string;
+    minutes: number;
+  }[];
 }
 
 export interface CockpitActivityRow {

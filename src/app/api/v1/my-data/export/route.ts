@@ -14,6 +14,8 @@ import {
   getEmployeeAuditRecords,
 } from "@/repos/exportRepo";
 import { buildEmployeeExport, generateDSGVOCSV } from "@/services/exportService";
+import { getOwnFeedback } from "@/repos/feedbackRepo";
+import { generateFeedbackCSV } from "@/services/feedbackExportService";
 
 export async function GET() {
   try {
@@ -30,10 +32,11 @@ export async function GET() {
     const { tenantId, employeeId } = authResult.data;
 
     // Fetch all data in parallel
-    const [employee, allEntries, auditRecords] = await Promise.all([
+    const [employee, allEntries, auditRecords, feedback] = await Promise.all([
       getEmployeeProfile(supabase, tenantId, employeeId),
       getEmployeeAllEntries(supabase, tenantId, employeeId),
       getEmployeeAuditRecords(supabase, tenantId, employeeId),
+      getOwnFeedback(supabase, employeeId),
     ]);
 
     if (!employee) {
@@ -51,7 +54,7 @@ export async function GET() {
     );
 
     // Generate CSV
-    const csv = generateDSGVOCSV(exportData);
+    const csv = generateDSGVOCSV(exportData) + "\n" + generateFeedbackCSV(feedback);
     const filename = `quoska_meine_daten_${employee.first_name.toLowerCase()}_${employee.last_name.toLowerCase()}.csv`;
 
     return new NextResponse(csv, {
