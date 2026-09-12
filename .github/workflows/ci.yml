@@ -153,6 +153,18 @@ jobs:
             echo "SUPABASE_SERVICE_ROLE_KEY=$SECRET_KEY"
           } >> "$GITHUB_ENV"
 
+      - name: Configure local feedback mail catcher
+        run: |
+          MAIL_CONTAINER=$(docker ps --filter name=supabase_inbucket_ --format '{{.ID}}')
+          test -n "$MAIL_CONTAINER"
+          MAIL_HOST=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$MAIL_CONTAINER")
+          test -n "$MAIL_HOST"
+          {
+            echo "FEEDBACK_SMTP_HOST=$MAIL_HOST"
+            echo "FEEDBACK_SMTP_PORT=1025"
+            echo "FEEDBACK_SMTP_SECURITY=none"
+          } >> "$GITHUB_ENV"
+
       - name: Apply migrations
         run: supabase db push --local
 

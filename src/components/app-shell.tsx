@@ -8,6 +8,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { AppHeader } from "@/components/app-header";
 import { PresencePanel } from "@/components/presence-panel";
 import { ClockTabTitle } from "@/components/clock-tab-title";
+import { FeedbackInvitation } from "@/components/feedback-invitation";
 import type { ReactNode } from "react";
 import type { Role } from "@/types";
 
@@ -77,6 +78,7 @@ export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShel
 
       {/* Live clock timer in the browser tab title (display only) */}
       <ClockTabTitle />
+      <FeedbackInvitation />
 
       <BottomNav
         role={role}

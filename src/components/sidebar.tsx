@@ -20,6 +20,7 @@ import {
   Briefcase,
   LayoutDashboard,
   Globe2,
+  MessageSquare,
 } from "lucide-react";
 
 interface NavItem {
@@ -190,6 +191,9 @@ export function Sidebar({ role, userName, isAnalyticsAdmin, onSignOut }: Sidebar
 
       {/* User section */}
       <div className="border-t border-slate-900/15 px-3 py-4">
+        <Link href="/app/help" className={`mb-3 flex min-h-10 items-center gap-2.5 rounded-sm px-3 text-xs font-medium hover:bg-white/60 hover:text-[#5548ba] ${pathname === "/app/help" ? "bg-white/70 text-[#5548ba]" : "text-slate-500"}`}>
+          <MessageSquare className="size-4" />Hilfe &amp; Feedback
+        </Link>
         <div className="flex items-center gap-3 px-2">
           <Avatar size="sm">
             <AvatarFallback className="bg-[#dcd8cf] text-[#5548ba] text-xs font-semibold">

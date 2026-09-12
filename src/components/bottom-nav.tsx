@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquare,
   Palmtree,
   Settings,
   Thermometer,
@@ -41,6 +42,7 @@ interface MobileNavItem {
 }
 
 const MOBILE_NAV_ITEMS: MobileNavItem[] = [
+  { href: "/app/help", label: "Hilfe & Feedback", icon: MessageSquare, roles: ["admin", "manager", "employee"] },
   {
     href: "/app/dashboard",
     label: "Cockpit",

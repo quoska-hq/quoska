@@ -31,6 +31,7 @@ const ROUTE_LABELS: { match: string; label: string }[] = [
   { match: "/app/projects", label: "Projekte" },
   { match: "/app/reports", label: "Berichte" },
   { match: "/app/settings", label: "Einstellungen" },
+  { match: "/app/help", label: "Hilfe & Feedback" },
 ];
 
 function useRouteLabel(pathname: string): string {

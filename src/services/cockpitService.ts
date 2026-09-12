@@ -5,8 +5,8 @@ import type {
   CockpitData,
   CockpitDailyPoint,
   CockpitEmployeeRow,
-  CockpitProjectRow,
 } from "@/types/cockpit";
+import { completedWorkMinutes as netMinutes, buildCockpitProjects } from "@/services/cockpitWorkService";
 import { success, failure, type ApiResponse } from "@/types/api";
 import { getCockpitDates } from "@/services/cockpitPeriodService";
 import { scheduledMinutesForDate } from "@/services/workScheduleService";
@@ -48,12 +48,6 @@ interface CockpitBuildInput {
   days: 7 | 30;
   employeeId?: string;
   nowIso: string;
-}
-
-function netMinutes(entry: TimeEntry): number {
-  if (entry.status !== "completed" || !entry.clock_out) return 0;
-  const elapsed = (Date.parse(entry.clock_out) - Date.parse(entry.clock_in)) / 60_000;
-  return Math.max(0, Math.round(elapsed - (entry.break_minutes ?? 0)));
 }
 
 function employeeTarget(
@@ -181,29 +175,6 @@ function buildEmployeeRows(
   }).sort((a, b) => b.workedMinutes - a.workedMinutes);
 }
 
-function buildProjects(entries: TimeEntry[], projects: Project[]): CockpitProjectRow[] {
-  const projectMap = new Map(projects.map((project) => [project.id, project]));
-  const totals = new Map<string, number>();
-  for (const entry of entries) {
-    const key = entry.project_id ?? "__none__";
-    totals.set(key, (totals.get(key) ?? 0) + netMinutes(entry));
-  }
-  const totalMinutes = [...totals.values()].reduce((sum, minutes) => sum + minutes, 0);
-  return [...totals]
-    .filter(([, minutes]) => minutes > 0)
-    .map(([key, minutes]) => {
-      const project = projectMap.get(key);
-      return {
-        id: project?.id ?? null,
-        name: project?.name ?? "Ohne Projekt",
-        color: project?.color ?? null,
-        minutes,
-        sharePercent: totalMinutes ? Math.round((minutes / totalMinutes) * 100) : 0,
-      };
-    })
-    .sort((a, b) => b.minutes - a.minutes);
-}
-
 export function buildCockpitData(input: CockpitBuildInput): CockpitData {
   const dates = getCockpitDates(input.startDate, input.endDate);
   const daily = buildDaily(dates, input.scopedEmployees, input.entries, input);
@@ -226,7 +197,7 @@ export function buildCockpitData(input: CockpitBuildInput): CockpitData {
     },
     daily,
     employeeRows,
-    projects: buildProjects(input.entries, input.projects),
+    projects: buildCockpitProjects(input.entries, input.projects, input.scopedEmployees),
     activity: buildCockpitActivity(input.audits, input.employees, input.projects,
       input.corrections.filter((request) => request.updated_at >= `${input.startDate}T00:00:00.000Z`)),
     actions: buildCockpitActions({

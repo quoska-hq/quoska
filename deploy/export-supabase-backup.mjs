@@ -20,6 +20,8 @@ const TABLES = [
   "notifications",
   "subscription_events",
   "public_holidays",
+  "feedback_prompt_state",
+  "feedback_messages",
 ];
 
 const STORAGE_BUCKETS = ["au-certificates"];

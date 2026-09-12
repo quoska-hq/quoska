@@ -14,6 +14,7 @@ import { BillingCard } from "@/components/billing-card";
 import { BrowserExtensionConnectionsCard } from "@/components/browser-extension-connections-card";
 import { TimeTrackingSettingsCard } from "@/components/time-tracking-settings-card";
 import { TimeImportCard } from "@/components/time-import-card";
+import { FeedbackSettingsCard } from "@/components/feedback-settings-card";
 import type { ApiResponse } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,6 +125,7 @@ export default function SettingsPage() {
         {(isAdmin || authInfo?.role === "manager") && <TimeImportCard />}
 
         <BrowserExtensionConnectionsCard />
+        <FeedbackSettingsCard />
 
         {/* Export Section */}
         <Card>
