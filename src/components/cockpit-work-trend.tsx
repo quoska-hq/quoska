@@ -91,15 +91,15 @@ export function CockpitWorkTrend({ data }: { data: CockpitData }) {
             ))}
           </div>
         </div>
-        <div className="relative ml-12 mt-3 h-5 text-[10px] tabular-nums text-slate-500" aria-hidden="true">
+        <div className="relative ml-12 mt-3 h-5 text-[10px] tabular-nums text-slate-500" aria-hidden="true" data-testid="cockpit-date-labels">
           {data.daily.map((day, index) => {
-            const compactLabel = index === 0 || index === lastIndex || (index === middleIndex && lastIndex > 2);
-            const wideLabel = data.period.days === 7 || index % 5 === 0 || index === lastIndex;
-            if (!compactLabel && !wideLabel) return null;
+            const endpoint = index === 0 || index === lastIndex;
+            const midpoint = index === middleIndex && lastIndex > 2;
+            if (!endpoint && !midpoint) return null;
             return (
               <span
                 key={day.date}
-                className={`absolute whitespace-nowrap ${index === 0 ? "" : index === lastIndex ? "-translate-x-full" : "-translate-x-1/2"} ${compactLabel ? (wideLabel ? "" : "sm:hidden") : "hidden sm:block"}`}
+                className={`absolute whitespace-nowrap ${index === 0 ? "" : index === lastIndex ? "-translate-x-full" : "-translate-x-1/2"} ${endpoint ? "" : "hidden sm:block"}`}
                 style={{ left: `${lastIndex > 0 ? index / lastIndex * 100 : 50}%` }}
               >
                 {formatDateFullDE(day.date)}

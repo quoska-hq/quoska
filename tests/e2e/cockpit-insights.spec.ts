@@ -118,8 +118,14 @@ test.describe("Cockpit charts and expandable projects", () => {
     const longProject = distribution(page).locator("details").filter({ hasText: "Ein sehr langer Projektname" });
     await longProject.locator("summary").click();
     await expect(longProject.getByRole("button", { name: "Mitarbeiterdetails für Lukas Mitarbeiter" })).toBeVisible();
-    for (const width of [320, 375, 768, 1280]) {
+    for (const width of [320, 375, 768, 1280, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
+      const dates = await trend(page).getByTestId("cockpit-date-labels").locator("span:visible").evaluateAll((elements) =>
+        elements.map((element) => ({ left: element.getBoundingClientRect().left, right: element.getBoundingClientRect().right })),
+      );
+      for (let index = 1; index < dates.length; index++) {
+        expect(dates[index].left).toBeGreaterThanOrEqual(dates[index - 1].right + 4);
+      }
       for (const card of [trend(page), distribution(page)]) {
         const box = await card.boundingBox();
         expect(box!.x + box!.width).toBeLessThanOrEqual(width);
