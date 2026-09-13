@@ -49,7 +49,7 @@ export async function getProjectById(
   return data;
 }
 
-/** List all projects for a tenant with assignment counts. */
+/** List all projects for a tenant with active employee assignment counts. */
 export async function listProjects(
   supabase: SupabaseClient,
   tenantId: string,
@@ -83,11 +83,16 @@ export async function listProjects(
 
   let query = supabase
     .from("projects")
-    .select("*, project_assignments(count)")
+    // Filter the counted assignments, retaining projects with zero active members.
+    .select("*, project_assignments(count, employee:employees!employee_id!inner())")
     .eq("tenant_id", tenantId)
-    .is("deleted_at", null);
+    .is("deleted_at", null)
+    .eq("project_assignments.tenant_id", tenantId)
+    .eq("project_assignments.employee.tenant_id", tenantId)
+    .is("project_assignments.employee.deleted_at", null);
   if (!includeInactive) query = query.eq("active", true);
-  const { data } = await query.order("name", { ascending: true });
+  const { data, error } = await query.order("name", { ascending: true });
+  if (error) throw error;
   if (!data) return [];
   return data.map((p) => ({
     id: p.id, tenant_id: p.tenant_id, name: p.name,

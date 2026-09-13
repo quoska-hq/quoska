@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-export const productObservationContext = new AsyncLocalStorage<{ tenantId?: string }>();
+export const productObservationContext = new AsyncLocalStorage<{ tenantId?: string; employeeId?: string }>();
 // Only call after the existing route authentication resolved a trusted tenant.
-export function setObservedTenant(tenantId: string): void {
+export function setObservedTenant(tenantId: string, employeeId?: string): void {
   const context = productObservationContext.getStore();
-  if (context) context.tenantId = tenantId;
+  if (context) { context.tenantId = tenantId; context.employeeId = employeeId; }
 }

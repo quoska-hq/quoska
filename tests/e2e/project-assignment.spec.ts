@@ -330,7 +330,7 @@ test.describe("Project Assignment — Epic 11", () => {
     await loginAsEmployee2(page);
     await page.goto("/app/clock");
 
-    await expect(page.locator('[data-slot="select-trigger"]')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("combobox", { name: "Projektzuordnung" })).toBeVisible({ timeout: 10_000 });
   });
 
   test("employee can clock in with a project and clock out", async ({ page }) => {
@@ -345,7 +345,7 @@ test.describe("Project Assignment — Epic 11", () => {
     await page.goto("/app/clock");
 
     // Select project
-    await page.locator('[data-slot="select-trigger"]').click();
+    await page.getByRole("combobox", { name: "Projektzuordnung" }).click();
     await page.getByRole("option", { name: new RegExp(PROJECT_NAME, "i") }).click();
 
     // Clock in — success is reflected by the button switching to "Ausstempeln"

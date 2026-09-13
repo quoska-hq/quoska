@@ -3,6 +3,7 @@
 import { FREE_PLAN_EMPLOYEE_LIMIT } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GermanDateInput } from "@/components/german-date-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -120,11 +121,10 @@ export function InviteStep({
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor={`invite-start-${index}`}>Eintrittsdatum</Label>
-                  <Input
+                  <GermanDateInput
                     id={`invite-start-${index}`}
-                    type="date"
                     value={invite.employmentStartDate}
-                    onChange={(e) => updateRow(index, "employmentStartDate", e.target.value)}
+                    onChange={(value) => updateRow(index, "employmentStartDate", value)}
                     required
                   />
                   <p className="text-xs text-muted-foreground">Beginn der Sollzeitberechnung</p>

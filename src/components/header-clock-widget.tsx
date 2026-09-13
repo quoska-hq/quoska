@@ -18,6 +18,7 @@ import { useLiveElapsedSeconds, formatStopwatch } from "@/components/use-live-cl
 import { Button } from "@/components/ui/button";
 import { MIN_BREAK_BLOCK_SECONDS } from "@/config/break-policy";
 import { AlertCircle, Coffee, Play, Square, X } from "lucide-react";
+import { useClockProject } from "@/hooks/use-clock-project";
 
 type Optimistic = "clock-in" | "clock-out" | "pause" | null;
 
@@ -37,16 +38,18 @@ export function HeaderClockWidget() {
 
   const activeEntry = status?.activeEntry ?? null;
   const activeBreak = status?.activeBreak ?? null;
+  const { selectedProject, isLoading: projectsLoading } = useClockProject(status);
 
   const {
     clockInMutation,
     clockOutMutation,
     pauseMutation,
     resumeMutation,
-    isProcessing,
+    isProcessing: mutationPending,
     error,
     clearError,
-  } = useClockMutations(activeEntry, activeBreak, null);
+  } = useClockMutations(activeEntry, activeBreak, selectedProject);
+  const isProcessing = mutationPending || (!activeEntry && projectsLoading);
 
   // Effective state honours optimistic overrides so the button reflects the
   // just-pressed action immediately (matches the Stempeln page's behavior).

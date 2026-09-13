@@ -38,7 +38,7 @@ async function handlePatch(request: Request) {
 
     const { data: employee } = await admin
       .from("employees")
-      .select("tenant_id, role")
+      .select("id, tenant_id, role")
       .eq("user_id", user.id)
       .is("deleted_at", null)
       .single();
@@ -50,7 +50,7 @@ async function handlePatch(request: Request) {
       );
     }
 
-    setObservedTenant(employee.tenant_id);
+    setObservedTenant(employee.tenant_id, employee.id);
     const { error } = await admin
       .from("tenants")
       .update({ setup_complete: setupComplete })

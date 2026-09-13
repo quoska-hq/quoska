@@ -1,23 +1,19 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Employee, Project, TimeEntry } from "@/types/database";
 import type { CorrectionRequestWithEntry } from "@/types/correction";
-import type {
-  CockpitData,
-  CockpitDailyPoint,
-  CockpitEmployeeRow,
-} from "@/types/cockpit";
+import type { CockpitData, CockpitDailyPoint, CockpitEmployeeRow } from "@/types/cockpit";
 import { completedWorkMinutes as netMinutes, buildCockpitProjects } from "@/services/cockpitWorkService";
 import { success, failure, type ApiResponse } from "@/types/api";
-import { getCockpitDates } from "@/services/cockpitPeriodService";
+import { getCockpitDates, getCockpitMissingEntryStart } from "@/services/cockpitPeriodService";
 import { scheduledMinutesForDate } from "@/services/workScheduleService";
 import { buildCockpitActivity } from "@/services/cockpitActivityService";
 import { employmentStartDate } from "@/services/overtimeService";
 import {
   absenceTypeOnDate,
-  buildCockpitActions,
   countEmployeeAbsenceDays,
   type CockpitAbsences,
-} from "@/services/cockpitInsightsService";
+} from "@/services/cockpitAbsenceService";
+import { buildCockpitActions } from "@/services/cockpitInsightsService";
 import { getEmployeesByTenant } from "@/repos/employeeRepo";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import { getApprovedLeavesForTenant } from "@/repos/leaveRepo";
@@ -37,6 +33,7 @@ interface CockpitBuildInput {
   scopedEmployees: Employee[];
   entries: TimeEntry[];
   recentBreakEntries: TimeEntry[];
+  missingEntryEntries?: TimeEntry[];
   projects: Project[];
   audits: CockpitAuditRecord[];
   absences: CockpitAbsences;
@@ -204,6 +201,7 @@ export function buildCockpitData(input: CockpitBuildInput): CockpitData {
       employees: input.scopedEmployees,
       entries: input.entries,
       recentBreakEntries: input.recentBreakEntries,
+      missingEntryEntries: input.missingEntryEntries,
       corrections: input.corrections,
       absences: input.absences,
       holidaysByState: input.holidaysByState,
@@ -224,6 +222,7 @@ export async function getAdminCockpit(
   nowIso: string,
   employeeId?: string,
 ): Promise<ApiResponse<CockpitData>> {
+  const missingEntryStart = getCockpitMissingEntryStart(startDate, endDate);
   const [
     employees,
     entryScopes,
@@ -236,13 +235,13 @@ export async function getAdminCockpit(
     corrections,
   ] = await Promise.all([
     getEmployeesByTenant(supabase, tenantId),
-    getCockpitTimeEntryScopes(supabase, tenantId, startDate, endDate, employeeId),
+    getCockpitTimeEntryScopes(supabase, tenantId, startDate, endDate, missingEntryStart, employeeId),
     getCockpitActiveEntries(supabase, tenantId, employeeId),
     getCockpitProjects(supabase, tenantId),
     getCockpitAuditRecords(supabase, tenantId, `${startDate}T00:00:00.000Z`, employeeId),
     getCockpitTenantState(supabase, tenantId),
-    getApprovedLeavesForTenant(supabase, tenantId, startDate, endDate),
-    getActiveSickForTenant(supabase, tenantId, startDate, endDate),
+    getApprovedLeavesForTenant(supabase, tenantId, missingEntryStart, endDate),
+    getActiveSickForTenant(supabase, tenantId, missingEntryStart, endDate),
     getCockpitCorrectionRecords(supabase, tenantId, `${startDate}T00:00:00.000Z`, employeeId),
   ]);
   const scopedEmployees = employeeId
@@ -259,13 +258,14 @@ export async function getAdminCockpit(
   const states = [...new Set(employees.map((employee) => employee.bundesland ?? tenantState))];
   const holidayRows = await Promise.all(states.map(async (state) => [
     state,
-    await getHolidayDatesInRange(supabase, state, startDate, endDate),
+    await getHolidayDatesInRange(supabase, state, missingEntryStart, endDate),
   ] as const));
   return success(buildCockpitData({
     employees,
     scopedEmployees,
     entries: allEntries,
     recentBreakEntries: entryScopes.recentBreakEntries,
+    missingEntryEntries: entryScopes.missingEntryEntries,
     projects,
     audits,
     absences: { leaves, sicknesses },

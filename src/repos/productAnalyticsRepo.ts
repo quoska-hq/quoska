@@ -17,7 +17,7 @@ export async function loadProductData(admin: SupabaseClient, now: string): Promi
   }
   const [tenants, employees, entries, projects] = await Promise.all([
     rows<ProductData["tenants"][number]>("tenants", "id,name,created_at,plan,setup_complete"),
-    rows<ProductData["employees"][number]>("employees", "id,tenant_id,user_id,role,created_at,deleted_at"),
+    rows<ProductData["employees"][number]>("employees", "id,tenant_id,user_id,role,created_at,deleted_at,first_name,last_name"),
     rows<ProductData["entries"][number]>("time_entries", "id,tenant_id,created_at,date,entry_source,status,clock_in", true),
     rows<ProductData["projects"][number]>("projects", "id,tenant_id,created_at", true),
   ]);
@@ -28,6 +28,7 @@ export async function loadProductData(admin: SupabaseClient, now: string): Promi
     accounts.push(...data.users.map((u) => ({
       id: u.id, created_at: u.created_at, confirmed: Boolean(u.email_confirmed_at),
       banned: Boolean(u.banned_until && Date.parse(u.banned_until) > Date.parse(now)),
+      email: u.email ?? null, last_sign_in_at: u.last_sign_in_at ?? null,
     })));
     if (data.users.length < 1000) break;
   }

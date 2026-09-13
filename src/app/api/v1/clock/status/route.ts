@@ -203,6 +203,8 @@ export async function GET() {
     }
 
     const response: ClockStatusResponse = {
+      employeeId,
+      lastProjectId: (activeEntry ?? lastCompletedEntry)?.project_id ?? null,
       staleActiveEntry: Boolean(activeEntry && isStaleEntry(activeEntry.clock_in, getNowIso())),
       activeEntry,
       activeBreak,

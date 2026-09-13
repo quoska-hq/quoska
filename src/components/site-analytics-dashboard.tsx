@@ -100,7 +100,7 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
           </div>
           <Activity className="size-4 text-[#6658d3]" />
         </CardHeader>
-        <CardContent className="pt-2">
+        <CardContent className="pt-2 pb-12">
           <div className="flex h-52 items-end gap-1 border-b border-slate-900/10 pt-8 sm:gap-1.5">
             {summary.daily.map((point, index) => (
               <div key={point.date} className="group relative flex h-full min-w-0 flex-1 items-end">
@@ -112,8 +112,8 @@ export function SiteAnalyticsDashboard({ summary }: { summary: SiteAnalyticsSumm
                   {formatDate(point.date)} · {point.pageviews} Aufrufe · {point.visitors} Besucher
                 </div>
                 {showDateLabel(index, summary.daily.length) && (
-                  <span className="absolute top-full left-1/2 mt-2 -translate-x-1/2 text-[10px] text-slate-400">
-                    {formatShortDate(point.date)}
+                  <span className="absolute top-full left-1/2 mt-2 -translate-x-1/2 text-center text-[10px] text-slate-400">
+                    {formatDate(point.date).slice(0, 6)}<br />{formatDate(point.date).slice(6)}
                   </span>
                 )}
               </div>
@@ -189,7 +189,6 @@ function RankingCard({ title, icon, rows, empty }: { title: string; icon: React.
 
 function formatNumber(value: number): string { return value.toLocaleString("de-DE"); }
 function formatDate(value: string): string { const [y, m, d] = value.split("-"); return `${d}.${m}.${y}`; }
-function formatShortDate(value: string): string { const [, m, d] = value.split("-"); return `${d}.${m}.`; }
 function showDateLabel(index: number, length: number): boolean {
   const step = length <= 7 ? 1 : length <= 30 ? 6 : 18;
   return index === 0 || index === length - 1 || index % step === 0;

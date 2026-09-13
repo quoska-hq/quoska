@@ -61,7 +61,7 @@ test.describe("Setup Wizard", () => {
     await expect(page.getByLabel("Vorname")).toHaveValue("");
     await page.getByLabel("Vorname").fill("Erika");
     await page.getByLabel("Nachname").fill("Gründerin");
-    await page.getByLabel("Eintrittsdatum").fill("2026-01-15");
+    await page.getByLabel("Eintrittsdatum").fill("15.01.2026");
     await page.getByLabel("Überstunden-Startsaldo").fill("2.5");
     await page.getByRole("button", { name: "Weiter" }).click();
 

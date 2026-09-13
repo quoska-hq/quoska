@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { SetupProfileInput } from "@/types/setup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GermanDateInput } from "@/components/german-date-input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -72,11 +73,10 @@ export function SetupProfileStep({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="setup-employment-start">Eintrittsdatum</Label>
-          <Input
+          <GermanDateInput
             id="setup-employment-start"
-            type="date"
             value={employmentStartDate}
-            onChange={(event) => setEmploymentStartDate(event.target.value)}
+            onChange={setEmploymentStartDate}
             required
           />
           <p className="text-xs text-muted-foreground">Ab diesem Tag wird Sollzeit berechnet.</p>

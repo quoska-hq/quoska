@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   createClient: vi.fn(),
   getEmployeeFromAuth: vi.fn(),
   getTimeEntriesByDateRange: vi.fn(),
+  getTimeEntriesThroughDate: vi.fn(),
   getActiveEntry: vi.fn(),
   getHolidayDatesInRange: vi.fn(),
 }));
@@ -19,6 +20,7 @@ vi.mock("@/services/timeEntryService", () => ({
 }));
 vi.mock("@/repos/timeEntryRepo", () => ({
   getTimeEntriesByDateRange: mocks.getTimeEntriesByDateRange,
+  getTimeEntriesThroughDate: mocks.getTimeEntriesThroughDate,
   getActiveEntry: mocks.getActiveEntry,
 }));
 vi.mock("@/repos/holidayRepo", () => ({
@@ -41,6 +43,7 @@ describe("GET /api/v1/my-times", () => {
       error: null,
     });
     mocks.getTimeEntriesByDateRange.mockResolvedValue(entries);
+    mocks.getTimeEntriesThroughDate.mockResolvedValue(entries);
     mocks.getActiveEntry.mockResolvedValue(null);
     mocks.getHolidayDatesInRange.mockResolvedValue(new Map());
     mocks.createClient.mockResolvedValue(employeeClient({
@@ -74,6 +77,39 @@ describe("GET /api/v1/my-times", () => {
       "2026-08-13": 0,
       "2026-08-14": 0,
     });
+  });
+
+  it("counts work before employment without accruing targets before employment", async () => {
+    const earlyEntry = entry("early", "2026-08-07", "2026-08-07T06:00:00.000Z", "2026-08-07T08:30:00.000Z");
+    mocks.getTimeEntriesThroughDate.mockResolvedValue([earlyEntry, ...entries]);
+    const response = await GET(new Request(
+      "http://localhost/api/v1/my-times?startDate=2026-08-10&endDate=2026-08-16",
+    ));
+    const body = await response.json();
+    expect(body.data.cumulativeOvertimeMinutes).toBe(120);
+    expect(body.data.weeklySummaries[0].targetMinutes).toBe(1440);
+    expect(mocks.getTimeEntriesThroughDate).toHaveBeenCalledWith(
+      expect.anything(), "tenant-1", "employee-1", "2026-08-12",
+    );
+  });
+
+  it("counts completed and running work even when employment starts in the future", async () => {
+    mocks.createClient.mockResolvedValue(employeeClient({
+      target_hours_week: 40,
+      employment_start_date: "2026-09-01",
+      initial_overtime_minutes: 60,
+      created_at: "2026-08-01T00:00:00.000Z",
+    }));
+    const running = { ...entries[2], clock_in: "2026-08-12T17:00:00.000Z", clock_out: null, break_minutes: 0, status: "running" };
+    mocks.getTimeEntriesThroughDate.mockResolvedValue([entries[0], running]);
+    const response = await GET(new Request(
+      "http://localhost/api/v1/my-times?startDate=2026-08-10&endDate=2026-08-16",
+    ));
+    const body = await response.json();
+    expect(body.data.cumulativeOvertimeMinutes).toBe(600);
+    expect(body.data.weeklySummaries[0].targetMinutes).toBe(0);
+    expect(body.data.dailyTargets["2026-08-12"]).toBe(0);
+    expect(mocks.getHolidayDatesInRange).toHaveBeenCalledTimes(1);
   });
 });
 

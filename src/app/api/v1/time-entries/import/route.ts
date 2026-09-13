@@ -11,7 +11,7 @@ async function handlePost(request: Request) {
   const auth = await getEmployeeFromAuth(await createClient());
   if (!auth.data) return NextResponse.json({ data: null, error: auth.error }, { status: 401 });
   const { tenantId, employeeId, role } = auth.data;
-    setObservedTenant(tenantId);
+  setObservedTenant(tenantId, employeeId);
   if (!["admin", "manager"].includes(role)) {
     return NextResponse.json({ data: null, error: "Nur Administratoren und Führungskräfte können Zeiten importieren." }, { status: 403 });
   }

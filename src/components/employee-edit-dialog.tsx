@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GermanDateInput } from "@/components/german-date-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -215,11 +216,10 @@ export function EmployeeEditDialog({
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="edit-employment-start">Eintrittsdatum</Label>
-              <Input
+              <GermanDateInput
                 id="edit-employment-start"
-                type="date"
                 value={employmentStartDate}
-                onChange={(event) => setEmploymentStartDate(event.target.value)}
+                onChange={setEmploymentStartDate}
                 required
               />
               <p className="text-xs text-muted-foreground">Ab diesem Tag wird Sollzeit berechnet.</p>

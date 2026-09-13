@@ -1,9 +1,12 @@
 "use client";
 
+import { formatDateFullDE } from "@/config/client/date-utils";
+
 import { useEffect, useState, type FormEvent } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GermanDateInput } from "@/components/german-date-input";
 import { FreeToolViewTracker, ToolResultCta } from "@/components/free-tools/free-tool-analytics";
 import { Field, ResultMetric, ToolPanel, ToolPanelHeader } from "@/components/free-tools/tool-elements";
 import { trackFreeToolEvent } from "@/lib/free-tool-analytics";
@@ -148,7 +151,7 @@ export function MonthlyWorkTimeCalculator({
           <div className="mt-3 space-y-3">
             {absences.map((absence, index) => (
               <div key={absence.id} className="grid gap-3 border border-slate-900/10 bg-white p-3 sm:grid-cols-[1fr_1.3fr_auto] sm:items-end">
-                <Field label={`Datum ${index + 1}`} htmlFor={`absence-date-${absence.id}`}><Input id={`absence-date-${absence.id}`} type="date" min={`${monthPrefix}-01`} max={lastDate} value={absence.date} onChange={(event) => updateAbsence(absence.id, { date: event.target.value })} className="mt-2 h-10 font-mono" /></Field>
+                <Field label={`Datum ${index + 1}`} htmlFor={`absence-date-${absence.id}`}><GermanDateInput id={`absence-date-${absence.id}`} min={`${monthPrefix}-01`} max={lastDate} value={absence.date} onChange={(value) => updateAbsence(absence.id, { date: value })} className="mt-2 h-10 font-mono" /></Field>
                 <Field label="Art" htmlFor={`absence-type-${absence.id}`}><select id={`absence-type-${absence.id}`} value={absence.type} onChange={(event) => updateAbsence(absence.id, { type: event.target.value as AbsenceType })} className={`${SELECT_CLASS} h-10`}>{Object.entries(ABSENCE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
                 <Button type="button" variant="outline" size="icon-lg" aria-label={`Abwesenheit ${index + 1} entfernen`} onClick={() => { setAbsences((current) => current.filter((item) => item.id !== absence.id)); setResult(null); }}><Minus /></Button>
               </div>
@@ -178,7 +181,7 @@ export function MonthlyWorkTimeCalculator({
             <ResultMetric label="Zeitbilanz" value={result.balanceMinutes === null ? "—" : formatDuration(result.balanceMinutes, true)}>{result.balanceMinutes === null ? "Istzeit optional ergänzen" : "Istzeit + Abwesenheit − Sollzeit"}</ResultMetric>
           </div>
 
-          {result.holidays.length > 0 && <div className="mt-5 border border-slate-900/10 bg-[#f5f3ee] p-4"><p className="text-sm font-semibold text-slate-950">Berücksichtigte Feiertage</p><ul className="mt-2 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">{result.holidays.map((holiday) => <li key={`${holiday.date}-${holiday.name}`}>{holiday.date.slice(8, 10)}.{holiday.date.slice(5, 7)}. · {holiday.name}{result.holidaysOnWorkdays.some((item) => item.date === holiday.date) ? " (reduziert Sollzeit)" : ""}</li>)}</ul></div>}
+          {result.holidays.length > 0 && <div className="mt-5 border border-slate-900/10 bg-[#f5f3ee] p-4"><p className="text-sm font-semibold text-slate-950">Berücksichtigte Feiertage</p><ul className="mt-2 grid gap-1 text-sm text-slate-600 sm:grid-cols-2">{result.holidays.map((holiday) => <li key={`${holiday.date}-${holiday.name}`}>{formatDateFullDE(holiday.date)} · {holiday.name}{result.holidaysOnWorkdays.some((item) => item.date === holiday.date) ? " (reduziert Sollzeit)" : ""}</li>)}</ul></div>}
           {result.ignoredAbsences.length > 0 && <p role="status" className="mt-4 text-sm text-amber-800">{result.ignoredAbsences.length} Abwesenheit(en) wurden nicht angerechnet, weil das Datum außerhalb des Monats, auf einem freien Tag oder Feiertag lag oder doppelt vorkam.</p>}
           <p className="mt-4 text-xs leading-5 text-slate-500">Gemeindeabhängige Feiertage sind nicht enthalten. Das betrifft insbesondere Mariä Himmelfahrt und das Augsburger Friedensfest in Teilen Bayerns sowie Fronleichnam in einzelnen Gemeinden Sachsens und Thüringens.</p>
           <ToolResultCta tool={TOOL} employerCopy />

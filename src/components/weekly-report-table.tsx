@@ -4,6 +4,8 @@
 
 "use client";
 
+import { formatDateFullDE } from "@/config/client/date-utils";
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
@@ -61,10 +63,9 @@ function formatOvertime(minutes: number): string {
   return `${sign}${minutes > 0 ? "" : "-"}${h}:${m.toString().padStart(2, "0")}`;
 }
 
-/** Format date as DD.MM. */
+/** Format date as DD.MM.YYYY. */
 function formatDate(iso: string): string {
-  const [, m, d] = iso.split("-");
-  return `${d}.${m}`;
+  return formatDateFullDE(iso);
 }
 
 interface DrillDown {
@@ -115,7 +116,7 @@ export function WeeklyReportTable() {
   return (
     <div>
       {/* Week navigation */}
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Wochenbericht</h2>
           {data && (
@@ -125,7 +126,7 @@ export function WeeklyReportTable() {
           )}
         </div>
         <div
-          className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
+          className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:shrink-0"
           data-testid="weekly-report-navigation"
         >
           <div className="grid w-full grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] gap-2 sm:flex sm:w-auto">
@@ -142,7 +143,7 @@ export function WeeklyReportTable() {
             <Button
               variant="outline"
               size="sm"
-              className="w-full"
+              className="w-full sm:w-auto"
               onClick={() => setWeekOffset(0)}
               disabled={weekOffset === 0}
             >
@@ -160,12 +161,7 @@ export function WeeklyReportTable() {
               <ChevronRight className="size-4" />
             </Button>
           </div>
-          {data && (
-            <ExportButtons
-              weekStart={data.weekStart}
-              weekEnd={data.weekEnd}
-            />
-          )}
+          <ExportButtons weekStart={weekStart} weekEnd={weekEnd} />
         </div>
       </div>
 

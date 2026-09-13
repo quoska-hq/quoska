@@ -45,6 +45,8 @@ export function CockpitOverview({
       <CockpitActionCenter
         actions={data.actions}
         onEmployeeSelect={onEmployeeSelect}
+        days={data.period.days}
+        employeeId={data.selectedEmployeeId}
       />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
