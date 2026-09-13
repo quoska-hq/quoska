@@ -32,10 +32,10 @@ import { ClockDayProgress } from "@/components/clock-day-progress";
 import { TodaySummaryCard } from "@/components/clock-today-summary";
 import { WeekSummaryCard } from "@/components/clock-week-summary";
 import { useLiveElapsedSeconds } from "@/components/use-live-clock";
+import { useClockProject } from "@/hooks/use-clock-project";
 
 export function ClockView() {
   const [displayMinutes, setDisplayMinutes] = useState(0);
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [pulsePhase, setPulsePhase] = useState(false);
   // Optimistic UI state: tracks what the user just pressed
   const [optimisticAction, setOptimisticAction] = useState<OptimisticAction>(null);
@@ -66,15 +66,7 @@ export function ClockView() {
   const monthCarryOverMinutes = statusData?.monthCarryOverMinutes ?? 0;
   const activeBreakSeconds = useLiveElapsedSeconds(activeBreak?.break_start, 0);
 
-  const { data: myProjects } = useQuery<{ id: string; name: string }[]>({
-    queryKey: ["myProjects"],
-    queryFn: async () => {
-      const res = await fetch("/api/v1/projects?assigned=true");
-      const json: ApiResponse<{ id: string; name: string }[]> = await res.json();
-      return json.data ?? [];
-    },
-    staleTime: 60_000,
-  });
+  const { projects: myProjects, selectedProject, setSelectedProject, isLoading: projectsLoading } = useClockProject(statusData);
   const projectName = myProjects?.find((p) => p.id === activeEntry?.project_id)?.name;
 
   const updateProjectMutation = useMutation({
@@ -220,9 +212,9 @@ export function ClockView() {
             <AlertDescription>Diese Zeiterfassung ist seit mehr als 24 Stunden offen. Bitte prüfe den Eintrag unter „Meine Zeiten“ und lasse die tatsächlichen Zeiten bei Bedarf korrigieren.</AlertDescription>
           </Alert>
         )}
-        {error && (
+        {(error || updateProjectMutation.error) && (
           <Alert variant="destructive" className="mb-5">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{error ?? updateProjectMutation.error?.message}</AlertDescription>
           </Alert>
         )}
 
@@ -241,7 +233,7 @@ export function ClockView() {
               popKey={popKey}
               btn={btn}
               btnShadow={btnShadow}
-              isProcessing={isProcessing}
+              isProcessing={isProcessing || (!activeEntry && projectsLoading)}
               optimisticAction={optimisticAction}
               onClockAction={handleClockAction}
               projectName={projectName}
@@ -249,13 +241,14 @@ export function ClockView() {
             />
 
             {!activeEntry && !optimisticAction && (
-              <ProjectSelector value={selectedProject} onValueChange={setSelectedProject} />
+              <ProjectSelector projects={myProjects} value={selectedProject} onValueChange={setSelectedProject} />
             )}
 
             {activeEntry?.status === "running" && !activeBreak && !activeEntry.project_id && (
-              <ProjectSelector value={selectedProject} onValueChange={(v) => {
-                setSelectedProject(v);
-                if (v && activeEntry) updateProjectMutation.mutate({ entryId: activeEntry.id, projectId: v });
+              <ProjectSelector projects={myProjects} value={null} disabled={updateProjectMutation.isPending} onValueChange={(v) => {
+                if (v && activeEntry) updateProjectMutation.mutate({ entryId: activeEntry.id, projectId: v }, {
+                  onSuccess: () => setSelectedProject(v),
+                });
               }} />
             )}
 

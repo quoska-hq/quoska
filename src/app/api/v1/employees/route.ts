@@ -10,7 +10,7 @@ import { observeProductAction } from "@/services/productObservationService";
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { createAdminClient } from "@/config/supabase/server";
-import { inviteEmployeeSchema } from "@/types/employee";
+import { inviteEmployeeSchema, type EmployeeListResponse } from "@/types/employee";
 import {
   listEmployees,
   inviteEmployee,
@@ -19,24 +19,7 @@ import {
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import type { ApiResponse } from "@/types/api";
 import type { Employee } from "@/types/database";
-import type { WorkSchedule } from "@/types/work-schedule";
 import { getTodayDate } from "@/config/server/timestamps";
-
-interface EmployeeListResponse {
-  active: Employee[];
-  deactivated: Employee[];
-  planStatus: {
-    plan: string | null;
-    activeCount: number;
-    limit: number | null;
-    canAddMore: boolean;
-  } | null;
-  defaults: {
-    bundesland: string | null;
-    workSchedule: WorkSchedule | null;
-    employmentStartDate: string;
-  };
-}
 
 export async function GET() {
   try {
@@ -119,7 +102,7 @@ async function handlePost(request: Request) {
     }
 
     const { tenantId, role } = authResult.data;
-    setObservedTenant(tenantId);
+    setObservedTenant(tenantId, authResult.data.employeeId);
 
     if (role !== "admin") {
       return NextResponse.json<ApiResponse<Employee>>(

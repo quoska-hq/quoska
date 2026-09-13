@@ -10,6 +10,7 @@
  */
 
 import type { TimeEntry } from "@/types/database";
+import { formatDateFullDE } from "@/config/client/date-utils";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -46,16 +47,9 @@ export const DAYS_DE_FULL = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Fr
 // Formatting helpers
 // ---------------------------------------------------------------------------
 
-/** Format ISO date to DD.MM. */
-export function formatShortDate(iso: string): string {
-  const [, m, d] = iso.slice(0, 10).split("-");
-  return `${d}.${m}`;
-}
-
-/** Format ISO date to DD.MM.YYYY */
+/** Format ISO date to DD.MM.YYYY. */
 export function formatFullDate(iso: string): string {
-  const [y, m, d] = iso.slice(0, 10).split("-");
-  return `${d}.${m}.${y}`;
+  return formatDateFullDE(iso);
 }
 
 /** Format absolute minutes as "Xh Ym" */

@@ -29,6 +29,8 @@ const FOOTER_LINKS = [
       },
       { href: "/open-source-zeiterfassung", label: "Open Source" },
       { href: "/arbeitszeitnachweis", label: "Arbeitszeitnachweis" },
+      { href: "/stundenzettel-minijob", label: "Stundenzettel im Minijob" },
+      { href: "/arbeitszeitkonto", label: "Arbeitszeitkonto" },
       { href: "/pausenregelung-arbeitszeit", label: "Automatischer Pausenabzug" },
     ],
   },

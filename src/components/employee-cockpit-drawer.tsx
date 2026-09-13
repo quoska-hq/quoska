@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from "@/components/ui/skeleton";
 import { Activity, Briefcase, CalendarOff, Clock3 } from "lucide-react";
 import { formatDateFullDE } from "@/config/client/date-utils";
+import { CockpitActionCenter } from "@/components/cockpit-action-center";
 
 export function EmployeeCockpitDrawer({
   employeeId,
@@ -49,6 +50,7 @@ export function EmployeeCockpitDrawer({
             <div className="space-y-4"><Skeleton className="h-24" /><Skeleton className="h-44" /></div>
           ) : (
             <div className="space-y-7" data-testid="employee-cockpit-drawer">
+              <CockpitActionCenter actions={data.actions} days={days} employeeId={employeeId} />
               <div className="grid grid-cols-3 border border-slate-900/15">
                 <Metric label="Ist" value={formatCockpitMinutes(row.workedMinutes)} />
                 <Metric label="Soll" value={formatCockpitMinutes(row.targetMinutes)} />

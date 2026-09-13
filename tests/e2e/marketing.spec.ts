@@ -15,6 +15,8 @@ const PUBLIC_PAGES = [
     "Arbeitszeiterfassung: Pflicht für Kleinbetriebe 2026",
   ],
   ["/arbeitszeitnachweis", "Arbeitszeitnachweis 2026"],
+  ["/stundenzettel-minijob", "Stundenzettel Minijob"],
+  ["/arbeitszeitkonto", "Arbeitszeitkonto"],
   ["/arbeitszeitwuensche", "Arbeitszeitwünsche: Was kleine Arbeitgeber"],
   ["/pausenregelung-arbeitszeit", "Automatischer Pausenabzug"],
   ["/projektzeiterfassung", "Projektzeiterfassung für kleine Teams"],

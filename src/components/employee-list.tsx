@@ -7,8 +7,8 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ApiResponse } from "@/types/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEmployees } from "@/hooks/use-employees";
 import type { Employee } from "@/types/database";
 import { EmployeeAddDialog } from "@/components/employee-add-dialog";
 import { EmployeeEditDialog } from "@/components/employee-edit-dialog";
@@ -17,26 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import type { WorkSchedule } from "@/types/work-schedule";
 import { ROLE_LABELS } from "@/types/employee";
-
-interface PlanStatus {
-  plan: string | null;
-  activeCount: number;
-  limit: number | null;
-  canAddMore: boolean;
-}
-
-interface EmployeeListResponse {
-  active: Employee[];
-  deactivated: Employee[];
-  planStatus: PlanStatus | null;
-  defaults: {
-    bundesland: string | null;
-    workSchedule: WorkSchedule | null;
-    employmentStartDate: string;
-  };
-}
 
 export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
   const queryClient = useQueryClient();
@@ -45,14 +26,7 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
   const [showDeactivated, setShowDeactivated] = useState(false);
   const [deactivateError, setDeactivateError] = useState<string | null>(null);
 
-  const { data: employeeData, isLoading } = useQuery({
-    queryKey: ["employees"],
-    queryFn: async () => {
-      const res = await fetch("/api/v1/employees");
-      const json: ApiResponse<EmployeeListResponse> = await res.json();
-      return json.data;
-    },
-  });
+  const { data: employeeData, isLoading, error: loadError, refetch } = useEmployees();
 
   const deactivateMutation = useMutation({
     mutationFn: async (employeeId: string) => {
@@ -65,6 +39,7 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });
 
@@ -87,7 +62,18 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
     );
   }
 
-  const active = employeeData?.active ?? [];
+  if (!employeeData) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>
+          {loadError?.message ?? "Mitarbeiter konnten nicht geladen werden."}
+          <Button variant="outline" size="sm" onClick={() => refetch()}>Erneut laden</Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  const active = employeeData.active;
   const deactivated = employeeData?.deactivated ?? [];
   const planStatus = employeeData?.planStatus;
   const atPlanLimit = planStatus && !planStatus.canAddMore;

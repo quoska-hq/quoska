@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
-import { getTimeEntriesByDateRange, getActiveEntry } from "@/repos/timeEntryRepo";
+import { getTimeEntriesByDateRange, getTimeEntriesThroughDate, getActiveEntry } from "@/repos/timeEntryRepo";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import {
   addDays,
@@ -112,9 +112,7 @@ export async function GET(request: Request) {
       getTimeEntriesByDateRange(supabase, tenantId, employeeId, startDate, endDate),
       getActiveEntry(supabase, tenantId, employeeId),
       getHolidayDatesInRange(supabase, bundesland, startDate, endDate),
-      hasBalancePeriod
-        ? getTimeEntriesByDateRange(supabase, tenantId, employeeId, employeeStart, todayDate)
-        : Promise.resolve([]),
+      getTimeEntriesThroughDate(supabase, tenantId, employeeId, todayDate),
       hasBalancePeriod
         ? getHolidayDatesInRange(supabase, bundesland, employeeStart, todayDate)
         : Promise.resolve(new Map<string, string>()),

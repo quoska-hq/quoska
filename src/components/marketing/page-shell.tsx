@@ -13,6 +13,7 @@ export function MarketingPageShell({
   children,
   cta = true,
   heroCtaLabel,
+  heroActions,
 }: {
   eyebrow: string;
   title: string;
@@ -20,6 +21,7 @@ export function MarketingPageShell({
   children: ReactNode;
   cta?: boolean;
   heroCtaLabel?: string;
+  heroActions?: ReactNode;
 }) {
   return (
     <div className="flex min-h-full flex-col bg-[#f5f3ee]">
@@ -39,6 +41,7 @@ export function MarketingPageShell({
               {title}
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">{intro}</p>
+            {heroActions}
             {heroCtaLabel && (
               <MarketingSignupLink
                 placement="hero"

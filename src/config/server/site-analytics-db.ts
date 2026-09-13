@@ -15,6 +15,11 @@ export function initializeSiteAnalyticsSchema(db: Database.Database): void {
       PRIMARY KEY(day,action,outcome,tenant_key)
     );
     CREATE TABLE IF NOT EXISTS product_snapshots (day TEXT PRIMARY KEY, summary TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS product_account_activity (
+      tenant_key TEXT NOT NULL, employee_key TEXT NOT NULL,
+      last_active_at TEXT NOT NULL, last_action_at TEXT, last_action TEXT,
+      PRIMARY KEY (tenant_key, employee_key)
+    );
     CREATE TABLE IF NOT EXISTS product_operations (id INTEGER PRIMARY KEY CHECK(id=1), at TEXT NOT NULL, data TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS site_pageviews (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

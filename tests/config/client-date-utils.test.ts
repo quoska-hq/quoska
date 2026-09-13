@@ -3,6 +3,9 @@ import {
   berlinDateTimeToIso,
   epochToDate,
   formatDateTimeDE,
+  formatDateFullDE,
+  formatDateDE,
+  parseGermanDate,
   formatTimeLocal,
   getCurrentEpochDays,
   getDayOfWeekFromEpoch,
@@ -10,6 +13,22 @@ import {
 } from "@/config/client/date-utils";
 
 describe("client date utilities", () => {
+  it("formats date-only values consistently with a four-digit year", () => {
+    expect(formatDateFullDE("2026-09-01")).toBe("01.09.2026");
+    expect(formatDateDE("2026-09-01")).toBe("01.09.2026");
+    expect(formatDateFullDE("2026-09-01T12:30:00Z")).toBe("01.09.2026");
+    expect(formatDateFullDE("")).toBe("");
+  });
+
+  it("parses typed German dates, including leap years, without swapping month and day", () => {
+    expect(parseGermanDate("01.09.2026")).toBe("2026-09-01");
+    expect(parseGermanDate("1.9.2026")).toBe("2026-09-01");
+    expect(parseGermanDate("01092026")).toBe("2026-09-01");
+    expect(parseGermanDate("29.02.2024")).toBe("2024-02-29");
+    for (const invalid of ["31.02.2026", "29.02.2026", "31.04.2026", "01.13.2026", "00.09.2026", "2026-09-01", "01.09."]) {
+      expect(parseGermanDate(invalid), invalid).toBeNull();
+    }
+  });
   it("uses the German calendar date between German and UTC midnight", () => {
     const sundayUtc = Date.parse("2026-08-09T22:30:00.000Z");
     const germanEpochDay = getCurrentEpochDays(sundayUtc);

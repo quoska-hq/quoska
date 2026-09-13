@@ -23,7 +23,7 @@ import { EmployeeTimeBalanceCards } from "@/components/employee-time-balance-car
 import { getWeekBoundsForOffset } from "@/config/client/date-utils";
 import {
   getWeekDays,
-  formatShortDate,
+  formatFullDate,
   type TimeEntryWithNet,
   type MyTimesData,
 } from "@/components/employee-self-service-helpers";
@@ -141,8 +141,8 @@ export function EmployeeSelfService() {
     if (weekOffset === 0) return "Diese Woche";
     if (weekOffset === -1) return "Letzte Woche";
     if (weekOffset === 1) return "Nächste Woche";
-    const s = formatShortDate(start);
-    const e = formatShortDate(end);
+    const s = formatFullDate(start);
+    const e = formatFullDate(end);
     return `${s} – ${e}`;
   })();
 

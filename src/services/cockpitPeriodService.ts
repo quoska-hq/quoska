@@ -19,3 +19,9 @@ export function getCockpitDates(startDate: string, endDate: string): string[] {
   }
   return dates;
 }
+
+/** Include full calendar weeks so a shifted workday is never missed at a filter boundary. */
+export function getCockpitMissingEntryStart(startDate: string, endDate: string): string {
+  const previousMonday = addDays(getWeekMonday(endDate), -7);
+  return getWeekMonday(startDate < previousMonday ? startDate : previousMonday);
+}

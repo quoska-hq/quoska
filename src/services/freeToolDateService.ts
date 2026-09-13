@@ -43,8 +43,8 @@ export function germanDateLabel(date: string): string {
     saturday: "Sa",
     sunday: "So",
   } as const;
-  const [, month, day] = date.split("-");
-  return `${labels[workdayForDate(date)]}, ${day}.${month}.`;
+  const [year, month, day] = date.split("-");
+  return `${labels[workdayForDate(date)]}, ${day}.${month}.${year}`;
 }
 
 export function offsetDate(date: string, days: number): string {

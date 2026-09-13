@@ -1,6 +1,22 @@
 import { z } from "zod";
 import type { Employee } from "./database";
-import { workScheduleSchema } from "./work-schedule";
+import { workScheduleSchema, type WorkSchedule } from "./work-schedule";
+
+export interface EmployeeListResponse {
+  active: Employee[];
+  deactivated: Employee[];
+  planStatus: {
+    plan: string | null;
+    activeCount: number;
+    limit: number | null;
+    canAddMore: boolean;
+  } | null;
+  defaults: {
+    bundesland: string | null;
+    workSchedule: WorkSchedule | null;
+    employmentStartDate: string;
+  };
+}
 
 export type Role = Employee["role"];
 

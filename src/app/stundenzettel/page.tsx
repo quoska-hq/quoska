@@ -7,6 +7,7 @@ import { GuideFaq, GuideNotice } from "@/components/marketing/guide-elements";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
 import { getTodayDate } from "@/config/server/timestamps";
 import { site } from "@/lib/site";
+import { TimesheetTemplateLinks } from "@/components/marketing/timesheet-template-links";
 
 const PATH = "/stundenzettel";
 const TOOL = "stundenzettel" as const;
@@ -55,8 +56,8 @@ const JSON_LD = {
 };
 
 export const metadata: Metadata = {
-  title: "Stundenzettel kostenlos: Vorlage online ausfüllen",
-  description: "Stundenzettel online ausfüllen, Arbeitszeiten automatisch summieren und ohne Anmeldung als CSV oder PDF exportieren.",
+  title: "Stundenzettel kostenlos: PDF-Vorlage und Online-Berechnung",
+  description: "Leere Stundenzettel-Vorlage als PDF herunterladen oder online ausfüllen: Arbeitszeiten summieren, CSV exportieren und drucken. Kostenlos, ohne Anmeldung.",
   alternates: { canonical: PATH },
   openGraph: {
     title: "Interaktiver Stundenzettel mit PDF- und CSV-Export",
@@ -70,12 +71,13 @@ export default function TimesheetPage() {
   return (
     <MarketingPageShell
       eyebrow="Kostenloser Stundenzettel"
-      title="Ein Monat Arbeitszeit. Klar in einer Tabelle."
-      intro="Beginn, Ende und Pause für jeden Tag eintragen, Summen sofort prüfen und den fertigen Stundenzettel als CSV oder über den Druckdialog als PDF sichern."
+      title="Stundenzettel: kostenlose Vorlage für deinen Monat."
+      intro="Leere PDF-Vorlage ausdrucken oder die Zeiten hier online eintragen. Der Online-Stundenzettel zieht Pausen ab, summiert die Arbeitszeit und lässt sich als CSV oder über den Druckdialog als PDF sichern."
+      heroActions={<TimesheetTemplateLinks calculatorHref="#vorlage" />}
       cta={false}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
-      <ToolSection><TimesheetCalculator initialMonth={initialMonth} /></ToolSection>
+      <div id="vorlage" className="scroll-mt-24"><ToolSection><TimesheetCalculator initialMonth={initialMonth} /></ToolSection></div>
 
       <section className="border-y border-slate-900/10 bg-[#f5f3ee]">
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-20">
@@ -99,6 +101,10 @@ export default function TimesheetPage() {
       </section>
 
       <section className="bg-white">
+        <div className="mx-auto max-w-7xl px-5 pt-12 text-sm leading-7 text-slate-700 sm:px-6">
+          <p>Für geringfügig Beschäftigte erklärt der Ratgeber <Link href="/stundenzettel-minijob" className="font-semibold text-[#5145ad] underline underline-offset-4">Stundenzettel im Minijob</Link> die besonderen Fristen. Wenn du zusätzlich Sollzeit und Überträge vergleichen möchtest, hilft das <Link href="/arbeitszeitkonto" className="font-semibold text-[#5145ad] underline underline-offset-4">Rechenbeispiel zum Arbeitszeitkonto</Link>.</p>
+          <p className="mt-3">Die CSV-Datei lässt sich in Excel oder LibreOffice öffnen. Sie enthält die berechneten Werte zum Zeitpunkt des Exports; sie ist keine Excel-Vorlage mit weiterrechnenden Formeln.</p>
+        </div>
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-6 sm:py-20 lg:grid-cols-2">
           <div>
             <SectionHeading eyebrow="Datenschutz" title="Eine lokale Vorlage, keine Datensammlung.">

@@ -186,14 +186,27 @@ export function berlinDateTimeToIso(date: string, time: string): string {
  * Format an ISO date string (YYYY-MM-DD) as DD.MM.YYYY.
  */
 export function formatDateDE(iso: string): string {
-  const [, m, d] = iso.split("-");
-  return `${d}.${m}`;
+  return formatDateFullDE(iso);
 }
 
 /**
  * Format an ISO date string (YYYY-MM-DD) as DD.MM.YYYY.
  */
 export function formatDateFullDE(iso: string): string {
-  const [y, m, d] = iso.split("-");
+  if (!iso) return "";
+  const [y, m, d] = iso.slice(0, 10).split("-");
   return `${d}.${m}.${y}`;
+}
+
+/** Parse an explicitly entered German calendar date without timezone conversion. */
+export function parseGermanDate(value: string): string | null {
+  const match = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(value.trim())
+    ?? /^(\d{2})(\d{2})(\d{4})$/.exec(value.trim());
+  if (!match) return null;
+  const [, day, month, year] = match;
+  const y = Number(year), m = Number(month), d = Number(day);
+  const leap = y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0);
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (y < 1 || m < 1 || m > days.length || d < 1 || d > days[m - 1]) return null;
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }

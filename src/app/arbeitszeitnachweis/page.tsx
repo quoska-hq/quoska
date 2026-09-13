@@ -12,9 +12,10 @@ import {
   SectionHeading,
 } from "@/components/marketing/page-shell";
 import { site } from "@/lib/site";
+import { TimesheetTemplateLinks } from "@/components/marketing/timesheet-template-links";
 
 const PAGE_PATH = "/arbeitszeitnachweis";
-const UPDATED_DATE = "2026-08-19";
+const UPDATED_DATE = "2026-09-13";
 
 const SOURCES = {
   bmasFaq:
@@ -49,11 +50,12 @@ const JSON_LD = {
     {
       "@type": "Article",
       "@id": `${site.url}${PAGE_PATH}#artikel`,
-      headline: "Arbeitszeitnachweis 2026: Inhalt, Fristen und Beispiel",
+      headline: "Arbeitszeitnachweis 2026: Vorlage, Inhalt und Fristen",
       description:
         "Quellenbasierter Leitfaden zu Inhalt, Form und Aufbewahrung von Arbeitszeitnachweisen in Deutschland.",
-      datePublished: UPDATED_DATE,
+      datePublished: "2026-08-19",
       dateModified: UPDATED_DATE,
+      author: { "@type": "Organization", name: "Quoska Redaktion", url: `${site.url}/ueber-uns#redaktion` },
       inLanguage: "de-DE",
       mainEntityOfPage: `${site.url}${PAGE_PATH}`,
       isPartOf: { "@id": `${site.url}/#website` },
@@ -73,9 +75,9 @@ const JSON_LD = {
 };
 
 export const metadata: Metadata = {
-  title: "Arbeitszeitnachweis 2026: Inhalt, Fristen und Beispiel",
+  title: "Arbeitszeitnachweis 2026: Vorlage, Inhalt und Fristen",
   description:
-    "Arbeitszeitnachweis richtig führen: Welche Angaben wichtig sind, welche Zwei-Jahres-Fristen gelten und wie ein nachvollziehbarer Nachweis aussieht.",
+    "Arbeitszeitnachweis mit kostenloser PDF-Vorlage und Online-Stundenzettel. Angaben, Beispiel und Aufbewahrungsfristen für kleine Betriebe verständlich erklärt.",
   alternates: { canonical: PAGE_PATH },
 };
 
@@ -92,8 +94,9 @@ export default function WorkTimeRecordPage() {
   return (
     <MarketingPageShell
       eyebrow="Arbeitszeitnachweis"
-      title="Arbeitszeitnachweis: nachvollziehbar statt nur ausgefüllt."
+      title="Arbeitszeitnachweis: Vorlage, Beispiel und Fristen."
       intro="Ein Arbeitszeitnachweis soll erkennen lassen, wann die tägliche Arbeit begonnen und geendet hat und wie sich ihre Dauer ergibt. Dieser Leitfaden trennt die allgemeine Erfassungspflicht von besonderen Aufbewahrungs- und Dokumentationsregeln."
+      heroActions={<TimesheetTemplateLinks />}
     >
       <script
         type="application/ld+json"
@@ -104,7 +107,7 @@ export default function WorkTimeRecordPage() {
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-6 sm:py-20">
           <GuideNotice>
             <p>
-              <strong>Stand 19. August 2026.</strong> Diese Übersicht bietet
+              <strong>Quoska Redaktion · Stand 13.09.2026.</strong> Diese Übersicht bietet
               allgemeine Informationen und keine Rechtsberatung für den
               Einzelfall. Verbindliche Entscheidungen treffen die zuständigen
               Behörden und Gerichte.
@@ -126,6 +129,7 @@ export default function WorkTimeRecordPage() {
               verantwortlich.
             </FactCard>
           </div>
+          <p className="mt-6 text-sm leading-7 text-slate-700">Diese Einordnung folgt den <SourceLink href={SOURCES.bmasFaq}>BMAS-Antworten zu Inhalt, Form und Delegation</SourceLink>. Die allgemeine Erfassungspflicht ergibt sich aus der <SourceLink href={SOURCES.bag}>BAG-Entscheidung 1 ABR 22/21</SourceLink>.</p>
         </div>
       </section>
 
@@ -180,18 +184,19 @@ export default function WorkTimeRecordPage() {
                   <td className="p-4">Derzeit keine einheitliche allgemeine Aufbewahrungsfrist festgelegt</td>
                 </tr>
                 <tr className="border-t border-slate-900/15 align-top">
-                  <th className="p-4 font-semibold text-slate-950">§ 16 Abs. 2 ArbZG</th>
+                  <th scope="row" className="p-4 font-semibold text-slate-950"><SourceLink href={SOURCES.arbzg16}>§ 16 Abs. 2 ArbZG</SourceLink></th>
                   <td className="p-4">Arbeitszeit über die werktägliche Arbeitszeit des § 3 Satz 1 hinaus</td>
                   <td className="p-4">Mindestens zwei Jahre aufbewahren</td>
                 </tr>
                 <tr className="border-t border-slate-900/15 align-top">
-                  <th className="p-4 font-semibold text-slate-950">§ 17 MiLoG</th>
+                  <th scope="row" className="p-4 font-semibold text-slate-950"><SourceLink href={SOURCES.milog17}>§ 17 MiLoG</SourceLink></th>
                   <td className="p-4">Bestimmte geringfügig Beschäftigte und genannte Wirtschaftsbereiche</td>
                   <td className="p-4">Bis zum siebten folgenden Kalendertag erfassen; mindestens zwei Jahre aufbewahren</td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <p className="mt-6 max-w-3xl text-sm leading-7 text-slate-700">Bei gewerblichen Minijobs sollte die Erfassung deshalb nicht bis zum Monatsende warten. Ein konkretes Fristbeispiel und die Abgrenzung zum Privathaushalt findest du unter <Link href="/stundenzettel-minijob" className="font-semibold text-[#5145ad] underline underline-offset-4">Stundenzettel im Minijob</Link>.</p>
         </div>
       </section>
 
@@ -199,7 +204,7 @@ export default function WorkTimeRecordPage() {
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
           <SectionHeading eyebrow="Beispiel" title="Ein Arbeitstag auf einen Blick.">
             <p>
-              Das Beispiel zeigt keine amtliche Vorlage, sondern eine klare
+              Das fiktive Beispiel für eine Person zeigt keine amtliche Vorlage, sondern eine klare
               Darstellung, aus der die Nettoarbeitszeit rechnerisch hervorgeht.
             </p>
           </SectionHeading>
@@ -223,6 +228,10 @@ export default function WorkTimeRecordPage() {
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div className="text-sm leading-7 text-slate-700 lg:col-start-2">
+            <p>08:00 bis 16:30 sind 8 Stunden 30 Minuten Anwesenheit. Nach Abzug der tatsächlich genommenen Pause bleiben 8 Stunden Arbeit. Bei einem Ende nach Mitternacht muss auch das Enddatum erkennbar sein.</p>
+            <p className="mt-4">Dauer und Kontostand sind unterschiedliche Angaben: Der Nachweis zeigt die geleistete Arbeit, das <Link href="/arbeitszeitkonto" className="font-semibold text-[#5145ad] underline underline-offset-4">Arbeitszeitkonto vergleicht sie mit Sollzeit und Übertrag</Link>.</p>
           </div>
         </div>
       </section>

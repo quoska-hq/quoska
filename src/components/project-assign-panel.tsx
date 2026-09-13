@@ -32,12 +32,13 @@ export function ProjectAssignPanel({
   const queryClient = useQueryClient();
 
   // Fetch current assignments
-  const { data: assignedIds = [], isLoading } = useQuery<string[]>({
+  const { data: assignedIds = [], isLoading, error: loadError, refetch } = useQuery<string[]>({
     queryKey: ["projectAssignments", projectId],
     queryFn: async () => {
       const res = await fetch(`/api/v1/projects/${projectId}/assign`);
       const json: ApiResponse<string[]> = await res.json();
-      return json.data ?? [];
+      if (!res.ok || !json.data) throw new Error(json.error ?? "Zuordnungen konnten nicht geladen werden.");
+      return json.data;
     },
   });
 
@@ -56,10 +57,12 @@ export function ProjectAssignPanel({
         body: JSON.stringify({ employee_ids: employeeIds }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
+      if (!res.ok) throw new Error(json.error ?? "Zuordnungen konnten nicht gespeichert werden.");
     },
-    onSuccess: () => {
+    onSuccess: (_data, employeeIds) => {
+      queryClient.setQueryData(["projectAssignments", projectId], employeeIds);
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["myProjects"] });
       onClose();
     },
   });
@@ -83,6 +86,11 @@ export function ProjectAssignPanel({
 
       {isLoading ? (
         <p className="text-xs text-muted-foreground">Laden…</p>
+      ) : loadError ? (
+        <div role="alert" className="space-y-2 text-xs text-red-700">
+          <p>{loadError.message}</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>Erneut laden</Button>
+        </div>
       ) : employees.length === 0 ? (
         <p className="text-xs text-muted-foreground">
           Keine aktiven Mitarbeiter vorhanden.
@@ -101,6 +109,7 @@ export function ProjectAssignPanel({
                 <input
                   type="checkbox"
                   checked={isAssigned}
+                  disabled={mutation.isPending}
                   onChange={() => toggle(emp.id)}
                   className="rounded"
                 />
@@ -111,10 +120,12 @@ export function ProjectAssignPanel({
         </div>
       )}
 
+      {mutation.error && <p role="alert" className="text-xs text-red-700">{mutation.error.message}</p>}
+
       <div className="flex items-center gap-2">
         <Button
           size="sm"
-          disabled={!hasChanges || mutation.isPending}
+          disabled={isLoading || Boolean(loadError) || !hasChanges || mutation.isPending}
           onClick={() => mutation.mutate([...workingIds])}
         >
           {mutation.isPending ? "Speichern…" : "Änderungen speichern"}

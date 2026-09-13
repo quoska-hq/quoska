@@ -4,6 +4,8 @@
 
 "use client";
 
+import { formatDateFullDE } from "@/config/client/date-utils";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { ClipboardList } from "lucide-react";
 
@@ -17,10 +19,9 @@ interface MissingEntriesListProps {
   entries: MissingEntry[];
 }
 
-/** Format ISO date to DD.MM. */
+/** Format ISO date to DD.MM.YYYY. */
 function formatDate(iso: string): string {
-  const [, m, d] = iso.slice(0, 10).split("-");
-  return `${d}.${m}`;
+  return formatDateFullDE(iso);
 }
 
 export function MissingEntriesList({ entries }: MissingEntriesListProps) {

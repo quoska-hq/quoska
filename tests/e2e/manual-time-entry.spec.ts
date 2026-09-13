@@ -123,8 +123,12 @@ test.describe("Manual time entries and automatic breaks", () => {
     await page.getByRole("option", { name: "Tina Team" }).click();
     await dialog.getByLabel("Datum").click();
     await page.locator(`[data-day="${calendarDay(previousDay)}"]`).click();
+    // Wait for the calendar to close and restore focus before typing.
+    await expect(page.locator(`[data-day="${calendarDay(previousDay)}"]`)).toBeHidden();
     await dialog.getByLabel("Beginn").fill("10:00");
+    await expect(dialog.getByLabel("Beginn")).toHaveValue("10:00");
     await dialog.getByLabel("Ende", { exact: true }).fill("15:00");
+    await expect(dialog.getByLabel("Ende", { exact: true })).toHaveValue("15:00");
     await dialog.getByRole("button", { name: "Zeit hinzufügen" }).click();
     await expect(dialog).not.toBeVisible({ timeout: 8_000 });
 

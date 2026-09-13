@@ -3,6 +3,7 @@ import { createClient } from "@/config/supabase/server";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getAdminCockpit } from "@/services/cockpitService";
+import { filterDismissedCockpitActions } from "@/services/cockpitDismissalService";
 import { getCockpitDateRange } from "@/services/cockpitPeriodService";
 import { cockpitQuerySchema, type CockpitData } from "@/types/cockpit";
 import type { ApiResponse } from "@/types/api";
@@ -47,6 +48,11 @@ export async function GET(request: Request) {
       getNowIso(),
       parsed.data.employeeId,
     );
+    if (result.data) {
+      result.data.actions = await filterDismissedCockpitActions(
+        supabase, auth.data.tenantId, auth.data.employeeId, result.data.actions,
+      );
+    }
     return NextResponse.json<ApiResponse<CockpitData>>(result, {
       status: result.data ? 200 : 404,
     });

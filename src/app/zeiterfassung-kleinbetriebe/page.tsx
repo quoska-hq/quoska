@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
 import { site } from "@/lib/site";
+import { SmallBusinessCosts } from "@/components/marketing/small-business-costs";
 
 export const metadata: Metadata = {
   title: "Zeiterfassung für Kleinbetriebe – kostenlos bis 3 Personen",
@@ -65,7 +66,7 @@ export default function SmallBusinessPage() {
   return (
     <MarketingPageShell
       eyebrow="Für Kleinbetriebe"
-      title="Zeiterfassung für Kleinbetriebe, nicht für IT-Abteilungen."
+      title="Zeiterfassung für Kleinbetriebe: einfach starten, Kosten überblicken."
       intro="Kleine Betriebe brauchen eine verlässliche Arbeitszeiterfassung, aber selten ein monatelanges Softwareprojekt. Quoska ist kostenlos für bis zu drei Personen und für einen direkten Start im Browser gebaut."
       heroCtaLabel="Kostenlos mit bis zu 3 Personen starten"
     >
@@ -73,6 +74,8 @@ export default function SmallBusinessPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
       />
+
+      <SmallBusinessCosts />
 
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">

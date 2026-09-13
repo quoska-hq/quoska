@@ -1,6 +1,22 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("free working-time tools", () => {
+  test("blank timesheet downloads directly and the online shortcut reaches the form", async ({ page, request }) => {
+    await page.goto("/stundenzettel");
+    const link = page.getByRole("link", { name: "Leere Monatsvorlage (PDF)" });
+    const response = await request.get((await link.getAttribute("href"))!);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("application/pdf");
+    const pdf = await response.body();
+    expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+    expect(pdf.toString("latin1")).toMatch(/\/Type \/Pages\s*\/Count 1\b/);
+    const downloadPromise = page.waitForEvent("download");
+    await link.click();
+    expect((await downloadPromise).suggestedFilename()).toBe("stundenzettel-monat.pdf");
+    await page.getByRole("link", { name: "Online ausfüllen und berechnen" }).click();
+    await expect(page.getByLabel("Unternehmen")).toBeInViewport();
+  });
+
   test("Arbeitszeitrechner handles normal and explicit overnight shifts privately", async ({ page }) => {
     const toolPayloads: unknown[] = [];
     await page.route("**/api/site-analytics/collect", async (route) => {
@@ -33,10 +49,10 @@ test.describe("free working-time tools", () => {
     await page.goto("/stundenzettel");
     await page.getByLabel("Unternehmen").fill("Musterbetrieb");
     await page.getByLabel("Mitarbeitende Person").fill("Erika Beispiel");
-    await page.getByLabel("Beginn Sa, 01.08.").fill("08:00");
-    await page.getByLabel("Ende Sa, 01.08.").fill("16:30");
-    await page.getByLabel("Pause Sa, 01.08.").fill("30");
-    await expect(page.getByLabel("Beginn Sa, 01.08.")).toHaveCSS("color", "rgb(23, 24, 27)");
+    await page.getByLabel("Beginn Sa, 01.08.2026").fill("08:00");
+    await page.getByLabel("Ende Sa, 01.08.2026").fill("16:30");
+    await page.getByLabel("Pause Sa, 01.08.2026").fill("30");
+    await expect(page.getByLabel("Beginn Sa, 01.08.2026")).toHaveCSS("color", "rgb(23, 24, 27)");
 
     const result = page.locator('section[aria-live="polite"]');
     await expect(result).toContainText("08:00");
@@ -86,7 +102,7 @@ test.describe("free working-time tools", () => {
     await expect(result).toContainText("Christi Himmelfahrt");
 
     await page.getByRole("button", { name: "Abwesenheit hinzufügen" }).click();
-    await page.getByLabel("Datum 1").fill("2026-05-04");
+    await page.getByLabel("Datum 1").fill("04.05.2026");
     await page.getByRole("button", { name: "Monatsarbeitszeit berechnen" }).click();
     await expect(result).toContainText("136:00");
     await expect(result).toContainText("08:00");

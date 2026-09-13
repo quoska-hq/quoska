@@ -75,6 +75,33 @@ export async function getTimeEntriesByDateRange(
   return data ?? [];
 }
 
+/** All tracked work through today, including work before employment started. */
+export async function getTimeEntriesThroughDate(
+  supabase: SupabaseClient,
+  tenantId: string,
+  employeeId: string,
+  endDate: string,
+): Promise<TimeEntry[]> {
+  const entries: TimeEntry[] = [];
+  const pageSize = 1000;
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await supabase
+      .from("time_entries")
+      .select("*")
+      .eq("tenant_id", tenantId)
+      .eq("employee_id", employeeId)
+      .lte("date", endDate)
+      .is("deleted_at", null)
+      .order("date", { ascending: true })
+      .order("clock_in", { ascending: true })
+      .order("id", { ascending: true })
+      .range(offset, offset + pageSize - 1);
+    if (error) throw error;
+    entries.push(...(data ?? []));
+    if (!data || data.length < pageSize) return entries;
+  }
+}
+
 /**
  * Get the most recent completed time entry for an employee.
  * Used for rest period (§5 ArbZG) compliance checks.

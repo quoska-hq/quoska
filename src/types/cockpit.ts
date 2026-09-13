@@ -107,3 +107,19 @@ export const cockpitQuerySchema = z.object({
 });
 
 export type CockpitQuery = z.infer<typeof cockpitQuerySchema>;
+
+export const cockpitDismissalSchema = z.object({
+  days: z.union([z.literal(7), z.literal(30)]),
+  employeeId: z.string().uuid().optional(),
+  actionIds: z.array(z.string().min(1).max(500)).min(1).max(5000),
+});
+
+export type CockpitDismissalInput = z.infer<typeof cockpitDismissalSchema>;
+
+export const COCKPIT_UNDO_SECONDS = 10;
+export const cockpitUndoSchema = z.object({ undoToken: z.string().uuid() });
+export interface CockpitDismissalResult {
+  dismissedCount: number;
+  undoToken: string | null;
+  undoExpiresAt: string | null;
+}

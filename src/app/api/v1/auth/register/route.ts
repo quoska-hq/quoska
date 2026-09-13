@@ -90,7 +90,7 @@ async function handlePost(request: Request) {
       .maybeSingle();
 
     if (existingEmployee) {
-      setObservedTenant(existingEmployee.tenant_id);
+      setObservedTenant(existingEmployee.tenant_id, existingEmployee.id);
       if (signupAttribution) {
         const { error: attributionError } = await adminClient
           .from("tenants")
@@ -165,6 +165,8 @@ async function handlePost(request: Request) {
         { status: 500 }
       );
     }
+
+    setObservedTenant(tenantId, employee.id);
 
     // Step 3: Set JWT custom claims via RPC
     // The trigger on_employee_created (011_helpers.sql) handles this

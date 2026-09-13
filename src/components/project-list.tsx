@@ -12,49 +12,35 @@ import type { ApiResponse } from "@/types/api";
 import type { ProjectWithStats } from "@/types";
 import { ProjectFormDialog } from "@/components/project-form-dialog";
 import { ProjectAssignPanel } from "@/components/project-assign-panel";
+import { useEmployees } from "@/hooks/use-employees";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pencil, Trash2, Users } from "lucide-react";
-
-interface Employee {
-  id: string;
-  first_name: string;
-  last_name: string;
-}
+import { Input } from "@/components/ui/input";
+import { Pencil, Search, Trash2, Users } from "lucide-react";
 
 export function ProjectList() {
   const queryClient = useQueryClient();
   const [showInactive, setShowInactive] = useState(false);
+  const [search, setSearch] = useState("");
   const [editProject, setEditProject] = useState<ProjectWithStats | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [assignProjectId, setAssignProjectId] = useState<string | null>(null);
 
-  const { data: projects, isLoading } = useQuery<ProjectWithStats[]>({
+  const { data: projects, isLoading, error: loadError, refetch } = useQuery<ProjectWithStats[]>({
     queryKey: ["projects", showInactive],
     queryFn: async () => {
       const res = await fetch(
         `/api/v1/projects${showInactive ? "?all=true" : ""}`,
       );
       const json: ApiResponse<ProjectWithStats[]> = await res.json();
-      return json.data ?? [];
+      if (!res.ok || !json.data) throw new Error(json.error ?? "Projekte konnten nicht geladen werden.");
+      return json.data;
     },
   });
 
-  const { data: employees } = useQuery<Employee[]>({
-    queryKey: ["employees"],
-    queryFn: async () => {
-      const res = await fetch("/api/v1/employees");
-      const json = await res.json();
-      const data = json.data as {
-        active: Employee[];
-        deactivated: Employee[];
-      } | null;
-      if (!data) return [];
-      return data.active ?? [];
-    },
-  });
+  const employees = useEmployees();
 
   const openAssign = useCallback(
     (projectId: string) => {
@@ -77,11 +63,12 @@ export function ProjectList() {
         body: JSON.stringify(data),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
+      if (!res.ok) throw new Error(json.error ?? "Projekt konnte nicht erstellt werden.");
       return json;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["myProjects"] });
       setDialogOpen(false);
     },
   });
@@ -98,11 +85,12 @@ export function ProjectList() {
         body: JSON.stringify(data),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
+      if (!res.ok) throw new Error(json.error ?? "Projekt konnte nicht gespeichert werden.");
       return json;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["myProjects"] });
       setEditProject(null);
       setDialogOpen(false);
     },
@@ -114,13 +102,17 @@ export function ProjectList() {
         method: "DELETE",
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
+      if (!res.ok) throw new Error(json.error ?? "Projekt konnte nicht gelöscht werden.");
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["projects"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["myProjects"] });
+    },
   });
 
   function openEdit(project: ProjectWithStats) {
+    updateMutation.reset();
+    createMutation.reset();
     setEditProject(project);
     setDialogOpen(true);
   }
@@ -138,11 +130,20 @@ export function ProjectList() {
   }
 
   if (isLoading) return <Skeleton className="h-40 w-full rounded-sm" />;
+  if (!projects) return <div role="alert" className="space-y-3 text-sm text-red-700">
+    <p>{loadError?.message ?? "Projekte konnten nicht geladen werden."}</p>
+    <Button variant="outline" onClick={() => refetch()}>Erneut laden</Button>
+  </div>;
+
+  const query = search.trim().toLocaleLowerCase("de-DE");
+  const filteredProjects = projects?.filter((project) =>
+    `${project.name} ${project.customer_name ?? ""}`.toLocaleLowerCase("de-DE").includes(query),
+  );
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-semibold">Projekte</h2>
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <input
@@ -155,17 +156,40 @@ export function ProjectList() {
           </label>
         </div>
         <ProjectFormDialog
-          key={editProject?.id ?? "__create__"}
+          key={`${editProject?.id ?? "__create__"}-${dialogOpen}`}
           editProject={dialogOpen ? editProject : null}
           open={dialogOpen}
           onOpenChange={(o) => {
+            createMutation.reset();
+            updateMutation.reset();
             setDialogOpen(o);
             if (!o) setEditProject(null);
           }}
           onSubmit={handleFormSubmit}
           isPending={createMutation.isPending || updateMutation.isPending}
+          serverError={(editProject ? updateMutation.error : createMutation.error)?.message}
         />
       </div>
+
+      {deleteMutation.error && <p role="alert" className="text-sm text-red-700">{deleteMutation.error.message}</p>}
+
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground" />
+        <Input
+          type="search"
+          aria-label="Projekte durchsuchen"
+          placeholder="Projekt oder Kunde suchen…"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      {projects && projects.length > 0 && filteredProjects?.length === 0 && (
+        <p role="status" className="py-8 text-center text-sm text-muted-foreground">
+          Keine passenden Projekte gefunden.
+        </p>
+      )}
 
       {projects && projects.length === 0 && (
         <Card>
@@ -178,7 +202,7 @@ export function ProjectList() {
       )}
 
       <div className="space-y-2">
-        {projects?.map((project) => (
+        {filteredProjects?.map((project) => (
           <Card key={project.id}>
             <CardContent className="py-3 px-4">
               <div className="flex items-center justify-between gap-3">
@@ -243,9 +267,13 @@ export function ProjectList() {
               </div>
 
               {assignProjectId === project.id && (
-                <ProjectAssignPanel
+                employees.isLoading ? <p className="mt-3 text-sm text-muted-foreground">Mitarbeiter werden geladen…</p>
+                : employees.error ? <div role="alert" className="mt-3 space-y-2 text-sm text-red-700">
+                  <p>{employees.error.message}</p>
+                  <Button variant="outline" size="sm" onClick={() => employees.refetch()}>Erneut laden</Button>
+                </div> : <ProjectAssignPanel
                   projectId={project.id}
-                  employees={employees ?? []}
+                  employees={employees.data?.active ?? []}
                   onClose={() => setAssignProjectId(null)}
                 />
               )}

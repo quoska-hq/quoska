@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
+import { formatDateFullDE } from "@/config/client/date-utils";
 import { de } from "date-fns/locale/de";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,6 +37,8 @@ interface DatePickerProps {
   minDate?: string;
   /** Maximum selectable date (ISO string) */
   maxDate?: string;
+  /** Compact calendar button next to a separate editable date field. */
+  iconOnly?: boolean;
 }
 
 export function DatePicker({
@@ -49,6 +51,7 @@ export function DatePicker({
   disabled,
   minDate,
   maxDate,
+  iconOnly = false,
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   // eslint-disable-next-line @quoska/legal/no-client-timestamps -- display-only date for calendar widget
@@ -76,16 +79,15 @@ export function DatePicker({
               className={cn(
                 "h-10 w-full justify-start border-slate-900/15 bg-white px-3 text-left font-normal shadow-none hover:border-slate-900/30",
                 !value && "text-muted-foreground",
+                iconOnly && "h-9 w-9 justify-center px-0",
               )}
+              aria-label={iconOnly ? "Kalender öffnen" : undefined}
               disabled={disabled}
             />
           }
         >
-          <CalendarIcon className="mr-2 size-4" />
-          {value
-            // eslint-disable-next-line @quoska/legal/no-client-timestamps -- display-only formatting
-            ? format(new Date(value + "T12:00:00"), "dd.MM.yyyy")
-            : placeholder}
+          <CalendarIcon className={cn("size-4", !iconOnly && "mr-2")} />
+          {!iconOnly && (value ? formatDateFullDE(value) : placeholder)}
         </PopoverTrigger>
         <PopoverContent
           className="w-auto max-w-[calc(100vw-2rem)] border-slate-900/15 p-0 shadow-lg"

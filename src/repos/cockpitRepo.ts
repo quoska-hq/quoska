@@ -16,10 +16,11 @@ export async function getCockpitTimeEntryScopes(
   tenantId: string,
   startDate: string,
   endDate: string,
+  missingEntryStart: string,
   employeeId?: string,
-): Promise<{ periodEntries: TimeEntry[]; recentBreakEntries: TimeEntry[] }> {
+): Promise<{ periodEntries: TimeEntry[]; recentBreakEntries: TimeEntry[]; missingEntryEntries: TimeEntry[] }> {
   const breakLookbackStart = format(subDays(parseISO(endDate), 6), "yyyy-MM-dd");
-  const queryStart = startDate < breakLookbackStart ? startDate : breakLookbackStart;
+  const queryStart = [startDate, breakLookbackStart, missingEntryStart].sort()[0];
   let query = supabase
     .from("time_entries")
     .select("*")
@@ -29,11 +30,18 @@ export async function getCockpitTimeEntryScopes(
     .is("deleted_at", null);
 
   if (employeeId) query = query.eq("employee_id", employeeId);
-  const { data } = await query.order("clock_in", { ascending: true });
-  const entries = data ?? [];
+  query = query.order("clock_in", { ascending: true }).order("id", { ascending: true });
+  const entries: TimeEntry[] = [];
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await query.range(offset, offset + 999);
+    if (error) throw error;
+    entries.push(...(data ?? []));
+    if (!data || data.length < 1000) break;
+  }
   return {
     periodEntries: entries.filter((entry) => entry.date >= startDate),
     recentBreakEntries: entries.filter((entry) => entry.date >= breakLookbackStart),
+    missingEntryEntries: entries.filter((entry) => entry.date >= missingEntryStart),
   };
 }
 

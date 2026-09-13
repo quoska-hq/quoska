@@ -21,6 +21,7 @@ const TABLES = [
   "subscription_events",
   "public_holidays",
   "feedback_prompt_state",
+  "cockpit_action_dismissals",
   "feedback_messages",
 ];
 

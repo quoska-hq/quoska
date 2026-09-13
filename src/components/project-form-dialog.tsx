@@ -34,6 +34,7 @@ interface ProjectFormDialogProps {
     color: string;
   }) => void;
   isPending: boolean;
+  serverError?: string;
 }
 
 export function ProjectFormDialog({
@@ -42,6 +43,7 @@ export function ProjectFormDialog({
   onOpenChange,
   onSubmit,
   isPending,
+  serverError,
 }: ProjectFormDialogProps) {
   const [formName, setFormName] = useState(editProject?.name ?? "");
   const [formCustomer, setFormCustomer] = useState(
@@ -124,7 +126,7 @@ export function ProjectFormDialog({
               ))}
             </div>
           </div>
-          {formError && <p className="text-sm text-red-600">{formError}</p>}
+          {(formError || serverError) && <p role="alert" className="text-sm text-red-600">{formError || serverError}</p>}
           <div className="flex gap-3">
             <Button
               onClick={handleSubmit}
