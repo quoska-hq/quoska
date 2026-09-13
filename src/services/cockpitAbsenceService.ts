@@ -36,4 +36,3 @@ export function countEmployeeAbsenceDays(
   }
   return { leaveDays, sickDays };
 }
-

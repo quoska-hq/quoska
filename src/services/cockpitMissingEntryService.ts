@@ -69,4 +69,3 @@ export function missingEntryActions(input: MissingEntryInput): CockpitActionItem
   }
   return actions;
 }
-

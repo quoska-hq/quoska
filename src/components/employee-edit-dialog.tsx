@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { WorkScheduleEditor } from "@/components/work-schedule-editor";
-import { ROLE_LABELS, ROLE_OPTIONS } from "@/types/employee";
+import { ROLE_LABELS, ROLE_OPTIONS, type EmployeeListResponse } from "@/types/employee";
 import {
   normalizeWorkSchedule,
   scheduleHours,
@@ -60,9 +60,7 @@ export function EmployeeEditDialog({
   const [workSchedule, setWorkSchedule] = useState<WorkSchedule>(
     normalizeWorkSchedule(employee.work_schedule, employee.target_hours_week),
   );
-  const [bundesland, setBundesland] = useState<string>(
-    employee.bundesland ?? "",
-  );
+  const [bundesland, setBundesland] = useState<string>(employee.bundesland ?? "");
   const [employmentStartDate, setEmploymentStartDate] = useState(
     employee.employment_start_date ?? employee.created_at.slice(0, 10),
   );
@@ -109,8 +107,8 @@ export function EmployeeEditDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Fehler beim Speichern");
+      const json: ApiResponse<Employee> = await res.json();
+      if (!res.ok || !json.data) throw new Error(json.error ?? "Fehler beim Speichern");
 
       const entitlementResponse = await fetch(
         `/api/v1/leave-entitlements/${employee.id}`,
@@ -132,7 +130,14 @@ export function EmployeeEditDialog({
 
       return { employee: json.data, entitlement: entitlementJson.data };
     },
-    onSuccess: () => {
+    onSuccess: async ({ employee: updatedEmployee }) => {
+      // Reopening immediately must use the saved profile, even while the list refetches.
+      await queryClient.cancelQueries({ queryKey: ["employees"] });
+      queryClient.setQueryData<EmployeeListResponse>(["employees"], (current) => current ? {
+        ...current,
+        active: current.active.map((item) => item.id === updatedEmployee.id ? updatedEmployee : item),
+        deactivated: current.deactivated.map((item) => item.id === updatedEmployee.id ? updatedEmployee : item),
+      } : current);
       queryClient.invalidateQueries({ queryKey: ["leaveBalance"] });
       onSuccess();
     },

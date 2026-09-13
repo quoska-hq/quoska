@@ -100,7 +100,7 @@ test.describe("Historical time import", () => {
     await expect(card.getByRole("combobox", { name: "Format der Arbeitsdauer", exact: true })).toHaveCount(0);
     await card.getByRole("button", { name: "Import prüfen", exact: true }).click();
     await expect(card.getByText("1 neue Einträge · 0 Duplikate · 0 Fehler")).toBeVisible();
-    await expect(card.getByRole("cell", { name: "19.01.26, 08:00:00", exact: true })).toBeVisible();
+    await expect(card.getByRole("cell", { name: "19.01.2026, 08:00:00", exact: true })).toBeVisible();
   });
 
   test("asks for ambiguous formats and unknown people, then resets settings for a new file", async ({ page }) => {
@@ -117,13 +117,13 @@ test.describe("Historical time import", () => {
     await card.getByRole("combobox", { name: "Mitarbeiter für unbekannt@example.com", exact: true }).selectOption({ label: `Anna Import (${email})` });
     await card.getByRole("button", { name: "Import prüfen", exact: true }).click();
     await expect(card.getByText("1 neue Einträge · 0 Duplikate · 0 Fehler")).toBeVisible();
-    await expect(card.getByRole("cell", { name: "20.01.26, 10:30:00", exact: true })).toBeVisible();
+    await expect(card.getByRole("cell", { name: "20.01.2026, 10:30:00", exact: true })).toBeVisible();
     await card.getByLabel("CSV-Datei auswählen").setInputFiles({ name: "neue-datei.csv", mimeType: "text/csv", buffer: Buffer.from(`Email,Datum,Beginn,Ende\n${email},2026-01-21,08:00,09:00`) });
     await expect(card.getByRole("button", { name: /Einträge importieren/ })).toHaveCount(0);
     await expect(card.getByRole("combobox")).toHaveCount(0);
     await expect(card.getByText(/Zeitzone: Deutschland/)).toBeVisible();
     await expect(card.getByText(/0 Minuten Pause/)).toBeVisible();
     await card.getByRole("button", { name: "Import prüfen", exact: true }).click();
-    await expect(card.getByRole("cell", { name: "21.01.26, 08:00:00", exact: true })).toBeVisible();
+    await expect(card.getByRole("cell", { name: "21.01.2026, 08:00:00", exact: true })).toBeVisible();
   });
 });
