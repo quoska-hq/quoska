@@ -17,7 +17,7 @@ import { TimeImportSection } from "@/components/marketing/sections/time-import";
 export const metadata: Metadata = {
   title: "Funktionen der digitalen Zeiterfassung",
   description:
-    "Stempeluhr, Pausen, Korrekturen, Urlaub, CSV-Import, DATEV-LODAS-Export (Beta) und Auswertungen: alle Funktionen von Quoska für kleine Betriebe im Überblick.",
+    "Stempeluhr, Pausen, Korrekturen, Urlaub, CSV-Import, DATEV-LODAS-Export und Auswertungen: alle Funktionen von Quoska für kleine Betriebe im Überblick.",
   alternates: { canonical: "/funktionen" },
 };
 

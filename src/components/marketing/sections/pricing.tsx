@@ -9,7 +9,7 @@ const INCLUDED = [
   "Abwesenheiten und Auswertungen",
   "Projekte und CSV-Export",
   "CSV-Import mit Vorschau",
-  "DATEV-LODAS-Export (Beta)",
+  "DATEV-LODAS-Export",
 ] as const;
 
 export function PricingSection() {
@@ -31,7 +31,7 @@ export function PricingSection() {
           </p>
         </div>
 
-        <p className="mt-6 text-sm leading-6 text-slate-600">DATEV-LODAS-Export ohne Aufpreis, auch in Free. Beta: zuerst im Lohnbüro testen. <Link href="/datev-export-zeiterfassung" className="text-[#5145ad] underline underline-offset-4">Umfang und Anleitung</Link></p>
+        <p className="mt-6 text-sm leading-6 text-slate-600">DATEV-LODAS-Export ohne Aufpreis, auch in Free. <Link href="/datev-export-zeiterfassung" className="text-[#5145ad] underline underline-offset-4">Umfang und Anleitung</Link></p>
 
         <div className="mt-12 grid border-l border-t border-slate-900/15 sm:grid-cols-2 lg:grid-cols-4">
           {PLAN_ORDER.map((key) => {
@@ -75,7 +75,7 @@ export function PricingSection() {
                   {employeeLabel}
                 </p>
 
-                <ul className="mt-5 space-y-2 border-t border-slate-900/10 pt-5">
+                <ul className="mb-6 mt-5 space-y-2 border-t border-slate-900/10 pt-5">
                   {INCLUDED.map((item) => (
                     <li key={item} className="flex gap-2 text-xs leading-5 text-slate-600">
                       <Check className="mt-0.5 size-3.5 shrink-0 text-[#5145ad]" />
@@ -86,7 +86,7 @@ export function PricingSection() {
 
                 <MarketingSignupLink
                   placement="pricing"
-                  className={`mt-auto inline-flex h-10 w-full items-center justify-center gap-1.5 text-sm font-semibold ${
+                  className={`mt-auto inline-flex h-10 w-full shrink-0 items-center justify-center gap-1.5 text-sm font-semibold ${
                       key === "team"
                         ? "bg-slate-950 text-white hover:bg-[#5145ad]"
                         : "border border-slate-400 bg-transparent text-slate-900 hover:bg-slate-950 hover:text-white"
