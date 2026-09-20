@@ -39,6 +39,7 @@ ${standardPrices}
 - Preise: ${site.url}/preise
 - Sicherheit und Datenschutz: ${site.url}/sicherheit
 - Alternativen und Vergleiche: ${site.url}/alternativen
+- DATEV-LODAS-Stundenexport (Beta, in allen Tarifen ohne Aufpreis): ${site.url}/datev-export-zeiterfassung
 - Digitale Zeiterfassung: ${site.url}/digitale-zeiterfassung
 - Arbeitszeiterfassung für Kleinbetriebe: ${site.url}/zeiterfassung-kleinbetriebe
 - Automatischer Pausenabzug und Pausenregelung: ${site.url}/pausenregelung-arbeitszeit

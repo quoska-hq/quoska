@@ -20,7 +20,7 @@ export interface ProductData {
 }
 export const PRODUCT_ACTIONS = [
   "clock_in", "clock_out", "clock_pause", "clock_resume", "extension_clock",
-  "import", "invite", "setup", "setup_complete", "register", "app_open",
+  "import", "invite", "setup", "setup_complete", "register", "app_open", "report_export",
 ] as const;
 export type ProductAction = typeof PRODUCT_ACTIONS[number];
 export type ActionOutcome = "ok" | "invalid" | "denied" | "conflict" | "limited" | "error";
