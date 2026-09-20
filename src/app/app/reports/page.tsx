@@ -59,7 +59,7 @@ export default function ReportsPage() {
           <TabsTrigger value="corrections" className="min-w-0 px-1.5 text-xs sm:px-3 sm:text-sm">
             Korrekturen
           </TabsTrigger>
-          <TabsTrigger value="datev" className="min-w-0 px-1.5 text-xs sm:px-3 sm:text-sm">DATEV</TabsTrigger>
+          <TabsTrigger value="datev" className="min-w-0 px-1.5 text-xs sm:px-3 sm:text-sm">DATEV <span className="rounded bg-muted-foreground/10 px-1.5 py-0.5 text-[9px] font-medium leading-none text-muted-foreground">Beta</span></TabsTrigger>
         </TabsList>
         <TabsContent value="weekly" className="min-w-0">
           <WeeklyReportTable />

@@ -64,7 +64,7 @@ const jsonLd = {
         "Urlaub und Krankheit",
         "Projektzeiterfassung",
         "Cockpit, Berichte und CSV-Export",
-        "DATEV-LODAS-Stundenexport (Beta), in jedem Tarif ohne Aufpreis",
+        "DATEV-LODAS-Stundenexport, in jedem Tarif ohne Aufpreis",
         "Vergangene Arbeitszeiten per CSV importieren, mit Vorschau",
       ],
       offers: [

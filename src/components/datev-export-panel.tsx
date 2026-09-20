@@ -28,12 +28,11 @@ export function DatevExportPanel() {
   });
   return <section className="space-y-6 py-4" data-testid="datev-export">
     <div className="space-y-2">
-      <p className="text-xs font-medium text-muted-foreground">In jedem Tarif ohne Aufpreis · Beta</p>
+      <p className="text-xs font-medium text-muted-foreground">In jedem Tarif ohne Aufpreis</p>
       <h2 className="text-xl font-semibold">DATEV LODAS: Arbeitsstunden exportieren</h2>
       <p className="text-sm text-muted-foreground">Monatliche Netto-Arbeitsstunden je Person und Lohnart. Urlaub, Krankheit, Feiertagsvergütung,
         Zuschläge und Überstundenauszahlung sind nicht enthalten. Die Datei ersetzt keine vollständige Lohnabrechnung.</p>
-      <p className="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">Beta: Ein Testimport in DATEV steht noch aus.
-        Zuerst mit einem Testbestand im Lohnbüro prüfen. Unterstützt wird LODAS, nicht „Lohn und Gehalt“.</p>
+      <p className="text-sm text-muted-foreground">Unterstützt wird LODAS, nicht „Lohn und Gehalt“.</p>
       <Link href="/datev-export-zeiterfassung" className="text-sm underline underline-offset-4">Anleitung und Vorbereitung mit dem Lohnbüro</Link>
     </div>
     <div className="max-w-xs space-y-1">

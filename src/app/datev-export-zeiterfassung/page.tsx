@@ -6,7 +6,7 @@ import { ArticleContent } from "./article-content";
 
 const PATH = "/datev-export-zeiterfassung";
 const TITLE = "DATEV-Export aus der Zeiterfassung: Stunden für LODAS";
-const DESCRIPTION = "Arbeitsstunden für DATEV LODAS vorbereiten: kostenloser Quoska-Export, Zuordnung und Übergabe ans Lohnbüro. Mit Anleitung und klaren Beta-Grenzen.";
+const DESCRIPTION = "Arbeitsstunden für DATEV LODAS vorbereiten: kostenloser Quoska-Export, Zuordnung und Übergabe ans Lohnbüro. Mit Anleitung zu Personalnummern und Lohnarten.";
 const DATE = "2026-09-20";
 const SOURCES = [
   {
@@ -25,7 +25,7 @@ const SOURCES = [
     "id": "quoska",
     "title": "Quoska: DATEV LODAS hours export",
     "url": "https://github.com/quoska-hq/quoska/blob/main/docs/datev-export.md",
-    "detail": "Geprüft am 20.09.2026. Eigene Funktionsbeschreibung; tatsächlicher LODAS-Testimport steht noch aus."
+    "detail": "Geprüft am 20.09.2026. Eigene Funktionsbeschreibung zum Exportumfang."
   }
 ];
 
@@ -93,7 +93,7 @@ export default function DatevExportGuidePage() {
                 </li>
               ))}
             </ol>
-            <p className="mt-5 text-sm leading-6 text-slate-600">20.09.2026: Erstveröffentlichung mit geprüften DATEV-Quellen, Anleitung und Abgrenzung des kostenlosen Beta-Exports.</p>
+            <p className="mt-5 text-sm leading-6 text-slate-600">20.09.2026: Erstveröffentlichung mit geprüften DATEV-Quellen, Anleitung und Abgrenzung des kostenlosen Stundenexports.</p>
           </section>
         </article>
       </div>

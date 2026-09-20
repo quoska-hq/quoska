@@ -239,7 +239,7 @@ test.describe("App Shell — Mobile Responsive", () => {
     const content = page.locator("[data-app-content]");
     const reports = page.getByTestId("reports-page");
     await expect(reports.getByRole("heading", { name: "Berichte" })).toBeVisible();
-    await expect(reports.getByRole("tab")).toHaveText(["Wochenbericht", "Projekte", "Korrekturen", "DATEV"]);
+    await expect(reports.getByRole("tab")).toHaveText(["Wochenbericht", "Projekte", "Korrekturen", "DATEV Beta"]);
     await expect(page.getByTestId("weekly-report-scroll")).toBeVisible({ timeout: 10_000 });
 
     const contentBox = await content.boundingBox();
@@ -247,7 +247,7 @@ test.describe("App Shell — Mobile Responsive", () => {
     const boundedElements = [
       reports.getByRole("button", { name: "Zeit hinzufügen" }),
       reports.locator('[data-slot="tabs-list"]'),
-      reports.getByRole("tab", { name: "DATEV", exact: true }),
+      reports.getByRole("tab", { name: "DATEV Beta", exact: true }),
       page.getByTestId("weekly-report-navigation"),
       page.getByTestId("weekly-report-scroll"),
     ];

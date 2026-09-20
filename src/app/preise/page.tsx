@@ -18,7 +18,7 @@ const INCLUDED = [
   "Cockpit, Projekte, CSV-Import und Export",
   "Rollen für Mitarbeitende und Verantwortliche",
   "Updates und Hosting inklusive",
-  "DATEV-LODAS-Stundenexport (Beta) ohne Aufpreis",
+  "DATEV-LODAS-Stundenexport ohne Aufpreis",
 ] as const;
 
 export default function PricesPage() {
