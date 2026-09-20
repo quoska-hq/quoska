@@ -1,4 +1,5 @@
 export const productActionLabels: Record<string, string> = {
+  report_export: "Bericht erzeugt",
   clock_in: "Einstempeln", clock_out: "Ausstempeln", clock_pause: "Pause starten",
   clock_resume: "Pause beenden", extension_clock: "Browser-Erweiterung",
   import: "Import / Vorschau", invite: "Einladung", register: "Firma anlegen",

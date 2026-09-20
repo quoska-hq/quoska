@@ -6,6 +6,7 @@ import { ProductTourSection } from "@/components/marketing/sections/product-tour
 import { FeaturesSection } from "@/components/marketing/sections/features";
 import { WhyQuoskaSection } from "@/components/marketing/sections/why-quoska";
 import { HowItWorksSection } from "@/components/marketing/sections/how-it-works";
+import { DatevExportSection } from "@/components/marketing/sections/datev-export";
 import { TimeImportSection } from "@/components/marketing/sections/time-import";
 import { TrustSection } from "@/components/marketing/sections/trust";
 import { GuidesSection } from "@/components/marketing/sections/guides";
@@ -63,6 +64,7 @@ const jsonLd = {
         "Urlaub und Krankheit",
         "Projektzeiterfassung",
         "Cockpit, Berichte und CSV-Export",
+        "DATEV-LODAS-Stundenexport (Beta), in jedem Tarif ohne Aufpreis",
         "Vergangene Arbeitszeiten per CSV importieren, mit Vorschau",
       ],
       offers: [
@@ -117,6 +119,7 @@ export default function HomePage() {
         <WhyQuoskaSection />
         <HowItWorksSection />
         <TimeImportSection />
+      <DatevExportSection />
       <TrustSection />
       <GuidesSection />
       <PricingSection />

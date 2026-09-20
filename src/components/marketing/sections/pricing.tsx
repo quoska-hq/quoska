@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { MarketingSignupLink } from "@/components/marketing/marketing-signup-link";
 import { FOUNDER_OFFERS, PLANS, PLAN_ORDER } from "@/config/plans";
@@ -8,6 +9,7 @@ const INCLUDED = [
   "Abwesenheiten und Auswertungen",
   "Projekte und CSV-Export",
   "CSV-Import mit Vorschau",
+  "DATEV-LODAS-Export (Beta)",
 ] as const;
 
 export function PricingSection() {
@@ -28,6 +30,8 @@ export function PricingSection() {
             Teamgröße — nicht pro Person.
           </p>
         </div>
+
+        <p className="mt-6 text-sm leading-6 text-slate-600">DATEV-LODAS-Export ohne Aufpreis, auch in Free. Beta: zuerst im Lohnbüro testen. <Link href="/datev-export-zeiterfassung" className="text-[#5145ad] underline underline-offset-4">Umfang und Anleitung</Link></p>
 
         <div className="mt-12 grid border-l border-t border-slate-900/15 sm:grid-cols-2 lg:grid-cols-4">
           {PLAN_ORDER.map((key) => {

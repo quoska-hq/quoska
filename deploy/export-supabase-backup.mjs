@@ -23,6 +23,8 @@ const TABLES = [
   "feedback_prompt_state",
   "cockpit_action_dismissals",
   "feedback_messages",
+  "datev_settings",
+  "datev_exports",
 ];
 
 const STORAGE_BUCKETS = ["au-certificates"];

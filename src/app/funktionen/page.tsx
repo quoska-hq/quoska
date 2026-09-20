@@ -11,12 +11,13 @@ import {
   Users,
 } from "lucide-react";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
+import { DatevExportSection } from "@/components/marketing/sections/datev-export";
 import { TimeImportSection } from "@/components/marketing/sections/time-import";
 
 export const metadata: Metadata = {
   title: "Funktionen der digitalen Zeiterfassung",
   description:
-    "Stempeluhr, Pausen, Korrekturen, Urlaub, CSV-Import und Auswertungen: alle Funktionen von Quoska für kleine Betriebe im Überblick.",
+    "Stempeluhr, Pausen, Korrekturen, Urlaub, CSV-Import, DATEV-LODAS-Export (Beta) und Auswertungen: alle Funktionen von Quoska für kleine Betriebe im Überblick.",
   alternates: { canonical: "/funktionen" },
 };
 
@@ -75,6 +76,7 @@ export default function FunctionsPage() {
       </section>
 
       <TimeImportSection />
+      <DatevExportSection />
 
       <section className="border-y border-slate-900/10 bg-[#e7e3da]">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-16">

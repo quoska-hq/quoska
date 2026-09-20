@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { WeeklyReportTable } from "@/components/weekly-report-table";
 import { ProjectReportTable } from "@/components/project-report-table";
+import { DatevExportPanel } from "@/components/datev-export-panel";
 import { CorrectionReviewList } from "@/components/correction-review-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ export default function ReportsPage() {
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
   const searchParams = useSearchParams();
   const requestedTab = searchParams.get("tab");
-  const initialTab = requestedTab === "projects" || requestedTab === "corrections"
+  const initialTab = requestedTab === "projects" || requestedTab === "corrections" || requestedTab === "datev"
     ? requestedTab
     : "weekly";
 
@@ -48,7 +49,7 @@ export default function ReportsPage() {
       />
 
       <Tabs defaultValue={initialTab} className="min-w-0">
-        <TabsList className="grid w-full grid-cols-3 sm:flex sm:w-fit">
+        <TabsList className="grid w-full grid-cols-2 auto-rows-9 group-data-horizontal/tabs:h-auto sm:flex sm:w-fit sm:group-data-horizontal/tabs:h-9">
           <TabsTrigger value="weekly" className="min-w-0 px-1.5 text-xs sm:px-3 sm:text-sm">
             Wochenbericht
           </TabsTrigger>
@@ -58,6 +59,7 @@ export default function ReportsPage() {
           <TabsTrigger value="corrections" className="min-w-0 px-1.5 text-xs sm:px-3 sm:text-sm">
             Korrekturen
           </TabsTrigger>
+          <TabsTrigger value="datev" className="min-w-0 px-1.5 text-xs sm:px-3 sm:text-sm">DATEV</TabsTrigger>
         </TabsList>
         <TabsContent value="weekly" className="min-w-0">
           <WeeklyReportTable />
@@ -68,6 +70,7 @@ export default function ReportsPage() {
         <TabsContent value="corrections" className="min-w-0">
           <CorrectionReviewList />
         </TabsContent>
+        <TabsContent value="datev" className="min-w-0"><DatevExportPanel /></TabsContent>
       </Tabs>
     </div>
   );

@@ -12,11 +12,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = site.url;
 
   return [
-    { url: base, lastModified: "2026-08-20" },
-    { url: `${base}/funktionen`, lastModified: "2026-08-19" },
+    { url: base, lastModified: "2026-09-20" },
+    { url: `${base}/funktionen`, lastModified: "2026-09-20" },
     { url: `${base}/ueber-uns`, lastModified: "2026-09-02" },
     { url: `${base}/browser-erweiterung`, lastModified: "2026-08-25" },
-    { url: `${base}/preise`, lastModified: "2026-08-19" },
+    { url: `${base}/preise`, lastModified: "2026-09-20" },
     { url: `${base}/sicherheit`, lastModified: "2026-08-11" },
     { url: `${base}/digitale-zeiterfassung`, lastModified: "2026-09-11" },
     { url: `${base}/zeiterfassung-kleinbetriebe`, lastModified: "2026-09-13" },
@@ -28,6 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/arbeitszeitnachweis`, lastModified: "2026-09-13" },
     { url: `${base}/stundenzettel-minijob`, lastModified: "2026-09-13" },
     { url: `${base}/arbeitszeitkonto`, lastModified: "2026-09-13" },
+    { url: `${base}/datev-export-zeiterfassung`, lastModified: "2026-09-20" },
     { url: `${base}/arbeitszeitwuensche`, lastModified: "2026-09-07" },
     { url: `${base}/pausenregelung-arbeitszeit`, lastModified: "2026-08-30" },
     { url: `${base}/projektzeiterfassung`, lastModified: "2026-08-19" },
