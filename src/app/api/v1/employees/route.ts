@@ -139,8 +139,8 @@ async function handlePost(request: Request) {
       const status =
         result.error?.includes("Maximal") ? 403 :
         result.error?.includes("existiert bereits") ? 409 : 500;
-      return NextResponse.json<ApiResponse<Employee>>(
-        { data: null, error: result.error },
+      return NextResponse.json(
+        { data: null, error: result.error, ...(result.error?.includes("Maximal") ? { code: "plan_limit" } : {}) },
         { status },
       );
     }

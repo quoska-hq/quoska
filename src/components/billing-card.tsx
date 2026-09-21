@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Check, X, AlertCircle } from "lucide-react";
+import { BillingInterest } from "@/components/billing-interest";
 
 interface BillingStatus {
   plan: Plan;
@@ -117,7 +118,7 @@ export function BillingCard() {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["billingStatus"] });
 
   return (
-    <Card>
+    <Card id="abrechnung" className="scroll-mt-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="size-4 text-[#6658d3]" />
@@ -125,10 +126,11 @@ export function BillingCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {data?.canUpgrade && <BillingInterest cancelled={showCancelledBanner} />}
         {showSuccessBanner && (
           <div className="flex items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
             <Check className="size-4 mt-0.5 shrink-0" />
-            <span className="flex-1">Zahlung erhalten — dein Tarif wird in Kürze aktualisiert. Bei Verzögerung „Status aktualisieren“ klicken.</span>
+            <span className="flex-1">Zurück vom Checkout. Sobald die Zahlungsbestätigung vorliegt, wird dein Tarif aktualisiert. Bei Verzögerung „Status aktualisieren“ klicken.</span>
             <button onClick={dismissBanner} aria-label="Schließen" className="shrink-0 text-emerald-600 hover:text-emerald-800">
               <X className="size-4" />
             </button>

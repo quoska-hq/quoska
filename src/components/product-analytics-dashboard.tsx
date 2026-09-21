@@ -6,6 +6,7 @@ import { ProductTenantTable } from "@/components/product-tenant-table";
 import { ProductAccountTable } from "@/components/product-account-table";
 import { productActionLabels as names } from "@/config/client/product-action-labels";
 import { PageHeader } from "@/components/page-header";
+import { ProductActivationOverview } from "@/components/product-activation-overview";
 
 const outcomes: Record<string,string> = { ok: "Erfolgreich", invalid: "Eingabe abgelehnt", denied: "Zugriff abgelehnt", conflict: "Konflikt", limited: "Begrenzt", error: "Serverfehler", rejected: "Abgelehnt", network: "Verbindungs-/Browserfehler" };
 export function ProductAnalyticsDashboard({ summary: s, history, operations }: {
@@ -31,6 +32,7 @@ export function ProductAnalyticsDashboard({ summary: s, history, operations }: {
       <Metric label="Erste Zeiterfassung / Import" value={s.totals.activated} note={`von ${s.totals.companies} Firmen`} />
       <Metric label="Firmen im Bezahlplan" value={s.totals.paidPlans} note="Tarifstatus; kein Nachweis einer Zahlung" />
     </div>
+    <ProductActivationOverview activation={s.activation} />
     <Section title="Was Aufmerksamkeit braucht">
       <p>{s.totals.incompleteSignups} Konten ohne Firmeneinrichtung · {s.totals.stale} seit mehr als 24 Stunden offene Zeiterfassungen.</p>
       {issues.map(t => <p key={t.name} className="mt-2 text-amber-800">{t.name}: {t.stale} alte offene Einträge. Zeiten prüfen und über die vorhandene Korrektur bearbeiten.</p>)}
@@ -63,7 +65,7 @@ export function ProductAnalyticsDashboard({ summary: s, history, operations }: {
     <Section title="Aktionen und Fehler · seit Beginn der Vorwoche">
       <Table headers={["Aktion", "Ergebnis", "Anzahl", "Zugeordnete Firmen"]} rows={[...groups.values()].sort((a,b) => Number(a.outcome === "ok") - Number(b.outcome === "ok") || b.count - a.count)
         .map(g => [names[g.action] ?? g.action, outcomes[g.outcome] ?? g.outcome, g.count, g.firms.size || "Nicht zugeordnet"])} />
-      <p className="mt-3 text-xs text-slate-500">Messung ab Bereitstellung; leere Werte bedeuten keine erfassten Ereignisse. Browsermeldungen sind unbestätigte Hinweise. Eingabe- und Zugriffsablehnungen sind nicht automatisch Programmfehler. App-Aufrufe sind auf eine Meldung pro Firma und Tag begrenzt.</p>
+      <p className="mt-3 text-xs text-slate-500">Messung ab Bereitstellung; leere Werte bedeuten keine erfassten Ereignisse. Browsermeldungen sind unbestätigte Hinweise. Eingabe- und Zugriffsablehnungen sind nicht automatisch Programmfehler. App-Aufrufe, Tarifansichten und gemeldete Checkout-Abbrüche sind auf eine Meldung pro Firma und Tag begrenzt. Die Firmenzahl zählt jede zugeordnete Firma im Zeitraum nur einmal.</p>
     </Section>
     <Section title="Tägliche Bestandsaufnahmen">
       <Table headers={["Datum", "Firmen", "Nutzbare Konten"]} rows={history.map(h => [formatDateFullDE(h.day),h.companies,h.usableAccounts])} />

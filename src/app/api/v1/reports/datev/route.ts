@@ -7,6 +7,8 @@ import { buildDatevPreview, generateLodasFile } from "@/services/datevExportServ
 import { observeProductAction } from "@/services/productObservationService";
 import { setObservedTenant } from "@/config/server/product-observation-context";
 
+import { markFirstReportExport } from "@/repos/onboardingRepo";
+
 const headers = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
 const fail = (error: string, status: number) => NextResponse.json({ error }, { status, headers });
 
@@ -69,6 +71,8 @@ async function handlePost(request: Request) {
     const content = generateLodasFile(snapshot.settings, preview);
     const saved = await storeDatevExport(admin, employee.tenant_id, employee.id,
       preview.month, preview.fingerprint, content);
+    try { await markFirstReportExport(admin, employee.tenant_id); }
+    catch { console.warn("report_progress_unavailable"); }
     return new NextResponse(saved.content, { headers: { ...headers,
       "Content-Type": "text/plain; charset=windows-1252",
       "Content-Disposition": `attachment; filename="quoska-lodas-${preview.month}-${saved.id.slice(0, 8)}.txt"`,

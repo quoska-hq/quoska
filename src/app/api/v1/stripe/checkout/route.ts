@@ -9,6 +9,8 @@
  * Inert when billing is disabled (no STRIPE_SECRET_KEY / price IDs).
  */
 
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/config/supabase/server";
 import { serverEnv } from "@/config/env";
@@ -39,7 +41,7 @@ function founderPromotionCodeIdForTier(
   }[tier];
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   if (!isBillingEnabled()) {
     return NextResponse.json<ApiResponse<{ url: string }>>(
       { data: null, error: "Billing ist nicht aktiviert." },
@@ -74,6 +76,7 @@ export async function POST(request: Request) {
       );
     }
 
+    setObservedTenant(authResult.data.tenantId, authResult.data.employeeId);
     if (authResult.data.role !== "admin") {
       return NextResponse.json<ApiResponse<{ url: string }>>(
         { data: null, error: "Nur Administratoren können Tarife buchen." },
@@ -125,3 +128,5 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = observeProductAction("checkout_start", handlePost);

@@ -6,6 +6,7 @@
  */
 
 import { createClient } from "@/config/supabase/server";
+import { StartGuide } from "@/components/start-guide";
 import { AdminCockpit } from "@/components/admin-cockpit";
 import { BrowserExtensionDashboardPromo } from "@/components/browser-extension-dashboard-promo";
 import { ManagerDashboard } from "@/components/manager-dashboard";
@@ -67,6 +68,7 @@ export default async function DashboardPage() {
           : "Zeiterfassung für dein Team"}
       />
 
+      {isAdmin && setupComplete && <StartGuide />}
       <BrowserExtensionDashboardPromo />
 
       {!setupComplete && (

@@ -74,6 +74,7 @@ export function loadOnboardingDraft(): OnboardingDraft | null {
       },
       company: {
         companyName: parsed.company?.companyName ?? "",
+        plannedTeamSize: parsed.company?.plannedTeamSize ?? null,
         bundesland: parsed.company?.bundesland ?? "",
       },
       schedule: normalizeWorkSchedule(parsed.schedule),

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TEAM_SIZES } from "@/types/onboarding";
 import { workScheduleSchema } from "@/types/work-schedule";
 
 export const setupProfileSchema = z.object({
@@ -15,6 +16,7 @@ export type SetupProfileInput = z.infer<typeof setupProfileSchema>;
 
 export const setupCompanySchema = z.object({
   companyName: z.string().min(1, "Firmenname ist erforderlich"),
+  plannedTeamSize: z.enum(TEAM_SIZES).nullable().optional(),
   bundesland: z.string().min(1, "Bundesland ist erforderlich"),
 });
 
