@@ -124,7 +124,7 @@ test.describe("Admin Cockpit", () => {
     await page.getByLabel("E-Mail").fill(email);
     await page.getByLabel("Passwort").fill(TEST_PASSWORD);
     await page.getByRole("button", { name: /anmelden/i }).click();
-    await page.getByRole("link", { name: "Prüfen" }).click();
+    await page.getByTestId("cockpit-action").getByRole("link", { name: "Prüfen", exact: true }).click();
 
     await expect(page).toHaveURL(/\/app\/reports\?tab=corrections/);
     await expect(page.getByRole("tab", { name: "Korrekturen" })).toHaveAttribute("data-active");

@@ -25,7 +25,7 @@ test.describe("Project management across navigation and saves", () => {
     await expect(project(page).getByRole("checkbox", { name: "Lukas Mitarbeiter" })).toBeChecked();
     await navigate(page, "employees");
     await expect(page.getByText("3 aktive Mitarbeiter", { exact: true })).toBeVisible();
-    await expect(page.getByText("Max. 3 Mitarbeiter im kostenlosen Tarif.", { exact: false })).toBeVisible();
+    await expect(page.getByText("Max. 3 Mitarbeiter in deinem Tarif.", { exact: false })).toBeVisible();
     const row = page.getByText("Lukas Mitarbeiter", { exact: true }).locator("../..");
     await row.getByRole("button", { name: "Bearbeiten", exact: true }).click();
     await expect(page.getByLabel("Eintrittsdatum")).toHaveValue(/^\d{2}\.\d{2}\.\d{4}$/);
