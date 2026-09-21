@@ -1,5 +1,6 @@
 "use client";
 
+import { TEAM_SIZE_LABELS } from "@/types/onboarding";
 import type { SetupCompanyInput, SetupProfileInput } from "@/types/setup";
 import { getBundeslandLabel } from "@/types/tenant";
 import { formatWorkMinutes, totalScheduleMinutes, type WorkSchedule } from "@/types/work-schedule";
@@ -49,6 +50,7 @@ export function SetupReviewStep({
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Eintritt</dt><dd className="font-medium">{formatDate(profile.employmentStartDate)}</dd></div>
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Startsaldo</dt><dd className="font-medium">{formatHours(profile.initialOvertimeHours)}</dd></div>
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Firma</dt><dd className="font-medium">{company.companyName}</dd></div>
+        {company.plannedTeamSize && <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Geplantes Team</dt><dd className="font-medium">{TEAM_SIZE_LABELS[company.plannedTeamSize]}</dd></div>}
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Bundesland</dt><dd className="font-medium">{getBundeslandLabel(company.bundesland)}</dd></div>
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Arbeitszeit</dt><dd className="font-medium">{formatWorkMinutes(totalScheduleMinutes(schedule))}/Woche</dd></div>
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Einladungen</dt><dd className="font-medium">{invites.length === 0 ? "Keine – kann später erfolgen" : invites.map((invite) => `${invite.firstName} ${invite.lastName}`).join(", ")}</dd></div>

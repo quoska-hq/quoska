@@ -7,7 +7,7 @@ export function recordProductAction(row: ActionCount, db: Sqlite = getSiteAnalyt
   db.prepare(`INSERT INTO product_action_counts(day,action,outcome,tenant_key,count)
     VALUES (@day,@action,@outcome,@tenantKey,@count)
     ON CONFLICT(day,action,outcome,tenant_key) DO UPDATE SET
-    count = CASE WHEN excluded.action = 'app_open' THEN 1 ELSE MIN(count + excluded.count, 1000000) END`).run(row);
+    count = CASE WHEN excluded.action IN ('app_open', 'upgrade_view', 'checkout_cancelled') THEN 1 ELSE MIN(count + excluded.count, 1000000) END`).run(row);
 }
 export function getProductActions(db: Sqlite = getSiteAnalyticsDb()): ActionCount[] {
   return db.prepare(`SELECT day,action,outcome,tenant_key AS tenantKey,count
@@ -15,7 +15,7 @@ export function getProductActions(db: Sqlite = getSiteAnalyticsDb()): ActionCoun
 }
 export function saveProductSnapshot(summary: ProductOverview, db: Sqlite = getSiteAnalyticsDb()): void {
   // Daily aggregate history contains neither account nor tenant identifiers.
-  const data = { at: summary.at, totals: summary.totals, weeks: summary.weeks, cohorts: summary.cohorts };
+  const data = { at: summary.at, totals: summary.totals, weeks: summary.weeks, cohorts: summary.cohorts, activation: summary.activation };
   db.prepare(`INSERT INTO product_snapshots(day,summary) VALUES (?,?)
     ON CONFLICT(day) DO UPDATE SET summary=excluded.summary`).run(summary.today, JSON.stringify(data));
 }

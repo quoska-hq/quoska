@@ -26,6 +26,10 @@ export function observeProductAction(action: ProductAction, handler: (request: R
         if (body?.data?.errorCount > 0) outcome = "invalid";
         if (body?.error === "Importprüfung fehlgeschlagen. Bitte versuche es erneut oder wende dich an die Administration.") outcome = "error";
       }
+      if (action === "invite" && response.status === 403) {
+        const body = await response.clone().json().catch(() => null);
+        if (body?.code === "plan_limit") await observe("plan_limit", "limited", request);
+      }
       await observe(action, outcome, request);
       return response;
     } catch (error) {

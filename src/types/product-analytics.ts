@@ -1,9 +1,11 @@
+import type { PlannedTeamSize } from "@/types/onboarding";
 export interface ProductTenant {
   id: string; name: string; created_at: string; plan: string; setup_complete: boolean;
+  planned_team_size?: PlannedTeamSize | null; first_report_export_at?: string | null; stripe_customer_id?: string | null;
 }
 export interface ProductEmployee {
   id: string; tenant_id: string; user_id: string; role: string; created_at: string; deleted_at: string | null;
-  first_name: string; last_name: string;
+  first_name: string; last_name: string; invited_at?: string | null;
 }
 export interface ProductAccount {
   id: string; created_at: string; confirmed: boolean; banned: boolean;
@@ -11,16 +13,18 @@ export interface ProductAccount {
 }
 export interface ProductEntry {
   id: string; tenant_id: string; created_at: string; date: string; entry_source: string;
-  status: string; clock_in: string;
+  status: string; clock_in: string; clock_out?: string | null;
 }
 export interface ProductActivity { tenant_id: string; created_at: string }
+export interface ProductPayment { tenantId: string; at: string }
 export interface ProductData {
   tenants: ProductTenant[]; employees: ProductEmployee[]; accounts: ProductAccount[];
-  entries: ProductEntry[]; projects: ProductActivity[];
+  entries: ProductEntry[]; projects: ProductActivity[]; payments?: ProductPayment[];
 }
 export const PRODUCT_ACTIONS = [
   "clock_in", "clock_out", "clock_pause", "clock_resume", "extension_clock",
-  "import", "invite", "setup", "setup_complete", "register", "app_open", "report_export",
+  "import", "invite", "setup", "setup_complete", "register", "app_open",
+  "report_export", "checkout_start", "upgrade_view", "checkout_cancelled", "plan_limit",
 ] as const;
 export type ProductAction = typeof PRODUCT_ACTIONS[number];
 export type ActionOutcome = "ok" | "invalid" | "denied" | "conflict" | "limited" | "error";
@@ -40,7 +44,7 @@ export interface ActionCount {
 export interface TenantOverview {
   name: string; created: string; plan: string; accounts: number; pending: number;
   entries: number; imports: number; firstUse: string | null; lastUse: string | null;
-  daysThisWeek: number; daysPreviousWeek: number; stale: number;
+  daysThisWeek: number; daysPreviousWeek: number; stale: number; plannedTeamSize?: PlannedTeamSize | null;
 }
 export interface ProductOverview {
   at: string; today: string; weekStart: string; previousWeekStart: string;
@@ -48,6 +52,7 @@ export interface ProductOverview {
     incompleteSignups: number; activated: number; paidPlans: number; stale: number };
   registration: { accounts: number; confirmed: number; companies: number; setup: number; activated: number };
   weeks: { label: string; from: string; to: string; companies: number; active: number; clock: number; manual: number; imports: number; setup: number; app: number }[];
+  activation: { companies: number; invited: number; completedEntry: number; returned: number; returnEligible: number; exported: number; checkout: number; paid: number; teamSizes: { size: PlannedTeamSize | null; companies: number; active: number }[] };
   cohorts: { week: string; companies: number; activated: number; eligible: boolean; returned: number | null }[];
   tenants: TenantOverview[]; accounts: AccountOverview[]; actions: ActionCount[];
 }

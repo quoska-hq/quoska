@@ -5,14 +5,17 @@
  * Returns CSV file with German headers and formatting.
  */
 
+import { markFirstReportExport } from "@/repos/onboardingRepo";
+import { setObservedTenant } from "@/config/server/product-observation-context";
+import { observeProductAction } from "@/services/productObservationService";
 import { NextResponse } from "next/server";
-import { createClient } from "@/config/supabase/server";
+import { createClient, createAdminClient } from "@/config/supabase/server";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getEntriesForExport } from "@/repos/exportRepo";
 import { entriesToExportRows, generateCSV, csvFilename } from "@/services/exportService";
 import { exportQuerySchema } from "@/types/export";
 
-export async function GET(request: Request) {
+async function handleGet(request: Request) {
   try {
     const supabase = await createClient();
     const authResult = await getEmployeeFromAuth(supabase);
@@ -25,6 +28,7 @@ export async function GET(request: Request) {
     }
 
     const { tenantId, role } = authResult.data;
+    setObservedTenant(tenantId, authResult.data.employeeId);
 
     if (role === "employee") {
       return NextResponse.json(
@@ -66,6 +70,10 @@ export async function GET(request: Request) {
     const csv = generateCSV(exportRows);
     const filename = csvFilename(startDate, endDate);
 
+    if (exportRows.length > 0) {
+      try { await markFirstReportExport(createAdminClient(), tenantId); }
+      catch { console.warn("report_progress_unavailable"); }
+    }
     return new NextResponse(csv, {
       status: 200,
       headers: {
@@ -81,3 +89,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const GET = observeProductAction("report_export", handleGet);

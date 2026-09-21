@@ -70,6 +70,7 @@ test.describe("Setup Wizard", () => {
     await page.getByLabel("Bundesland").click();
     await page.getByRole("option", { name: /nordrhein-westfalen/i }).click();
     await expect(page.getByLabel("Bundesland")).toContainText("Nordrhein-Westfalen");
+    await page.getByRole("radio", { name: "4–10 Personen", exact: true }).check();
     await page.getByRole("button", { name: "Weiter" }).click();
 
     // A four-day week is a first-class contractual schedule.
@@ -98,7 +99,7 @@ test.describe("Setup Wizard", () => {
 
     const { data: employee, error } = await adminClient
       .from("employees")
-      .select("first_name, last_name, bundesland, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, tenant_id, tenants(setup_complete, bundesland, default_work_schedule, signup_attribution)")
+      .select("first_name, last_name, bundesland, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, tenant_id, tenants(setup_complete, bundesland, default_work_schedule, signup_attribution, planned_team_size)")
       .eq("email", email)
       .is("deleted_at", null)
       .single();
@@ -114,11 +115,13 @@ test.describe("Setup Wizard", () => {
       initial_overtime_minutes: 150,
     });
     const tenant = employee!.tenants as unknown as {
+      planned_team_size: string | null;
       setup_complete: boolean;
       bundesland: string;
       default_work_schedule: { friday: number };
       signup_attribution: { firstTouch: { source: string; path: string } };
     };
+    expect(tenant.planned_team_size).toBe("4-10");
     expect(tenant.setup_complete).toBe(true);
     expect(tenant.bundesland).toBe("nordrhein-westfalen");
     expect(tenant.default_work_schedule.friday).toBe(0);

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { PlannedTeamSizeField } from "@/components/planned-team-size";
+import type { PlannedTeamSize } from "@/types/onboarding";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BUNDESLAENDER, BUNDESLAND_LABELS, getBundeslandLabel } from "@/types/tenant";
@@ -26,6 +28,7 @@ interface CompanyStepProps {
 }
 
 export function CompanyStep({ initialData, onSubmit, onBack, loading, error }: CompanyStepProps) {
+  const [plannedTeamSize, setPlannedTeamSize] = useState<PlannedTeamSize | null>(initialData.plannedTeamSize ?? null);
   const [selectedBundesland, setSelectedBundesland] = useState(initialData.bundesland);
 
   const {
@@ -39,7 +42,7 @@ export function CompanyStep({ initialData, onSubmit, onBack, loading, error }: C
   });
 
   function handleFormSubmit(data: SetupCompanyInput) {
-    onSubmit(data);
+    onSubmit({ ...data, plannedTeamSize });
   }
 
   return (
@@ -90,6 +93,8 @@ export function CompanyStep({ initialData, onSubmit, onBack, loading, error }: C
           </p>
         )}
       </div>
+
+      <PlannedTeamSizeField value={plannedTeamSize} onChange={setPlannedTeamSize} disabled={loading} />
 
       <div className="flex gap-2">
         <Button type="button" variant="outline" className="flex-1" onClick={onBack}>

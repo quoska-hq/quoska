@@ -94,8 +94,8 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
         {isAdmin && (
           atPlanLimit ? (
             <span className="text-sm text-muted-foreground">
-              Max. {planStatus?.limit} Mitarbeiter im kostenlosen Tarif.{" "}
-              <a href="/app/settings" className="text-primary underline">
+              Max. {planStatus?.limit} Mitarbeiter in deinem Tarif.{" "}
+              <a href="/app/settings#abrechnung" className="text-primary underline">
                 Jetzt upgraden →
               </a>
             </span>

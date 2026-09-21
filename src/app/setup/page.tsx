@@ -92,6 +92,7 @@ export default function SetupPage() {
         });
         setCompany({
           companyName: result.data.company?.name ?? "",
+          plannedTeamSize: result.data.company?.plannedTeamSize ?? null,
           bundesland: result.data.company?.bundesland ?? loadedProfile?.bundesland ?? "",
         });
         setSchedule(normalizeWorkSchedule(

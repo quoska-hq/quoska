@@ -5,6 +5,7 @@ import { productDay, productWeek, shiftProductDay, isStaleEntry } from "@/config
 import { loadProductData } from "@/repos/productAnalyticsRepo";
 import { getProductActions } from "@/repos/productEventRepo";
 import { getAccountActivity } from "@/repos/productAccountActivityRepo";
+import { buildProductActivation } from "@/services/productActivationService";
 import type { ProductData, ProductOverview, ActionCount, AccountActivity, AccountOverview } from "@/types/product-analytics";
 
 export async function getProductOverview(now: string): Promise<ProductOverview> {
@@ -51,7 +52,7 @@ export function buildProductOverview(
   const activity = entries.map(e => ({ tenant: e.tenant_id, day: productDay(e.created_at), kind: e.entry_source === "import" ? "imports" : e.entry_source === "manual" ? "manual" : "clock" }));
   const setup = [...data.projects, ...employees].filter(e => tenantIds.has(e.tenant_id))
     .map(e => ({ tenant: e.tenant_id, day: productDay(e.created_at), kind: "setup" }));
-  const observed = actions.filter(e => e.outcome === "ok" && keys.has(e.tenantKey))
+  const observed = actions.filter(e => e.outcome === "ok" && keys.has(e.tenantKey) && e.action !== "checkout_cancelled")
     .map(e => ({ tenant: keys.get(e.tenantKey)!, day: e.day, kind: e.action === "app_open" ? "app" : "action" }));
   const allActivity = [...activity, ...setup, ...observed];
   const between = (day: string, from: string, to: string) => day >= from && day < to;
@@ -70,7 +71,7 @@ export function buildProductOverview(
     const dates = [...new Set(te.map(e => productDay(e.created_at)))].sort();
     const active = employees.filter(e => e.tenant_id === t.id);
     const days = (from: string, to: string) => new Set(allActivity.filter(a => a.tenant === t.id && between(a.day, from, to)).map(a => a.day)).size;
-    return { name: t.name, created: productDay(t.created_at), plan: t.plan,
+    return { name: t.name, created: productDay(t.created_at), plan: t.plan, plannedTeamSize: t.planned_team_size ?? null,
       accounts: new Set(active.filter(e => usable(e.user_id)).map(e => e.user_id)).size,
       pending: active.filter(e => users.has(e.user_id) && !users.get(e.user_id)!.confirmed && !users.get(e.user_id)!.banned).length,
       entries: te.filter(e => e.entry_source !== "import").length, imports: te.filter(e => e.entry_source === "import").length,
@@ -108,5 +109,6 @@ export function buildProductOverview(
       inPeriod(weekStart, shiftProductDay(today, 1), "Laufende Woche · unvollständig"),
       inPeriod(previousWeekStart, weekStart, "Letzte vollständige Woche"),
       inPeriod(shiftProductDay(previousWeekStart, -7), previousWeekStart, "Vorherige vollständige Woche")],
+    activation: buildProductActivation({ ...data, tenants, entries, employees: data.employees.filter(e => tenantIds.has(e.tenant_id)) }, today, actions, tenantKey),
     cohorts, tenants: rows, accounts: accountRows, actions };
 }

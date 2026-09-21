@@ -57,3 +57,15 @@ it("recognizes the controlled import backend failure separately from invalid inp
   await wrapped(new Request("https://example.test"));
   expect(mocks.record).toHaveBeenCalledWith(expect.objectContaining({ outcome: "error" }));
 });
+
+it("counts an explicit plan-limit rejection without treating ordinary denials as purchase intent", async () => {
+  const { setObservedTenant } = await import("@/config/server/product-observation-context");
+  await observeProductAction("invite", async () => {
+    setObservedTenant("tenant", "actor");
+    return Response.json({ code: "plan_limit", error: "limit" }, { status: 403 });
+  })(new Request("https://example.test"));
+  expect(mocks.record).toHaveBeenCalledWith(expect.objectContaining({ action: "plan_limit", outcome: "limited" }));
+  mocks.record.mockClear();
+  await observeProductAction("invite", async () => Response.json({ error: "denied" }, { status: 403 }))(new Request("https://example.test"));
+  expect(mocks.record.mock.calls.map(call => call[0].action)).toEqual(["invite"]);
+});

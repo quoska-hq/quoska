@@ -27,7 +27,7 @@ export async function GET() {
 
   const { data: employee } = await admin
     .from("employees")
-    .select("id, tenant_id, first_name, last_name, email, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, bundesland, tenants(id, name, bundesland, default_work_schedule, setup_complete)")
+    .select("id, tenant_id, first_name, last_name, email, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, bundesland, tenants(id, name, bundesland, default_work_schedule, setup_complete, planned_team_size)")
     .eq("user_id", user.id)
     .single();
 
@@ -57,6 +57,7 @@ export async function GET() {
       },
       company: {
         name: tenant?.name ?? "",
+        plannedTeamSize: tenant?.planned_team_size ?? null,
         bundesland: tenant?.bundesland ?? "",
         defaultWorkSchedule: tenant?.default_work_schedule ?? null,
       },
@@ -93,8 +94,9 @@ async function handlePost(request: Request) {
     // Get tenant_id from the employee record linked to this user
     const { data: employee } = await admin
       .from("employees")
-      .select("id, tenant_id")
+      .select("id, tenant_id, role")
       .eq("user_id", user.id)
+      .is("deleted_at", null)
       .single();
 
     if (!employee) {
@@ -104,12 +106,17 @@ async function handlePost(request: Request) {
       );
     }
 
+    if (employee.role !== "admin") {
+      return NextResponse.json({ data: null, error: "Keine Berechtigung." }, { status: 403 });
+    }
+
     // Update tenant with company details
     setObservedTenant(employee.tenant_id, employee.id);
     const { error } = await admin
       .from("tenants")
       .update({
         name: input.companyName,
+        ...(input.plannedTeamSize !== undefined ? { planned_team_size: input.plannedTeamSize } : {}),
         bundesland: input.bundesland,
       })
       .eq("id", employee.tenant_id);

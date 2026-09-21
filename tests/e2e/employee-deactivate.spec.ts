@@ -137,7 +137,7 @@ test.describe("Plan Limit Enforcement — Story 3.2", () => {
     // The "Hinzufügen" button should be hidden when at plan limit
     // Instead, the page shows a plan limit message
     await expect(
-      page.getByText(/max\.? 3 mitarbeiter im kostenlosen tarif/i),
+      page.getByText(/max\.? 3 mitarbeiter in deinem tarif/i),
     ).toBeVisible({ timeout: 10_000 });
 
     // Verify the Hinzufügen button is NOT present
