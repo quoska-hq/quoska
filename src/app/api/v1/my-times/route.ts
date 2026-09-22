@@ -10,6 +10,7 @@ import { createClient } from "@/config/supabase/server";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getTimeEntriesByDateRange, getTimeEntriesThroughDate, getActiveEntry } from "@/repos/timeEntryRepo";
+import { getEmployeeAbsenceDates } from "@/services/absenceService";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import {
   addDays,
@@ -108,7 +109,7 @@ export async function GET(request: Request) {
     const hasBalancePeriod = employeeStart <= todayDate;
 
     // Fetch data in parallel
-    const [entries, activeEntry, holidayMap, balanceEntries, balanceHolidayMap] = await Promise.all([
+    const [entries, activeEntry, holidayMap, balanceEntries, balanceHolidayMap, absenceDates] = await Promise.all([
       getTimeEntriesByDateRange(supabase, tenantId, employeeId, startDate, endDate),
       getActiveEntry(supabase, tenantId, employeeId),
       getHolidayDatesInRange(supabase, bundesland, startDate, endDate),
@@ -116,7 +117,12 @@ export async function GET(request: Request) {
       hasBalancePeriod
         ? getHolidayDatesInRange(supabase, bundesland, employeeStart, todayDate)
         : Promise.resolve(new Map<string, string>()),
+      getEmployeeAbsenceDates(supabase, tenantId, employeeId,
+        startDate < employeeStart ? startDate : employeeStart, todayDate),
     ]);
+
+    const excludedDates = new Set([...holidayMap.keys(), ...absenceDates]);
+    const balanceExcludedDates = new Set([...balanceHolidayMap.keys(), ...absenceDates]);
 
     // Add net minutes to each entry
     const entriesWithNet: TimeEntryWithNet[] = entries.map((entry) => ({
@@ -137,7 +143,7 @@ export async function GET(request: Request) {
       const targetMin = calculateScheduleTargetMinutesForRange(
         targetStart,
         targetEnd,
-        holidayMap,
+        excludedDates,
         employee?.work_schedule,
         targetHoursWeek,
       );
@@ -169,7 +175,7 @@ export async function GET(request: Request) {
       ? calculateScheduleTargetMinutesForRange(
           employeeStart,
           todayDate,
-          balanceHolidayMap,
+          balanceExcludedDates,
           employee?.work_schedule,
           targetHoursWeek,
         )
@@ -183,7 +189,7 @@ export async function GET(request: Request) {
 
     const dailyTargets: Record<string, number> = {};
     for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
-      dailyTargets[date] = date < employeeStart || date > todayDate || holidayMap.has(date)
+      dailyTargets[date] = date < employeeStart || date > todayDate || excludedDates.has(date)
         ? 0
         : scheduledMinutesForDate(employee?.work_schedule, date, targetHoursWeek);
     }

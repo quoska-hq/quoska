@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getTimeEntriesThroughDate: vi.fn(),
   getActiveEntry: vi.fn(),
   getHolidayDatesInRange: vi.fn(),
+  getEmployeeAbsenceDates: vi.fn(),
 }));
 
 vi.mock("@/config/supabase/server", () => ({ createClient: mocks.createClient }));
@@ -27,6 +28,10 @@ vi.mock("@/repos/holidayRepo", () => ({
   getHolidayDatesInRange: mocks.getHolidayDatesInRange,
 }));
 
+vi.mock("@/services/absenceService", () => ({
+  getEmployeeAbsenceDates: mocks.getEmployeeAbsenceDates,
+}));
+
 import { GET } from "@/app/api/v1/my-times/route";
 
 const entries: TimeEntry[] = [
@@ -38,6 +43,7 @@ const entries: TimeEntry[] = [
 describe("GET /api/v1/my-times", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getEmployeeAbsenceDates.mockResolvedValue(new Set());
     mocks.getEmployeeFromAuth.mockResolvedValue({
       data: { tenantId: "tenant-1", employeeId: "employee-1", role: "employee" },
       error: null,
@@ -77,6 +83,32 @@ describe("GET /api/v1/my-times", () => {
       "2026-08-13": 0,
       "2026-08-14": 0,
     });
+  });
+
+  it("excludes absence days from daily, weekly and cumulative targets without inventing work", async () => {
+    mocks.getTimeEntriesByDateRange.mockResolvedValue([entries[0]]);
+    mocks.getTimeEntriesThroughDate.mockResolvedValue([entries[0]]);
+    mocks.getEmployeeAbsenceDates.mockResolvedValue(new Set(["2026-08-11", "2026-08-12"]));
+    const response = await GET(new Request(
+      "http://localhost/api/v1/my-times?startDate=2026-08-10&endDate=2026-08-16",
+    ));
+    const { data } = await response.json();
+    expect(data.weeklySummaries[0]).toMatchObject({ workedMinutes: 480, targetMinutes: 480, overtimeMinutes: 0 });
+    expect(data.cumulativeOvertimeMinutes).toBe(60);
+    expect(data.dailyTargets["2026-08-11"]).toBe(0);
+    expect(data.dailyTargets["2026-08-12"]).toBe(0);
+    expect(data.entries).toHaveLength(1);
+  });
+
+  it("loads historical absences even when viewing a later week", async () => {
+    mocks.getEmployeeAbsenceDates.mockResolvedValue(new Set(["2026-08-11"]));
+    const response = await GET(new Request(
+      "http://localhost/api/v1/my-times?startDate=2026-09-07&endDate=2026-09-13",
+    ));
+    expect(mocks.getEmployeeAbsenceDates).toHaveBeenCalledWith(
+      expect.anything(), "tenant-1", "employee-1", "2026-08-10", "2026-08-12",
+    );
+    expect((await response.json()).data.cumulativeOvertimeMinutes).toBe(480);
   });
 
   it("counts work before employment without accruing targets before employment", async () => {

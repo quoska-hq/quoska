@@ -19,6 +19,7 @@ import {
 } from "@/services/complianceService";
 import type { ApiResponse } from "@/types/api";
 import type { ClockStatusResponse } from "@/types/compliance";
+import { getEmployeeAbsenceDates } from "@/services/absenceService";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import { addDays } from "@/services/holidayService";
 import {
@@ -148,10 +149,15 @@ export async function GET() {
       weekStartStr,
       weekEndStr,
     );
+    const absenceDates = await getEmployeeAbsenceDates(
+      supabase, tenantId, employeeId,
+      monthStart < weekStartStr ? monthStart : weekStartStr, todayDate,
+    );
+    const excludedDates = new Set([...holidayMap.keys(), ...absenceDates]);
     const targetMinutes = calculateScheduleTargetMinutesForRange(
       employeeStart > weekStartStr ? employeeStart : weekStartStr,
       todayDate,
-      holidayMap,
+      excludedDates,
       empRecord?.work_schedule,
       targetHoursWeek,
     );
@@ -192,7 +198,7 @@ export async function GET() {
     let monthCarryOverMinutes = 0;
     const carryStart = employeeStart > monthStart ? employeeStart : monthStart;
     for (let date = carryStart; date < todayDate; date = addDays(date, 1)) {
-      const dayTarget = monthHolidayMap.has(date)
+      const dayTarget = monthHolidayMap.has(date) || absenceDates.has(date)
         ? 0
         : scheduledMinutesForDate(
             empRecord?.work_schedule,
@@ -215,7 +221,7 @@ export async function GET() {
         targetMinutes,
         overtimeMinutes: activeWeekMinutes - targetMinutes,
         dailyTargetMinutes:
-          todayDate < employeeStart || holidayMap.has(todayDate)
+          todayDate < employeeStart || excludedDates.has(todayDate)
             ? 0
             : scheduledMinutesForDate(
                 empRecord?.work_schedule,
