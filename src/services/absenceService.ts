@@ -11,7 +11,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getApprovedLeavesForTenant } from "@/repos/leaveRepo";
 import { getActiveSickForTenant } from "@/repos/sickEntryRepo";
-import { isWeekend } from "@/services/holidayService";
+import { getEmployeeAbsenceRanges } from "@/repos/employeeAbsenceRepo";
+import { addDays, isWeekend } from "@/services/holidayService";
 import { getTodayDate } from "@/config/server/timestamps";
 import { getHolidaysInRange } from "@/repos/holidayRepo";
 
@@ -191,4 +192,22 @@ export function calendarDaysBetween(startDate: string, endDate: string): number 
   const startMs = Date.parse(startDate + "T12:00:00Z");
   const endMs = Date.parse(endDate + "T12:00:00Z");
   return Math.floor((endMs - startMs) / 86_400_000);
+}
+
+/** Approved leave and sickness dates, clipped to the balance period. */
+export async function getEmployeeAbsenceDates(
+  supabase: SupabaseClient,
+  tenantId: string,
+  employeeId: string,
+  startDate: string,
+  endDate: string,
+): Promise<Set<string>> {
+  const ranges = await getEmployeeAbsenceRanges(supabase, tenantId, employeeId, startDate, endDate);
+  const dates = new Set<string>();
+  for (const range of ranges) {
+    const first = range.start_date > startDate ? range.start_date : startDate;
+    const last = range.end_date && range.end_date < endDate ? range.end_date : endDate;
+    for (let date = first; date <= last; date = addDays(date, 1)) dates.add(date);
+  }
+  return dates;
 }
