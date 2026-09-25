@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
+import { FeatureRequestsSection } from "@/components/marketing/sections/feature-requests";
 import { PricingSection } from "@/components/marketing/sections/pricing";
 
 export const metadata: Metadata = {
   title: "Kostenlose Zeiterfassung bis 3 Personen – Preise",
   description:
-    "Quoska kostet ab 0 Euro. Die Founder-Preise für Team, Business und Pro liegen bei 9, 59 und 99 Euro statt regulär 19, 69 und 129 Euro.",
+    "Quoska ist bis 3 Personen kostenlos. Team ab 9 €, Business ab 59 € im Monat. Enterprise mit unbegrenzt vielen Mitarbeitenden und individuellen Anforderungen auf Anfrage.",
   alternates: { canonical: "/preise" },
 };
 
@@ -26,9 +27,10 @@ export default function PricesPage() {
     <MarketingPageShell
       eyebrow="Preise"
       title="Faire Preise für frühe Teams."
-      intro="Bis 3 Personen kostenlos. Für die ersten 100 Buchungen gelten die Founder-Preise 9 €, 59 € und 99 € — danach 19 €, 69 € und 129 €."
+      intro="Bis 3 Personen kostenlos. Team für 9 € und Business für 59 € im Monat für die ersten 100 Buchungen je Tarif, danach 19 € und 69 €. Unbegrenzt viele Mitarbeitende und individuelle Anforderungen? Sprich mit uns über Enterprise."
     >
       <PricingSection />
+      <FeatureRequestsSection />
       <section className="border-t border-slate-900/10 bg-[#f5f3ee]">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-6 sm:py-24 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
           <SectionHeading eyebrow="In jedem Tarif" title="Kein abgespecktes Kernprodukt.">

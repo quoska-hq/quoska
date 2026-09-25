@@ -50,7 +50,7 @@ export const ALTERNATIVE_COMPARISONS: readonly AlternativeComparison[] = [
         topic: "Preismodell",
         quoska: {
           value: "Flatrate nach Teamgröße",
-          detail: "0 € bis 3; Founder-Preise für die ersten 100 Buchungen: 9 € bis 10, 59 € bis 50 und 99 € ohne Limit; danach 19 €, 69 € und 129 €.",
+          detail: "0 € bis 3; Founder-Preise für die ersten 100 Buchungen: 9 € bis 10 und 59 € bis 50; danach 19 € und 69 €. Enterprise ohne Personenlimit auf Anfrage.",
         },
         competitor: {
           value: "Preis pro Nutzer",
@@ -173,7 +173,7 @@ export const ALTERNATIVE_COMPARISONS: readonly AlternativeComparison[] = [
     rows: [
       {
         topic: "Preismodell",
-        quoska: { value: "Öffentliche Team-Flatrates", detail: "0 €; Founder-Preise 9 €, 59 € und 99 € für die ersten 100 Buchungen; danach 19 €, 69 € und 129 €." },
+        quoska: { value: "Öffentliche Team-Flatrates", detail: "0 €; Founder-Preise 9 € und 59 € für die ersten 100 Buchungen je Tarif; danach 19 € und 69 €. Enterprise auf Anfrage." },
         competitor: { value: "Abhängig von Team und Modulen", detail: "Exakter Preis wird für die konkrete Zusammenstellung ermittelt." },
       },
       {

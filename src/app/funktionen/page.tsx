@@ -13,6 +13,7 @@ import {
 import { MarketingPageShell, SectionHeading } from "@/components/marketing/page-shell";
 import { DatevExportSection } from "@/components/marketing/sections/datev-export";
 import { TimeImportSection } from "@/components/marketing/sections/time-import";
+import { FeatureRequestsSection } from "@/components/marketing/sections/feature-requests";
 
 export const metadata: Metadata = {
   title: "Funktionen der digitalen Zeiterfassung",
@@ -114,6 +115,7 @@ export default function FunctionsPage() {
           </Link>
         </div>
       </section>
+      <FeatureRequestsSection />
     </MarketingPageShell>
   );
 }

@@ -146,7 +146,8 @@ test.describe("Marketing and SEO", () => {
 
     expect(body).toContain("Team Founder: 9 EUR pro Monat statt 19 EUR");
     expect(body).toContain("Business Founder: 59 EUR pro Monat statt 69 EUR");
-    expect(body).toContain("Pro Founder: 99 EUR pro Monat statt 129 EUR");
+    expect(body).toContain("Enterprise: auf Anfrage");
+    expect(body).not.toContain("Pro Founder");
     expect(body).toMatch(/- Preise: https?:\/\/[^/]+\/preise/);
     expect(body).toMatch(/- Chrome-Erweiterung: https?:\/\/[^/]+\/browser-erweiterung/);
     expect(body).toMatch(/- Über Quoska und Redaktion: https?:\/\/[^/]+\/ueber-uns/);
@@ -158,16 +159,18 @@ test.describe("Marketing and SEO", () => {
     const businessCard = page.locator("article").filter({
       has: page.getByRole("heading", { name: "Business", exact: true }),
     });
-    const proCard = page.locator("article").filter({
-      has: page.getByRole("heading", { name: "Pro", exact: true }),
+    const enterpriseCard = page.locator("article").filter({
+      has: page.getByRole("heading", { name: "Enterprise", exact: true }),
     });
-    await expect(page.getByText("Founder-Preis", { exact: true })).toHaveCount(3);
+    await expect(page.getByText("Founder-Preis", { exact: true })).toHaveCount(2);
     await expect(page.getByText(/statt 19 € · erste 100 Unternehmen/)).toBeVisible();
     await expect(businessCard).toContainText("59 €");
     await expect(businessCard).toContainText("69 €");
-    await expect(proCard).toContainText("99 €");
-    await expect(proCard).toContainText("129 €");
-    await expect(page.getByText("Zeiterfassung und Pausen", { exact: true })).toHaveCount(4);
+    await expect(enterpriseCard).toContainText("Auf Anfrage");
+    await expect(enterpriseCard).toContainText("Feature Requests");
+    await expect(enterpriseCard.getByRole("link", { name: "Enterprise anfragen" })).toHaveAttribute("href", /^mailto:.*subject=Enterprise/);
+    await expect(page.getByRole("heading", { name: "Pro", exact: true })).toHaveCount(0);
+    await expect(page.getByText("Zeiterfassung und Pausen", { exact: true })).toHaveCount(3);
 
     await page.setViewportSize({ width: 390, height: 844 });
     const dimensions = await page.evaluate(() => ({

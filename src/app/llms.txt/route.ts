@@ -1,10 +1,10 @@
-import { FOUNDER_OFFERS, PLAN_ORDER, PLANS } from "@/config/plans";
+import { FOUNDER_OFFERS, SELF_SERVICE_PLANS, PLANS } from "@/config/plans";
 import { site } from "@/lib/site";
 
 export const dynamic = "force-static";
 
 export function GET() {
-  const standardPrices = PLAN_ORDER.map((key) => {
+  const standardPrices = SELF_SERVICE_PLANS.map((key) => {
     const plan = PLANS[key];
     const limit =
       plan.employeeLimit === null
@@ -12,7 +12,7 @@ export function GET() {
         : `bis ${plan.employeeLimit} aktive Mitarbeitende`;
     return `- ${plan.label}: ${plan.priceEur ?? 0} EUR pro Monat, ${limit}`;
   }).join("\n");
-  const founderPrices = Object.values(FOUNDER_OFFERS)
+  const founderPrices = SELF_SERVICE_PLANS.filter((key) => key !== "free").map((key) => FOUNDER_OFFERS[key])
     .map(
       (offer) =>
         `- ${PLANS[offer.plan].label} Founder: ${offer.priceEur} EUR pro Monat statt ${offer.standardPriceEur} EUR, limitiert auf die ersten ${offer.maxOrganizations} Buchungen`,
@@ -29,6 +29,7 @@ Quoska erfasst Arbeitszeiten, Pausen, Urlaub, Krankheit, Projekte und nachvollzi
 
 ${founderPrices}
 ${standardPrices}
+- Enterprise: auf Anfrage, unbegrenzt viele Mitarbeitende; individuelle Funktionen, Integrationen und Automatisierungen nach Absprache. Kontakt: ${site.url}/preise#funktionswuensche
 
 ## Wichtige Seiten
 

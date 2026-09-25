@@ -17,7 +17,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
 import type { Plan } from "@/types/tenant";
-import { FOUNDER_OFFERS, PLANS } from "@/config/plans";
+import { ENTERPRISE_CONTACT_URL } from "@/config/enterprise";
+import { FOUNDER_OFFERS, PLANS, SELF_SERVICE_PAID_PLANS } from "@/config/plans";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +38,7 @@ interface BillingStatus {
   }>;
 }
 
-const PAID_TIERS: ReadonlyArray<"team" | "business" | "pro"> = ["team", "business", "pro"];
+const PAID_TIERS = SELF_SERVICE_PAID_PLANS;
 
 export function BillingCard() {
   const queryClient = useQueryClient();
@@ -75,7 +76,7 @@ export function BillingCard() {
 
   const currentPlan = data?.plan ?? "free";
 
-  const startCheckout = async (tier: "team" | "business" | "pro") => {
+  const startCheckout = async (tier: "team" | "business") => {
     setActionError(null);
     setPendingAction(`checkout-${tier}`);
     try {
@@ -224,6 +225,12 @@ export function BillingCard() {
                   </div>
                 );
               })}
+              <div className="border border-border bg-white p-3">
+                <p className="text-sm font-semibold">Enterprise</p>
+                <p className="text-xs text-muted-foreground">Auf Anfrage · unbegrenzt viele Mitarbeitende</p>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">Individuelle Funktionen, Integrationen und Automatisierungen gemeinsam besprechen.</p>
+                <a href={ENTERPRISE_CONTACT_URL} className="mt-3 inline-flex min-h-9 w-full items-center justify-center bg-slate-950 px-3 text-sm font-semibold text-white hover:bg-[#5145ad]">Enterprise anfragen</a>
+              </div>
             </div>
 
             {actionError && (

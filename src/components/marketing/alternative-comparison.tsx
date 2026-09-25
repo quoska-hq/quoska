@@ -56,9 +56,9 @@ export function AlternativeComparisonContent({
               </h2>
               <p className="mt-4 leading-7 text-slate-700">
                 Kostenlos bis 3 aktive Personen. Für die ersten 100 Buchungen
-                gelten die Founder-Preise 9 € bis 10, 59 € bis 50 und 99 € ohne
-                Personenlimit; danach 19 €, 69 € und 129 €. Alle
-                Produktfunktionen sind in jeder Stufe enthalten. Gemäß § 19
+                gelten die Founder-Preise 9 € bis 10 und 59 € bis 50 Personen;
+                danach 19 € und 69 €. Enterprise ohne Personenlimit und individuelle
+                Anpassungen auf Anfrage. Alle Standardfunktionen sind in jeder Stufe enthalten. Gemäß § 19
                 UStG wird derzeit keine Umsatzsteuer ausgewiesen.
               </p>
               <Link

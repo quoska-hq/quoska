@@ -5,7 +5,7 @@ export const FAQ = [
   },
   {
     q: "Was kostet Quoska?",
-    a: "Bis zu 3 Mitarbeitende sind kostenlos. Für die ersten 100 Buchungen kosten Team 9 €, Business 59 € und Pro 99 € im Monat. Danach gelten 19 €, 69 € und 129 €. Gemäß § 19 UStG wird derzeit keine Umsatzsteuer ausgewiesen.",
+    a: "Bis zu 3 Mitarbeitende sind kostenlos. Für die ersten 100 Buchungen je Tarif kosten Team 9 € und Business 59 € im Monat, danach 19 € und 69 €. Enterprise für unbegrenzt viele Mitarbeitende sowie individuelle Funktionen, Integrationen und Automatisierungen bieten wir auf Anfrage an. Gemäß § 19 UStG wird derzeit keine Umsatzsteuer ausgewiesen.",
   },
   {
     q: "Kann ich meine bisherigen Arbeitszeiten importieren?",
