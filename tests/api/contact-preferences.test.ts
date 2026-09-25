@@ -1,6 +1,7 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { CONTACT_CONSENT_TEXT, CONTACT_CONSENT_VERSION } from "@/types/contact-preferences";
+vi.mock("@/config/env", () => ({ serverEnv: { NEXT_PUBLIC_APP_URL: "https://quoska.test" } }));
 const m = vi.hoisted(() => ({ user: { id: "own-user" } as { id: string } | null, rpc: vi.fn() }));
 vi.mock("@/config/supabase/server", () => ({ createClient: async () => ({
   auth: { getUser: async () => ({ data: { user: m.user }, error: null }) }, rpc: m.rpc,
@@ -46,4 +47,15 @@ it("keeps the recorded consent wording equal to the visible text", () => {
   const sql = readFileSync("supabase/migrations/038_admin_contact_preferences.sql", "utf8");
   expect(sql).toContain(`v_text CONSTANT TEXT := '${CONTACT_CONSENT_TEXT}'`);
   expect(sql).toContain(`p_version IS DISTINCT FROM '${CONTACT_CONSENT_VERSION}'`);
+});
+
+it("accepts the configured public origin behind a reverse proxy without trusting forwarded hosts", async () => {
+  const proxied = new Request("http://0.0.0.0:3000/api/v1/settings/contact", {
+    method: "PATCH", headers: { origin: "https://quoska.test", "sec-fetch-site": "same-origin" }, body: JSON.stringify(body),
+  });
+  expect((await PATCH(proxied)).status).toBe(200);
+  const forged = new Request("http://0.0.0.0:3000/api/v1/settings/contact", {
+    method: "PATCH", headers: { origin: "https://other.test", "x-forwarded-host": "other.test" }, body: JSON.stringify(body),
+  });
+  expect((await PATCH(forged)).status).toBe(403);
 });
