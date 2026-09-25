@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { serverEnv } from "@/config/env";
 import { createClient } from "@/config/supabase/server";
 import { contactPreferenceSchema } from "@/types/contact-preferences";
 
@@ -9,7 +10,7 @@ function reply(data: unknown, error: string | null = null, status = 200) {
 async function handle(request?: Request) {
   try {
     if (request && (request.headers.get("sec-fetch-site") === "cross-site"
-      || (request.headers.has("origin") && request.headers.get("origin") !== new URL(request.url).origin))) {
+      || (request.headers.has("origin") && request.headers.get("origin") !== new URL(serverEnv.NEXT_PUBLIC_APP_URL).origin))) {
       return reply(null, "Anfrage nicht erlaubt.", 403);
     }
     const client = await createClient();
