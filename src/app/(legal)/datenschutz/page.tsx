@@ -1,3 +1,4 @@
+import { ContactPrivacy } from "@/components/marketing/contact-privacy";
 import type { Metadata } from "next";
 import { LegalValue } from "@/components/marketing/legal-value";
 import { legalInfo, processors, site } from "@/lib/site";
@@ -118,6 +119,8 @@ export default function DatenschutzPage() {
         werden gelöscht, sobald das Vertragsverhältnis endet und keine
         Aufbewahrungspflichten mehr entgegenstehen.
       </p>
+
+      <ContactPrivacy />
 
       <h2>7. Optionale Browser-Erweiterung</h2>
       <p>

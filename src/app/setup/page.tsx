@@ -1,5 +1,6 @@
 "use client";
 
+import { saveContactPreference } from "@/lib/contact-preferences";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/config/supabase/client";
@@ -41,6 +42,7 @@ export default function SetupPage() {
   const [loadFailed, setLoadFailed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [contactConsent, setContactConsent] = useState(false);
   const [email, setEmail] = useState("");
   const [profile, setProfile] = useState<SetupProfileInput>({
     firstName: "",
@@ -224,6 +226,8 @@ export default function SetupPage() {
       }
 
       await supabase.auth.refreshSession();
+      // Unchecked never enrolls or changes an existing preference.
+      if (contactConsent) await saveContactPreference(true, "setup");
       await updateOwnProfile({ ...profile, workSchedule: schedule });
 
       const companyResponse = await fetch("/api/v1/tenants/setup", {
@@ -275,9 +279,7 @@ export default function SetupPage() {
     }
   }
 
-  if (!ready) {
-    return <SetupLoadingState failed={loadFailed} />;
-  }
+  if (!ready) return <SetupLoadingState failed={loadFailed} />;
 
   return (
     <div className="flex min-h-screen items-start justify-center bg-[#f5f3ee] px-4 pb-10 pt-[clamp(2rem,8vh,5rem)]">
@@ -304,7 +306,7 @@ export default function SetupPage() {
             <InviteStep invites={invites} setInvites={setInvites} onSubmit={onContinueInvites} onBack={() => goTo("schedule")} loading={loading} error={error} />
           )}
           {step === "review" && (
-            <SetupReviewStep profile={profile} company={company} schedule={schedule} invites={invites} onBack={() => goTo("invite")} onConfirm={finishSetup} loading={loading} error={error} />
+            <SetupReviewStep contactConsent={contactConsent} onContactConsentChange={setContactConsent} profile={profile} company={company} schedule={schedule} invites={invites} onBack={() => goTo("invite")} onConfirm={finishSetup} loading={loading} error={error} />
           )}
           {step === "verify" && (
             <SetupVerifyEmailStep

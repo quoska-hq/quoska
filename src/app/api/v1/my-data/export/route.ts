@@ -5,6 +5,8 @@
  * Exports all personal data as CSV: profile, time entries, audit records.
  */
 
+import { getOwnContactEvents } from "@/repos/contactPreferenceRepo";
+import { generateContactPreferenceCSV } from "@/services/contactPreferenceExportService";
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
@@ -32,11 +34,12 @@ export async function GET() {
     const { tenantId, employeeId } = authResult.data;
 
     // Fetch all data in parallel
-    const [employee, allEntries, auditRecords, feedback] = await Promise.all([
+    const [employee, allEntries, auditRecords, feedback, contactEvents] = await Promise.all([
       getEmployeeProfile(supabase, tenantId, employeeId),
       getEmployeeAllEntries(supabase, tenantId, employeeId),
       getEmployeeAuditRecords(supabase, tenantId, employeeId),
       getOwnFeedback(supabase, employeeId),
+      getOwnContactEvents(supabase),
     ]);
 
     if (!employee) {
@@ -54,7 +57,7 @@ export async function GET() {
     );
 
     // Generate CSV
-    const csv = generateDSGVOCSV(exportData) + "\n" + generateFeedbackCSV(feedback);
+    const csv = generateDSGVOCSV(exportData) + "\n" + generateFeedbackCSV(feedback) + "\n" + generateContactPreferenceCSV(contactEvents);
     const filename = `quoska_meine_daten_${employee.first_name.toLowerCase()}_${employee.last_name.toLowerCase()}.csv`;
 
     return new NextResponse(csv, {
