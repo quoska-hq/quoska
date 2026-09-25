@@ -55,7 +55,7 @@ export default function AgbPage() {
         (1) Gegenstand des Vertrages ist die zeitlich befristete,
         nicht-ausschließliche Einräumung eines Nutzungsrechts an der
         cloudbasierten Zeiterfassungs-Software Quoska gemäß dem gewählten
-        Tarif (Free, Team, Business oder Pro) und der jeweils aktuellen
+        Tarif (Free, Team, Business oder individuell vereinbartes Enterprise-Angebot) und der jeweils aktuellen
         Leistungsbeschreibung.
       </p>
       <p>
@@ -92,12 +92,13 @@ export default function AgbPage() {
         Mitarbeitenden kostenlos. Regulär kostet „Team“ {PLANS.team.priceEur}
         &nbsp;€ je Monat und umfasst bis zu zehn aktive Mitarbeitende,
         „Business“ kostet {PLANS.business.priceEur}&nbsp;€ bei bis zu 50 aktiven
-        Mitarbeitenden und „Pro“ kostet {PLANS.pro.priceEur}&nbsp;€ ohne
-        Personenlimit. Für die ersten {FOUNDER_OFFERS.team.maxOrganizations}{" "}
+        Mitarbeitenden. Enterprise ohne Personenlimit sowie individuelle Leistungen
+        werden auf Anfrage angeboten; maßgeblich ist das vereinbarte Angebot. Für die ersten {FOUNDER_OFFERS.team.maxOrganizations}{" "}
         Buchungen des jeweiligen Tarifs gelten, vorbehaltlich der beim Checkout
         angezeigten Verfügbarkeit, die Founder-Preise{" "}
-        {FOUNDER_OFFERS.team.priceEur}&nbsp;€, {FOUNDER_OFFERS.business.priceEur}
-        &nbsp;€ und {FOUNDER_OFFERS.pro.priceEur}&nbsp;€. Der gebuchte
+        {FOUNDER_OFFERS.team.priceEur}&nbsp;€ für Team und {FOUNDER_OFFERS.business.priceEur}
+        &nbsp;€ für Business. Für bestehende Pro-Abonnements gelten die bei
+        Buchung vereinbarten Konditionen fort. Der gebuchte
         Founder-Preis gilt, solange das entsprechende Abonnement ohne
         Unterbrechung besteht.
       </p>

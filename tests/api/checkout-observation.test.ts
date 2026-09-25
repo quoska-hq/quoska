@@ -18,6 +18,15 @@ beforeEach(() => {
   m.checkout.mockResolvedValue({ data: { url: "https://checkout.example.test/session" }, error: null });
 });
 afterEach(() => vi.unstubAllEnvs());
+it("rejects new Pro checkouts even when the legacy price is configured", async () => {
+  vi.stubEnv("STRIPE_PRO_PRICE_ID", "price_legacy_pro");
+  const response = await POST(new Request("http://localhost", {
+    method: "POST",
+    body: JSON.stringify({ tier: "pro" }),
+  }));
+  expect(response.status).toBe(400);
+  expect(m.checkout).not.toHaveBeenCalled();
+});
 it("counts a server-created checkout for the trusted tenant without inferring payment", async () => {
   expect((await POST(request())).status).toBe(200);
   expect(m.checkout.mock.calls[0][0]).toBe("trusted");

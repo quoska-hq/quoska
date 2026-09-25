@@ -4,6 +4,7 @@ import { MarketingFooter } from "@/components/marketing/footer";
 import { HeroSection } from "@/components/marketing/sections/hero";
 import { ProductTourSection } from "@/components/marketing/sections/product-tour";
 import { FeaturesSection } from "@/components/marketing/sections/features";
+import { FeatureRequestsSection } from "@/components/marketing/sections/feature-requests";
 import { WhyQuoskaSection } from "@/components/marketing/sections/why-quoska";
 import { HowItWorksSection } from "@/components/marketing/sections/how-it-works";
 import { DatevExportSection } from "@/components/marketing/sections/datev-export";
@@ -14,7 +15,7 @@ import { PricingSection } from "@/components/marketing/sections/pricing";
 import { FaqSection, FAQ } from "@/components/marketing/sections/faq";
 import { FinalCtaSection } from "@/components/marketing/sections/final-cta";
 import { JsonLd } from "@/components/seo/json-ld";
-import { FOUNDER_OFFERS, PLAN_ORDER, PLANS } from "@/config/plans";
+import { FOUNDER_OFFERS, SELF_SERVICE_PLANS, PLANS } from "@/config/plans";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -68,7 +69,7 @@ const jsonLd = {
         "Vergangene Arbeitszeiten per CSV importieren, mit Vorschau",
       ],
       offers: [
-        ...Object.values(FOUNDER_OFFERS).map((offer) => ({
+        ...SELF_SERVICE_PLANS.filter((key) => key !== "free").map((key) => FOUNDER_OFFERS[key]).map((offer) => ({
           "@type": "Offer",
           name: `${PLANS[offer.plan].label} Founder`,
           price: String(offer.priceEur),
@@ -77,7 +78,7 @@ const jsonLd = {
           availability: "https://schema.org/LimitedAvailability",
           description: `Founder-Preis für die ersten ${offer.maxOrganizations} Buchungen dieses Tarifs`,
         })),
-        ...PLAN_ORDER.map((key) => {
+        ...SELF_SERVICE_PLANS.map((key) => {
           const plan = PLANS[key];
           return {
             "@type": "Offer",
@@ -116,6 +117,7 @@ export default function HomePage() {
         <HeroSection />
         <ProductTourSection />
         <FeaturesSection />
+        <FeatureRequestsSection />
         <WhyQuoskaSection />
         <HowItWorksSection />
         <TimeImportSection />

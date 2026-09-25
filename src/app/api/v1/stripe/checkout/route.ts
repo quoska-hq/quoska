@@ -2,7 +2,7 @@
  * POST /api/v1/stripe/checkout
  *
  * Create a Stripe Checkout Session for upgrading the caller's tenant to a paid
- * tier. Body: { tier: "team" | "business" | "pro" }.
+ * tier. Body: { tier: "team" | "business" }.
  * Auth: tenant admin only (the upgrade applies to their tenant).
  * Returns the hosted Checkout URL to redirect to.
  *
@@ -22,22 +22,20 @@ import type { Plan } from "@/types/tenant";
 import type { ApiResponse } from "@/types/api";
 
 function priceIdForTier(
-  tier: "team" | "business" | "pro",
+  tier: "team" | "business",
 ): string | undefined {
   return {
     team: serverEnv.STRIPE_TEAM_PRICE_ID,
     business: serverEnv.STRIPE_BUSINESS_PRICE_ID,
-    pro: serverEnv.STRIPE_PRO_PRICE_ID,
   }[tier];
 }
 
 function founderPromotionCodeIdForTier(
-  tier: "team" | "business" | "pro",
+  tier: "team" | "business",
 ): string | undefined {
   return {
     team: serverEnv.STRIPE_TEAM_FOUNDER_PROMOTION_CODE_ID,
     business: serverEnv.STRIPE_BUSINESS_FOUNDER_PROMOTION_CODE_ID,
-    pro: serverEnv.STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID,
   }[tier];
 }
 
@@ -52,8 +50,8 @@ async function handlePost(request: Request) {
   try {
     // Parse + validate the requested tier.
     const body = (await request.json().catch(() => ({}))) as { tier?: string };
-    const tier = body.tier as "team" | "business" | "pro";
-    if (tier !== "team" && tier !== "business" && tier !== "pro") {
+    const tier = body.tier;
+    if (tier !== "team" && tier !== "business") {
       return NextResponse.json<ApiResponse<{ url: string }>>(
         { data: null, error: "Ungültiger Tarif." },
         { status: 400 },

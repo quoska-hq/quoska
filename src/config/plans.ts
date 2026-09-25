@@ -40,6 +40,10 @@ export interface FounderOfferConfig {
 }
 
 /** Ordered low → high, used for upgrade flows. */
+export const SELF_SERVICE_PLANS = ["free", "team", "business"] as const;
+export const SELF_SERVICE_PAID_PLANS = ["team", "business"] as const;
+
+/** Includes legacy Pro subscriptions; not the public pricing list. */
 export const PLAN_ORDER: Plan[] = ["free", "team", "business", "pro"];
 
 export const PLANS: Record<Plan, PlanConfig> = {
