@@ -25,6 +25,7 @@ const TABLES = [
   "feedback_messages",
   "datev_settings",
   "datev_exports",
+  "admin_contact_events",
 ];
 
 const STORAGE_BUCKETS = ["au-certificates"];

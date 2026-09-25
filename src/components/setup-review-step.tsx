@@ -1,5 +1,6 @@
 "use client";
 
+import { ContactConsentField } from "@/components/contact-consent-field";
 import { TEAM_SIZE_LABELS } from "@/types/onboarding";
 import type { SetupCompanyInput, SetupProfileInput } from "@/types/setup";
 import { getBundeslandLabel } from "@/types/tenant";
@@ -16,6 +17,8 @@ interface InviteSummary {
 }
 
 interface SetupReviewStepProps {
+  contactConsent: boolean;
+  onContactConsentChange: (checked: boolean) => void;
   profile: SetupProfileInput;
   company: SetupCompanyInput;
   schedule: WorkSchedule;
@@ -27,6 +30,8 @@ interface SetupReviewStepProps {
 }
 
 export function SetupReviewStep({
+  contactConsent,
+  onContactConsentChange,
   profile,
   company,
   schedule,
@@ -55,6 +60,8 @@ export function SetupReviewStep({
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Arbeitszeit</dt><dd className="font-medium">{formatWorkMinutes(totalScheduleMinutes(schedule))}/Woche</dd></div>
         <div className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-3"><dt className="text-slate-500">Einladungen</dt><dd className="font-medium">{invites.length === 0 ? "Keine – kann später erfolgen" : invites.map((invite) => `${invite.firstName} ${invite.lastName}`).join(", ")}</dd></div>
       </dl>
+
+      <ContactConsentField checked={contactConsent} onChange={onContactConsentChange} disabled={loading} />
 
       <div className="flex gap-2">
         <Button variant="outline" className="flex-1" onClick={onBack}>Zurück</Button>

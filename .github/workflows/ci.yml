@@ -168,6 +168,12 @@ jobs:
       - name: Apply migrations
         run: supabase db push --local
 
+      - name: Check admin contact consent permissions
+        run: |
+          TEST_DB_CONTAINER=$(docker ps --filter name=supabase_db_ --format '{{.ID}}')
+          test -n "$TEST_DB_CONTAINER"
+          docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/admin-contact.sql
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 

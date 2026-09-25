@@ -10,6 +10,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getWeekBoundsForOffset } from "@/config/client/date-utils";
+import { ContactPreferencesCard } from "@/components/contact-preferences-card";
 import { BillingCard } from "@/components/billing-card";
 import { BrowserExtensionConnectionsCard } from "@/components/browser-extension-connections-card";
 import { TimeTrackingSettingsCard } from "@/components/time-tracking-settings-card";
@@ -126,6 +127,7 @@ export default function SettingsPage() {
 
         <BrowserExtensionConnectionsCard />
         <FeedbackSettingsCard />
+        <ContactPreferencesCard />
 
         {/* Export Section */}
         <Card>

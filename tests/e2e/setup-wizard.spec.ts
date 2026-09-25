@@ -26,7 +26,7 @@ test.describe("Setup Wizard", () => {
     await expect(page).toHaveURL(/\/setup/, { timeout: 15_000 });
   }
 
-  test("completes onboarding without an Admin placeholder or team invites", async ({ page }) => {
+  for (const consentEnabled of [false, true]) test(`completes onboarding with contact consent ${consentEnabled ? "on" : "off"}`, async ({ page }) => {
     const email = testEmail("setup");
     await page.addInitScript(() => {
       window.localStorage.setItem("quoska:signup-attribution:v1", JSON.stringify({
@@ -85,6 +85,9 @@ test.describe("Setup Wizard", () => {
 
     // Review makes the important defaults visible before persisting setup_complete.
     await expect(page.getByRole("heading", { name: "Alles richtig?" })).toBeVisible();
+    const consent = page.getByRole("checkbox", { name: /Quoska darf mir per E-Mail/ });
+    await expect(consent).not.toBeChecked();
+    if (consentEnabled) await consent.check();
     await expect(page.getByText("Erika Gründerin")).toBeVisible();
     await expect(page.getByText("15.01.2026")).toBeVisible();
     await expect(page.getByText("+2,5 Std.")).toBeVisible();
@@ -105,6 +108,10 @@ test.describe("Setup Wizard", () => {
       .single();
 
     expect(error).toBeNull();
+    const { data: preferences, error: preferenceError } = await adminClient.from("admin_contact_events")
+      .select("enabled,source").eq("email", email);
+    expect(preferenceError).toBeNull();
+    expect(preferences).toEqual(consentEnabled ? [{ enabled: true, source: "setup" }] : []);
     expect(employee).toMatchObject({
       first_name: "Erika",
       last_name: "Gründerin",
