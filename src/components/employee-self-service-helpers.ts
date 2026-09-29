@@ -9,7 +9,7 @@
  * project's ArbZG §16 convention.
  */
 
-import type { TimeEntry } from "@/types/database";
+import type { BreakSession, TimeEntry } from "@/types/database";
 import { formatDateFullDE } from "@/config/client/date-utils";
 
 // ---------------------------------------------------------------------------
@@ -18,6 +18,7 @@ import { formatDateFullDE } from "@/config/client/date-utils";
 
 export interface TimeEntryWithNet extends TimeEntry {
   netMinutes: number;
+  shortInterruptions?: BreakSession[];
 }
 
 export interface WeekOvertimeSummary {

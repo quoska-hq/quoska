@@ -83,3 +83,15 @@ export async function getCompletedBreakSessions(
 
   return data ?? [];
 }
+
+/** Completed sessions for a scoped set of entries (including short interruptions). */
+export async function getCompletedBreaksForEntries(
+  supabase: SupabaseClient, tenantId: string, entryIds: string[],
+): Promise<BreakSession[]> {
+  if (!entryIds.length) return [];
+  const { data, error } = await supabase.from("break_sessions").select("*")
+    .eq("tenant_id", tenantId).in("time_entry_id", entryIds)
+    .not("break_end", "is", null).order("break_start", { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}

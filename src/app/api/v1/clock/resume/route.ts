@@ -4,7 +4,7 @@ import { observeProductAction } from "@/services/productObservationService";
  * POST /api/v1/clock/resume
  *
  * End a break — resume a paused time entry.
- * Enforces minimum 15-minute break duration (§4 ArbZG).
+ * Records actual duration; blocks below 15 minutes do not count as pauses.
  */
 
 import { NextResponse } from "next/server";
@@ -60,7 +60,7 @@ async function handlePost(request: Request) {
 
     if (!result.data) {
       let status = 500;
-      if (result.error?.includes("mindestens")) status = 400;
+      if (result.error?.includes("Ungültig")) status = 400;
       if (result.error?.includes("nicht gefunden")) status = 404;
       if (result.error?.includes("bereits beendet")) status = 409;
 

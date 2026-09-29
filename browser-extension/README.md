@@ -84,7 +84,7 @@ npx playwright test tests/e2e/browser-extension.spec.ts --reporter=line
 - Cancel once and verify no token is created.
 - Approve and verify the popup shows the same off/running/paused state as Quoska.
 - Clock in with and without a project and note.
-- Start a pause; verify an early resume shows the existing 15-minute warning.
+- Start a pause; verify an early resume asks for confirmation; cancel keeps the pause running, confirm resumes without a pause deduction.
 - Resume after the allowed duration and clock out.
 - Change state in the web app and verify popup refresh/badge synchronization.
 - Verify the toolbar keeps the original white, theme-safe logo background with a

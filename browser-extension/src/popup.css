@@ -261,3 +261,8 @@ textarea:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; 
   *, *::before, *::after { transition: none !important; }
   .spinner { animation-duration: 1.8s; }
 }
+
+#early-break-dialog { max-width: 300px; border: 1px solid #ddd; border-radius: 8px; padding: 20px; }
+#early-break-dialog::backdrop { background: rgb(15 23 42 / 35%); }
+#early-break-dialog h2 { font-size: 18px; }
+#early-break-dialog p { line-height: 1.5; }

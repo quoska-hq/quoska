@@ -32,9 +32,13 @@ import { ClockDayProgress } from "@/components/clock-day-progress";
 import { TodaySummaryCard } from "@/components/clock-today-summary";
 import { WeekSummaryCard } from "@/components/clock-week-summary";
 import { useLiveElapsedSeconds } from "@/components/use-live-clock";
+import { EarlyBreakDialog } from "@/components/early-break-dialog";
+import { MIN_BREAK_BLOCK_SECONDS } from "@/config/break-policy";
+import { ShortInterruptions } from "@/components/short-interruptions";
 import { useClockProject } from "@/hooks/use-clock-project";
 
 export function ClockView() {
+  const [confirmEarlyEnd, setConfirmEarlyEnd] = useState(false);
   const [displayMinutes, setDisplayMinutes] = useState(0);
   const [pulsePhase, setPulsePhase] = useState(false);
   // Optimistic UI state: tracks what the user just pressed
@@ -158,9 +162,8 @@ export function ClockView() {
     setPopKey((k) => k + 1);
 
     if (activeBreak) {
-      // Ending a break is server-validated (including the 15-minute minimum).
-      // Keep the paused UI stable until the server confirms the transition.
-      resumeMutation.mutate(undefined);
+      if (activeBreakSeconds < MIN_BREAK_BLOCK_SECONDS) setConfirmEarlyEnd(true);
+      else resumeMutation.mutate(undefined);
       return;
     }
     if (activeEntry?.status === "running") {
@@ -174,7 +177,7 @@ export function ClockView() {
     clockInMutation.mutate(undefined, {
       onError: () => setOptimisticAction(null),
     });
-  }, [activeBreak, activeEntry, clockInMutation, clockOutMutation, resumeMutation]);
+  }, [activeBreak, activeBreakSeconds, activeEntry, clockInMutation, clockOutMutation, resumeMutation]);
 
   const handlePause = useCallback(() => {
     setOptimisticAction("pause");
@@ -201,6 +204,11 @@ export function ClockView() {
 
   return (
     <TooltipProvider>
+      <EarlyBreakDialog open={confirmEarlyEnd && !!activeBreak} onOpenChange={setConfirmEarlyEnd}
+        pending={isProcessing} onConfirm={() => resumeMutation.mutate(undefined, {
+          onSuccess: () => setConfirmEarlyEnd(false),
+          onError: () => setConfirmEarlyEnd(false),
+        })} />
       <div className="w-full">
         <PageHeader
           title="Stempeln"
@@ -271,6 +279,8 @@ export function ClockView() {
                 Pause heute: {formatDuration(activeEntry.break_minutes)}
               </div>
             )}
+
+            <ShortInterruptions sessions={statusData?.shortInterruptions ?? []} />
 
             {compliance && compliance.warnings.length > 0 && (
               <ComplianceWarnings warnings={compliance.warnings} />

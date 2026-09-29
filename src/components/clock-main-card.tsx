@@ -69,16 +69,11 @@ export function ClockMainCard({
   const breakRemainingSeconds = activeBreak
     ? Math.max(0, MIN_BREAK_BLOCK_SECONDS - activeBreakSeconds)
     : 0;
-  const canEndBreak = activeBreak
-    ? breakRemainingSeconds === 0
-    : optimisticAction !== "pause";
-  const buttonHint = activeBreak && breakRemainingSeconds > 0
-    ? `Noch ${formatStopwatch(breakRemainingSeconds)}`
-    : btn.label === "Ausstempeln"
-      ? "Arbeitszeit beenden"
-      : btn.label === "Pause beenden"
-        ? "Zurück an die Arbeit"
-        : "Arbeitszeit starten";
+  const buttonHint = btn.label === "Ausstempeln"
+    ? "Arbeitszeit beenden"
+    : btn.label === "Pause beenden"
+      ? "Zurück an die Arbeit"
+      : "Arbeitszeit starten";
 
   return (
     <Card className="overflow-visible border-slate-900/15 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.07)]">
@@ -130,7 +125,7 @@ export function ClockMainCard({
                 <button
                   {...props}
                   onClick={onClockAction}
-                  disabled={isProcessing || !canEndBreak}
+                  disabled={isProcessing || optimisticAction === "pause"}
                   aria-label={btn.label}
                   className={`
                     stamp-button relative z-10
@@ -168,7 +163,7 @@ export function ClockMainCard({
             <TooltipContent side="bottom">
               <p>
                 {activeBreak && breakRemainingSeconds > 0
-                  ? `Pause kann in ${formatStopwatch(breakRemainingSeconds)} beendet werden.`
+                  ? "Vorzeitig beenden mit Bestätigung"
                   : btn.label}
               </p>
             </TooltipContent>
@@ -206,7 +201,7 @@ export function ClockMainCard({
               </time>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 {breakRemainingSeconds > 0
-                  ? `Noch ${formatStopwatch(breakRemainingSeconds)} Mindestpause`
+                  ? `Noch ${formatStopwatch(breakRemainingSeconds)} bis zur anrechenbaren Pause`
                   : "Mindestdauer erreicht"}
               </p>
             </div>

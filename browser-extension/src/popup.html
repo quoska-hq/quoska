@@ -77,6 +77,14 @@
         </nav>
       </section>
     </main>
+    <dialog id="early-break-dialog" aria-labelledby="early-break-title" aria-describedby="early-break-description">
+      <h2 id="early-break-title">Pause vorzeitig beenden?</h2>
+      <p id="early-break-description">Diese Unterbrechung ist kürzer als 15 Minuten und zählt nicht zur gesetzlichen Mindestpause.</p>
+      <form method="dialog" class="actions">
+        <button class="button secondary full" value="cancel" autofocus>Weiter pausieren</button>
+        <button class="button primary full" value="confirm">Pause beenden</button>
+      </form>
+    </dialog>
     <script src="config.js"></script>
     <script src="api.js"></script>
     <script src="popup.js"></script>

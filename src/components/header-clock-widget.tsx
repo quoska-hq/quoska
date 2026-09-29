@@ -18,11 +18,13 @@ import { useLiveElapsedSeconds, formatStopwatch } from "@/components/use-live-cl
 import { Button } from "@/components/ui/button";
 import { MIN_BREAK_BLOCK_SECONDS } from "@/config/break-policy";
 import { AlertCircle, Coffee, Play, Square, X } from "lucide-react";
+import { EarlyBreakDialog } from "@/components/early-break-dialog";
 import { useClockProject } from "@/hooks/use-clock-project";
 
 type Optimistic = "clock-in" | "clock-out" | "pause" | null;
 
 export function HeaderClockWidget() {
+  const [confirmEarlyEnd, setConfirmEarlyEnd] = useState(false);
   const queryClient = useQueryClient();
   const [optimistic, setOptimistic] = useState<Optimistic>(null);
 
@@ -70,8 +72,7 @@ export function HeaderClockWidget() {
       ? breakElapsed
       : 0
     : elapsed;
-  const breakRemainingSeconds = Math.max(0, MIN_BREAK_BLOCK_SECONDS - breakElapsed);
-  const canEndBreak = !!activeBreak && breakRemainingSeconds === 0;
+
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["presence"] });
   const wrap = (
@@ -91,6 +92,11 @@ export function HeaderClockWidget() {
 
   return (
     <div className="flex items-center gap-1.5">
+      <EarlyBreakDialog open={confirmEarlyEnd && !!activeBreak} onOpenChange={setConfirmEarlyEnd}
+        pending={isProcessing} onConfirm={() => resumeMutation.mutate(undefined, {
+          onSuccess: () => { setConfirmEarlyEnd(false); refresh(); },
+          onError: () => setConfirmEarlyEnd(false),
+        })} />
       {error && (
         <div
           role="alert"
@@ -146,12 +152,13 @@ export function HeaderClockWidget() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => resumeMutation.mutate(undefined, { onSuccess: refresh })}
-          disabled={(isProcessing && !optimistic) || !canEndBreak}
+          onClick={() => {
+            if (breakElapsed < MIN_BREAK_BLOCK_SECONDS) setConfirmEarlyEnd(true);
+            else resumeMutation.mutate(undefined, { onSuccess: refresh });
+          }}
+          disabled={isProcessing || !activeBreak}
           aria-label="Pause beenden"
-          title={canEndBreak
-            ? "Pause beenden"
-            : `Pause kann in ${formatStopwatch(breakRemainingSeconds)} beendet werden.`}
+          title="Pause beenden"
           className="h-8 gap-1.5 border-amber-700/20 bg-amber-50 text-amber-800 hover:bg-amber-100 hover:text-amber-900"
         >
           <Play className="size-4" />

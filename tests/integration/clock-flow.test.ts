@@ -231,7 +231,7 @@ describe("Clock out while on break", () => {
 // ---------------------------------------------------------------------------
 
 describe("Break minimum 15 minutes (§4 ArbZG)", () => {
-  test("ending break before 15 minutes is rejected", async () => {
+  test("ending break before its start is rejected", async () => {
     const { endBreak } = await import("@/services/breakService");
 
     const shortBreak: BreakSession = {
@@ -253,12 +253,11 @@ describe("Break minimum 15 minutes (§4 ArbZG)", () => {
     };
     const supabase = createMockSupabase(tables);
 
-    // Even 14:59.999 is still shorter than the required full 15 minutes.
-    const result = await endBreak(supabase, "t-1", "e-1", "b-1", "2026-05-30T10:14:59.999Z");
+    // Invalid negative intervals are still rejected.
+    const result = await endBreak(supabase, "t-1", "e-1", "b-1", "2026-05-30T09:59:59.999Z");
 
     expect(result.data).toBeNull();
-    expect(result.error).toContain("mindestens 15 Minuten");
-    expect(result.error).toContain("14 Minuten");
+    expect(result.error).toBe("Ungültige Pausenzeiten");
   });
 });
 
