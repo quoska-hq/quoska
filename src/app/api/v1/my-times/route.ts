@@ -5,6 +5,8 @@
  * for a given date range. Holiday-aware target hours.
  */
 
+import { getCompletedBreaksForEntries } from "@/repos/breakSessionRepo";
+import { isShortInterruption } from "@/config/break-policy";
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
@@ -25,7 +27,7 @@ import {
   formatOvertime,
 } from "@/services/overtimeService";
 import type { ApiResponse } from "@/types/api";
-import type { TimeEntry } from "@/types/database";
+import type { BreakSession, TimeEntry } from "@/types/database";
 import { weekQuerySchema } from "@/types/holiday";
 import {
   calculateScheduleTargetMinutesForRange,
@@ -34,6 +36,7 @@ import {
 
 export interface TimeEntryWithNet extends TimeEntry {
   netMinutes: number;
+  shortInterruptions?: BreakSession[];
 }
 
 export interface WeekOvertimeSummary {
@@ -124,9 +127,14 @@ export async function GET(request: Request) {
     const excludedDates = new Set([...holidayMap.keys(), ...absenceDates]);
     const balanceExcludedDates = new Set([...balanceHolidayMap.keys(), ...absenceDates]);
 
+    const shortInterruptions = (await getCompletedBreaksForEntries(
+      supabase, tenantId, entries.map((entry) => entry.id),
+    )).filter(isShortInterruption);
+
     // Add net minutes to each entry
     const entriesWithNet: TimeEntryWithNet[] = entries.map((entry) => ({
       ...entry,
+      shortInterruptions: shortInterruptions.filter((session) => session.time_entry_id === entry.id),
       netMinutes: entry.clock_out
         ? netMinutesForEntry(entry)
         : netMinutesForRunningEntry(entry, nowIso),

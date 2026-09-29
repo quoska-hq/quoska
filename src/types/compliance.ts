@@ -90,6 +90,7 @@ export interface ClockStatusResponse {
   staleActiveEntry?: boolean;
   activeEntry: TimeEntry | null;
   activeBreak: BreakSession | null;
+  shortInterruptions?: BreakSession[];
   compliance: ComplianceStatus;
   todaySummary: TodaySummary | null;
   weekSummary: WeekSummary;

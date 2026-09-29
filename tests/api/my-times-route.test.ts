@@ -32,6 +32,8 @@ vi.mock("@/services/absenceService", () => ({
   getEmployeeAbsenceDates: mocks.getEmployeeAbsenceDates,
 }));
 
+vi.mock("@/repos/breakSessionRepo", () => ({ getCompletedBreaksForEntries: vi.fn().mockResolvedValue([]) }));
+
 import { GET } from "@/app/api/v1/my-times/route";
 
 const entries: TimeEntry[] = [

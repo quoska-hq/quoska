@@ -8,6 +8,7 @@
 
 "use client";
 
+import { ShortInterruptions } from "@/components/short-interruptions";
 import type { CorrectionRequest } from "@/types/database";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -113,6 +114,8 @@ export function DayEntryCard({
                       </Badge>
                     )}
                   </div>
+
+                  <ShortInterruptions sessions={entry.shortInterruptions ?? []} />
 
                   {/* Details row */}
                   <div className="flex items-center gap-2 mt-0.5">

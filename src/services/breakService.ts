@@ -3,7 +3,7 @@
  *
  * Handles:
  * - Start break (pause time entry, create break_session)
- * - End break (resume time entry, enforce min 15min, calculate duration)
+ * - End break (resume time entry, record actual duration, count qualifying blocks)
  *
  * Legal basis: §4 ArbZG — breaks of at least 15 minutes per block.
  * Min 30min after 6h, min 45min after 9h.
@@ -24,8 +24,8 @@ import {
   getCompletedBreakSessions,
 } from "@/repos/breakSessionRepo";
 import {
-  MIN_BREAK_BLOCK_MILLISECONDS,
-  MIN_BREAK_BLOCK_MINUTES,
+  countedBreakMinutes,
+  isShortInterruption,
 } from "@/config/break-policy";
 
 /**
@@ -117,7 +117,7 @@ export async function startBreak(
  *
  * 1. Verify break exists and is active
  * 2. Calculate duration
- * 3. Enforce minimum 15 minutes (§4 ArbZG)
+ * 3. Validate timestamps; short interruptions remain paid
  * 4. Update break_session: break_end, duration_minutes
  * 5. Sum all completed breaks → update time_entry.break_minutes
  * 6. Update time_entry.status = 'running'
@@ -155,16 +155,14 @@ export async function endBreak(
     return failure("Ungültiger Zeiteintrag");
   }
 
-  // 3. Calculate duration and enforce minimum
+  // 3. Keep actual timestamps even for interruptions shorter than 15 minutes.
   const breakStart = Date.parse(breakSession.break_start);
   const breakEnd = Date.parse(nowIso);
   const durationMilliseconds = breakEnd - breakStart;
   const durationMinutes = Math.floor(durationMilliseconds / 60_000);
 
-  if (durationMilliseconds < MIN_BREAK_BLOCK_MILLISECONDS) {
-    return failure(
-      `Pause muss mindestens ${MIN_BREAK_BLOCK_MINUTES} Minuten dauern (§4 ArbZG). Aktuell: ${Math.max(0, durationMinutes)} Minuten.`,
-    );
+  if (!Number.isFinite(durationMilliseconds) || durationMilliseconds < 0) {
+    return failure("Ungültige Pausenzeiten");
   }
 
   // 4. Update break session
@@ -191,7 +189,7 @@ export async function endBreak(
     breakSession.time_entry_id,
   );
   const recordedBreakMinutes = completedBreaks.reduce(
-    (sum, b) => sum + (b.duration_minutes ?? 0),
+    (sum, b) => sum + countedBreakMinutes(b),
     0,
   );
   const totalBreakMinutes = recordedBreakMinutes + (entry.automatic_break_minutes ?? 0);
@@ -220,7 +218,9 @@ export async function endBreak(
     field_name: "status",
     old_value: "paused",
     new_value: "running",
-    reason: `Pause beendet (${durationMinutes} Min)`,
+    reason: isShortInterruption(updatedBreak)
+      ? `Kurze Unterbrechung beendet (${durationMinutes} Min; kein Pausenabzug)`
+      : `Pause beendet (${durationMinutes} Min)`,
   });
 
   return success({ breakSession: updatedBreak, breakMinutes: totalBreakMinutes });

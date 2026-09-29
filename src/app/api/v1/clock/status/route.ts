@@ -11,7 +11,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { getNowIso, getTodayDate, getWeekBounds, getMonthStart } from "@/config/server/timestamps";
 import { getEmployeeFromAuth, getClockStatus } from "@/services/timeEntryService";
-import { getActiveBreak } from "@/repos/breakSessionRepo";
+import { isShortInterruption } from "@/config/break-policy";
+import { getActiveBreak, getCompletedBreaksForEntries } from "@/repos/breakSessionRepo";
 import { getMonthEntriesBeforeToday } from "@/repos/timeEntryRepo";
 import {
   getFullComplianceStatus,
@@ -72,6 +73,10 @@ export async function GET() {
     if (activeEntry?.status === "paused") {
       activeBreak = await getActiveBreak(supabase, tenantId, activeEntry.id);
     }
+
+    const shortInterruptions = (await getCompletedBreaksForEntries(
+      supabase, tenantId, [...new Set([...todayEntries.map((entry) => entry.id), ...(activeEntry ? [activeEntry.id] : [])])],
+    )).filter(isShortInterruption);
 
     // Calculate compliance
     const nowIso = getNowIso();
@@ -214,6 +219,7 @@ export async function GET() {
       staleActiveEntry: Boolean(activeEntry && isStaleEntry(activeEntry.clock_in, getNowIso())),
       activeEntry,
       activeBreak,
+      shortInterruptions,
       compliance,
       todaySummary,
       weekSummary: {

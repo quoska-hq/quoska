@@ -3,6 +3,7 @@
 "use strict";
 
 const elements = {
+  earlyBreakDialog: document.querySelector("#early-break-dialog"),
   loading: document.querySelector("#loading-view"),
   disconnected: document.querySelector("#disconnected-view"),
   connected: document.querySelector("#connected-view"),
@@ -227,6 +228,15 @@ elements.primary.addEventListener("click", async () => {
       }
     : { action: state === "paused" ? "resume" : "clock-out" };
   setBusy(true);
+  const breakStart = currentStatus?.activeBreak?.breakStart;
+  if (body.action === "resume" && breakStart && Date.now() + serverOffsetMs - Date.parse(breakStart) < 15 * 60_000) {
+    const confirmed = await new Promise((resolve) => {
+      elements.earlyBreakDialog.returnValue = "cancel";
+      elements.earlyBreakDialog.addEventListener("close", () => resolve(elements.earlyBreakDialog.returnValue === "confirm"), { once: true });
+      elements.earlyBreakDialog.showModal();
+    });
+    if (!confirmed) { setBusy(false); return; }
+  }
   showError(elements.actionError, "");
   try {
     renderStatus(await QuoskaApi.performAction(body));

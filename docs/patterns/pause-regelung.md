@@ -89,20 +89,22 @@ function getBreakWarnings(entry: TimeEntry): BreakWarning[] {
 }
 ```
 
-### Minimum Break Block Size
+### Ending a break and short interruptions
 
-```typescript
-function endBreak(breakSessionId: UUID): void {
-  const duration = calculateBreakDuration(breakSessionId);
+A break can end at any time. Below 15 minutes, both clock controls ask:
+“Pause vorzeitig beenden? Diese Unterbrechung ist kürzer als 15 Minuten und zählt nicht zur gesetzlichen Mindestpause.”
+The actions are “Pause beenden” and “Weiter pausieren”.
 
-  if (duration < 15) {
-    throw new ValidationError(
-      'Pause muss mindestens 15 Minuten dauern (§4 ArbZG). ' +
-      `Aktuell: ${duration} Minuten.`
-    );
-  }
-}
-```
+The server stores the actual start/end timestamps and floors `duration_minutes`.
+Only individual completed blocks of at least 900 seconds contribute to
+`time_entries.break_minutes`. Short interruptions remain paid in this variant;
+they do not satisfy the minimum pause, and multiple short blocks are never
+combined. The UI lists them separately on the clock and in “Meine Zeiten”.
+
+`break_minutes` remains the total deduction consumed by balances and exports:
+qualifying recorded breaks plus `automatic_break_minutes`. At clock-out the
+existing automatic-break policy may add a separate deduction if enabled; short
+interruptions do not reduce that deduction. This does not rewrite existing data.
 
 ## Testing
 
@@ -130,8 +132,8 @@ describe('Pausenregelung §4 ArbZG', () => {
     );
   });
 
-  test('break block <15min is rejected', () => {
-    expect(() => endBreak(shortBreakSession)).toThrow('mindestens 15 Minuten');
-  });
+  // See tests/services/breakService.test.ts for 0s, 14:59.999, 15:00,
+  // multiple blocks, automatic deductions, balances, warnings and exports.
+  // See tests/e2e/break-tracking.spec.ts for confirmation and clock-out.
 });
 ```
