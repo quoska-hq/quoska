@@ -13,6 +13,7 @@ const TEST_SERVER_COMMAND = process.env.CI
 export default defineConfig({
   testDir: "./tests/e2e",
   testMatch: /.*\.spec\.ts/,
+  testIgnore: "**/planning-preview/**",
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

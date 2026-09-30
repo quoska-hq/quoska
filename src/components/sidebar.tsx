@@ -21,6 +21,7 @@ import {
   LayoutDashboard,
   Globe2,
   MessageSquare,
+  CalendarDays,
 } from "lucide-react";
 
 interface NavItem {
@@ -30,9 +31,18 @@ interface NavItem {
   roles: Role[];
   group: "main" | "manage";
   siteAdminOnly?: boolean;
+  developmentOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
+  {
+    href: "/app/planning",
+    label: "Dienstplanung · Vorschau",
+    icon: <CalendarDays className="size-[18px]" />,
+    roles: ["admin", "manager"],
+    group: "manage",
+    developmentOnly: true,
+  },
   {
     href: "/app/dashboard",
     label: "Cockpit",
@@ -132,7 +142,7 @@ export function Sidebar({ role, userName, isAnalyticsAdmin, onSignOut }: Sidebar
   const pathname = usePathname();
 
   const visibleItems = NAV_ITEMS.filter(
-    (item) => item.roles.includes(role) && (!item.siteAdminOnly || isAnalyticsAdmin),
+    (item) => item.roles.includes(role) && (!item.siteAdminOnly || isAnalyticsAdmin) && (!item.developmentOnly || process.env.NODE_ENV === "development"),
   );
   const mainItems = visibleItems.filter((i) => i.group === "main");
   const manageItems = visibleItems.filter((i) => i.group === "manage");

@@ -21,6 +21,7 @@
     "test:legal": "vitest run tests/legal/",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:planning-preview": "playwright test -c playwright.planning.config.ts",
     "extension:build": "node scripts/build-browser-extension.mjs",
     "extension:build:local": "QUOSKA_EXTENSION_APP_URL=http://localhost:3000 node scripts/build-browser-extension.mjs",
     "search-console": "node scripts/search-console.mjs",

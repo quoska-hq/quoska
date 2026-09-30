@@ -180,6 +180,9 @@ jobs:
       - name: Run Playwright tests
         run: npx playwright test
 
+      - name: Run development planning preview tests
+        run: npm run test:planning-preview
+
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7

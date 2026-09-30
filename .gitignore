@@ -5,6 +5,7 @@ node_modules/
 .next/
 .next-e2e/
 .next-marketing/
+.next-planning/
 /out/
 /browser-extension/dist/
 
