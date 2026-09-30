@@ -6,6 +6,7 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { getLocalToday } from "../../src/config/client/date-utils";
 import {
   testEmail,
   TEST_PASSWORD,
@@ -38,11 +39,11 @@ test.describe("Absence calendar indicators", () => {
       .single();
     employeeEmpId = empRecord!.id;
 
-    // Create leave entitlement for 2026
+    // Match the German calendar year used by the browser.
     await adminClient.from("leave_entitlements").insert({
       tenant_id: tenantId,
       employee_id: employeeEmpId,
-      year: 2026,
+      year: Number(getLocalToday().slice(0, 4)),
       total_days: 28,
       carried_over: 0,
     });
@@ -66,11 +67,9 @@ test.describe("Absence calendar indicators", () => {
   }
 
   test("vacation-only days show emerald indicator bar", async ({ page }) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const vacStart = `${year}-${month}-10`;
-    const vacEnd = `${year}-${month}-12`;
+    const month = getLocalToday().slice(0, 7);
+    const vacStart = `${month}-10`;
+    const vacEnd = `${month}-12`;
 
     await adminClient.from("leave_requests").insert({
       tenant_id: tenantId,
@@ -101,11 +100,9 @@ test.describe("Absence calendar indicators", () => {
   });
 
   test("sick-only days show rose indicator bar", async ({ page }) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const sickStart = `${year}-${month}-20`;
-    const sickEnd = `${year}-${month}-21`;
+    const month = getLocalToday().slice(0, 7);
+    const sickStart = `${month}-20`;
+    const sickEnd = `${month}-21`;
 
     await adminClient.from("sick_entries").insert({
       tenant_id: tenantId,
@@ -132,10 +129,8 @@ test.describe("Absence calendar indicators", () => {
   });
 
   test("vacation + sick on same day shows gradient bar", async ({ page }) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const overlapDate = `${year}-${month}-25`;
+    const month = getLocalToday().slice(0, 7);
+    const overlapDate = `${month}-25`;
 
     await adminClient.from("leave_requests").insert({
       tenant_id: tenantId,

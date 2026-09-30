@@ -171,6 +171,8 @@ test.describe("Integrated planning", () => {
       await expect(
         page.getByText("Verbindlich", { exact: false }).first(),
       ).toBeVisible();
+      await page.getByRole("button", { name: "Nächste Woche", exact: true }).click();
+      await expect(page.getByRole("button", { name: /06:00–12:00/ }).first()).toBeVisible();
       const screenshot = test.info().outputPath("planning-manager.png");
       await page.screenshot({
         path: screenshot,
