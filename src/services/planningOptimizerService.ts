@@ -16,7 +16,10 @@ import {
   planningShiftIssues,
 } from "@/services/planningShiftRules";
 import { PlanningError } from "@/services/planningPeriodService";
-import { planningTargetMinutes } from "@/services/planningBalanceService";
+import {
+  planningTargetMinutes,
+  planningBalanceForecast,
+} from "@/services/planningBalanceService";
 const FAIRNESS_HISTORY_DAYS = 90;
 
 export function buildPlanningJob(
@@ -80,6 +83,8 @@ export function buildPlanningJob(
         .filter(
           (p) =>
             (!s.locked || s.employeeId === p.employeeId) &&
+            p.locationIds.includes(s.locationId) &&
+            p.skillIds.includes(s.skillId) &&
             candidate(s, p.employeeId),
         )
         .map((p) => p.employeeId),
@@ -170,55 +175,81 @@ export function buildPlanningJob(
     })),
     employees: context.employees
       .filter((e) => profiles.some((p) => p.employeeId === e.id))
-      .map((e) => ({
-        id: e.id,
-        weeklyMinutes: profiles.find((p) => p.employeeId === e.id)!
-          .maxWeeklyMinutes,
-        targetMinutes: Math.max(
-          0,
-          planningTargetMinutes(
-            e,
-            context,
-            period.month <= context.today
-              ? planningAddDays(context.today, 1)
-              : period.month,
-            planningAddDays(
-              planningAddMonths(selectedPeriods.at(-1)!.month, 1),
-              -1,
+      .map((e) => {
+        const carry = e.balanceComplete
+          ? period.month <= context.today.slice(0, 7) + "-01"
+            ? e.balanceMinutes
+            : planningBalanceForecast(
+                state,
+                context,
+                e,
+                planningAddMonths(period.month, -1),
+              ).forecastMinutes
+          : 0;
+        return {
+          id: e.id,
+          weeklyMinutes: profiles.find((p) => p.employeeId === e.id)!
+            .maxWeeklyMinutes,
+          targetMinutes: Math.max(
+            0,
+            planningTargetMinutes(
+              e,
+              context,
+              period.month <= context.today
+                ? planningAddDays(context.today, 1)
+                : period.month,
+              planningAddDays(
+                planningAddMonths(selectedPeriods.at(-1)!.month, 1),
+                -1,
+              ),
+            ) - Math.round(carry / 3),
+          ),
+          monthlyTargets: selectedPeriods.map((p) => ({
+            month: p.month.slice(0, 7),
+            minutes: Math.max(
+              0,
+              planningTargetMinutes(
+                e,
+                context,
+                p.month <= context.today
+                  ? planningAddDays(context.today, 1)
+                  : p.month,
+                planningAddDays(planningAddMonths(p.month, 1), -1),
+              ) - Math.round(carry / (3 * selectedPeriods.length)),
             ),
-          ) - Math.round((e.balanceComplete ? e.balanceMinutes : 0) / 3),
-        ),
-        initialMinutes: neighboring
-          .filter((s) => s.employeeId === e.id)
-          .reduce((sum, s) => sum + planningNetMinutes(s), 0),
-        pastWeekendDays: new Set(
-          context.actual
-            .filter(
-              (a) =>
-                a.employeeId === e.id &&
-                a.date < context.today &&
-                a.date >=
-                  planningAddDays(context.today, -FAIRNESS_HISTORY_DAYS) &&
-                [0, 6].includes(planningDay(a.date)),
-            )
-            .map((a) => a.date),
-        ).size,
-        pastNightDays: new Set(
-          context.actual
-            .filter(
-              (a) =>
-                a.employeeId === e.id &&
-                a.date < context.today &&
-                a.date >=
-                  planningAddDays(context.today, -FAIRNESS_HISTORY_DAYS) &&
-                (planningLocal(a.start).time < "05:00" ||
-                  planningLocal(a.start).time >= "22:00" ||
-                  (a.end && planningLocal(a.end).date !== a.date)),
-            )
-            .map((a) => a.date),
-        ).size,
-        preferredDays: profiles.find((p) => p.employeeId === e.id)!
-          .preferredDays,
-      })),
+          })),
+          initialMinutes: neighboring
+            .filter((s) => s.employeeId === e.id)
+            .reduce((sum, s) => sum + planningNetMinutes(s), 0),
+          pastWeekendDays: new Set(
+            context.actual
+              .filter(
+                (a) =>
+                  a.employeeId === e.id &&
+                  a.date < context.today &&
+                  a.date >=
+                    planningAddDays(context.today, -FAIRNESS_HISTORY_DAYS) &&
+                  [0, 6].includes(planningDay(a.date)),
+              )
+              .map((a) => a.date),
+          ).size,
+          pastNightDays: new Set(
+            context.actual
+              .filter(
+                (a) =>
+                  a.employeeId === e.id &&
+                  a.date < context.today &&
+                  a.date >=
+                    planningAddDays(context.today, -FAIRNESS_HISTORY_DAYS) &&
+                  (planningLocal(a.start).time < "05:00" ||
+                    planningLocal(a.start).time >= "22:00" ||
+                    (a.end && planningLocal(a.end).date !== a.date)),
+              )
+              .map((a) => a.date),
+          ).size,
+          preferredDays: profiles.find((p) => p.employeeId === e.id)!
+            .preferredDays,
+        };
+      }),
   };
 }

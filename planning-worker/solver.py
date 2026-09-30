@@ -31,9 +31,17 @@ def solve(payload):
     eligible_employees = {eid for _, eid in choices}
     total_target = sum(max(0, employees[eid]["targetMinutes"]) for eid in eligible_employees)
     total_minutes = sum(s["minutes"] for s in shifts.values())
+    month_minutes = {}
+    month_eligible = {}
+    month_weights = {eid: {t["month"]: t["minutes"] for t in e.get("monthlyTargets", [])} for eid, e in employees.items()}
+    for sid, shift in shifts.items():
+        month = shift["date"][:7]
+        month_minutes[month] = month_minutes.get(month, 0) + shift["minutes"]
+        month_eligible.setdefault(month, set()).update(eid for eid in shift["candidates"] if (sid, eid) in choices)
     for eid, employee in employees.items():
         weekly = {}
         daily = {}
+        monthly = {}
         terms = []
         for sid, shift in shifts.items():
             if (sid, eid) not in choices:
@@ -46,6 +54,7 @@ def solve(payload):
             monday = str(day - timedelta(days=day.weekday()))
             weekly.setdefault(monday, []).append(term)
             daily.setdefault(shift["date"], []).append(term)
+            monthly.setdefault(shift["date"][:7], []).append(term)
             # Python weekdays start on Monday; API weekdays start on Sunday.
             if employee["preferredDays"] and (day.weekday() + 1) % 7 not in employee["preferredDays"]:
                 objective.append(30 * choices[sid, eid])
@@ -67,6 +76,13 @@ def solve(payload):
             allocation_deviation = model.new_int_var(0, 10_000_000, f"allocation:{eid}")
             model.add_abs_equality(allocation_deviation, sum(terms) - quota)
             objective.append(allocation_deviation)
+        for month, month_terms in monthly.items():
+            weights = {person: max(0, month_weights[person].get(month, employees[person]["targetMinutes"])) for person in month_eligible[month]}
+            total_weight = sum(weights.values())
+            quota = round(month_minutes[month] * weights[eid] / total_weight) if total_weight else round(month_minutes[month] / len(weights))
+            monthly_deviation = model.new_int_var(0, 10_000_000, f"monthly:{month}:{eid}")
+            model.add_abs_equality(monthly_deviation, sum(month_terms) - quota)
+            objective.append(monthly_deviation)
     for category in ("weekend", "night"):
         category_shifts = [s for s in shifts.values() if s.get(category)]
         eligible = {eid for shift in category_shifts for eid in shift["candidates"] if eid in employees}

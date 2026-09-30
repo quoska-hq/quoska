@@ -61,6 +61,16 @@ class SolverTests(unittest.TestCase):
         result = solve(data)
         self.assertEqual({a["employeeId"] for a in result["assignments"]}, {"one", "two"})
 
+    def test_available_work_is_also_shared_within_each_month(self):
+        data = payload()
+        data["shifts"] = [{**data["shifts"][0], "id": str(i), "date": day} for i, day in enumerate(["2026-10-01", "2026-10-02", "2026-11-02", "2026-11-03"])]
+        for employee in data["employees"]:
+            employee["targetMinutes"] = 4000
+        result = solve(data)
+        assignments = {a["shiftId"]: a["employeeId"] for a in result["assignments"]}
+        for ids in [("0", "1"), ("2", "3")]:
+            self.assertEqual({assignments[sid] for sid in ids}, {"one", "two"})
+
 
 if __name__ == "__main__":
     unittest.main()

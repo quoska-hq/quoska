@@ -25,6 +25,9 @@ export function PlanningSetup({
 }) {
   const [config, setConfig] = useState<PlanningConfig>(() => ({
     ...structuredClone(data.state.config),
+    profiles: structuredClone(data.state.config.profiles).filter((profile) =>
+      data.context.employees.some((employee) => employee.id === profile.employeeId),
+    ),
     firstMonth:
       data.state.config.firstMonth ??
       planningAddMonths(data.context.today.slice(0, 7) + "-01", 1),
