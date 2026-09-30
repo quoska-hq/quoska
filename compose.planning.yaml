@@ -1,0 +1,19 @@
+services:
+  planning-worker:
+    profiles: [planning]
+    build: ./planning-worker
+    init: true
+    restart: unless-stopped
+    environment:
+      PLANNING_APP_URL: http://app:3000
+      PLANNING_ALLOW_LOCAL_HTTP: "true"
+      PLANNING_WORKER_TOKEN: ${PLANNING_WORKER_TOKEN:?Set the same worker token in the app environment}
+    depends_on:
+      app:
+        condition: service_healthy
+    cpus: 2
+    mem_limit: 768m
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=64m
+    security_opt: [no-new-privileges:true]

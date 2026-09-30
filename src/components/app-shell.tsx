@@ -61,7 +61,7 @@ export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShel
       />
 
       {/* Main content — offset for sidebar on desktop, padding for bottom nav on mobile */}
-      <main className="min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pl-[260px] md:pb-0">
+      <main className="print:pl-0 print:pb-0 min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pl-[260px] md:pb-0">
         <AppHeader
           presenceOpen={presenceOpen}
           onTogglePresence={() => setPresenceOpen((o) => !o)}

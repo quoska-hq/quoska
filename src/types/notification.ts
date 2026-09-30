@@ -2,6 +2,8 @@ import { z } from "zod";
 
 /** Notification types used throughout the system. */
 export type NotificationType =
+  | "planning_published"
+  | "planning_swap"
   | "forgot_clockout"
   | "break_reminder"
   | "automatic_break_added"
@@ -15,6 +17,8 @@ export type NotificationType =
 
 /** Map notification type to display icon. */
 export const NOTIFICATION_ICON: Record<NotificationType, string> = {
+  planning_published: "📅",
+  planning_swap: "🔄",
   forgot_clockout: "⏰",
   break_reminder: "☕",
   automatic_break_added: "☕",

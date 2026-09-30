@@ -99,7 +99,7 @@ export async function GET(request: Request) {
     // Get employee config
     const { data: employee } = await supabase
       .from("employees")
-      .select("bundesland, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, created_at")
+      .select("bundesland, target_hours_week, work_schedule, employment_schedule, employment_start_date, initial_overtime_minutes, created_at")
       .eq("id", employeeId)
       .is("deleted_at", null)
       .single();
@@ -152,7 +152,7 @@ export async function GET(request: Request) {
         targetStart,
         targetEnd,
         excludedDates,
-        employee?.work_schedule,
+        (employee?.employment_schedule ?? employee?.work_schedule),
         targetHoursWeek,
       );
 
@@ -184,7 +184,7 @@ export async function GET(request: Request) {
           employeeStart,
           todayDate,
           balanceExcludedDates,
-          employee?.work_schedule,
+          (employee?.employment_schedule ?? employee?.work_schedule),
           targetHoursWeek,
         )
       : 0;
@@ -199,7 +199,7 @@ export async function GET(request: Request) {
     for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
       dailyTargets[date] = date < employeeStart || date > todayDate || excludedDates.has(date)
         ? 0
-        : scheduledMinutesForDate(employee?.work_schedule, date, targetHoursWeek);
+        : scheduledMinutesForDate((employee?.employment_schedule ?? employee?.work_schedule), date, targetHoursWeek);
     }
 
     const response: MyTimesResponse = {

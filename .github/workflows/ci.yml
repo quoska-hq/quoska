@@ -28,6 +28,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ci-service-role-key
       # Billing tested in no-keys mode (the open-source / self-host path).
       # Striped empty so the zod schema's .optional() allows them through.
+      PLANNING_WORKER_TOKEN: ci-planning-worker-token-with-at-least-32-characters
       STRIPE_SECRET_KEY: ""
       STRIPE_TEAM_PRICE_ID: ""
       STRIPE_TEAM_LEGACY_PRICE_IDS: ""
@@ -97,6 +98,11 @@ jobs:
             GOOGLE_SITE_VERIFICATION=
             APP_REVISION=${{ github.sha }}
 
+      - name: Validate planning worker container and Compose profile
+        run: |
+          QUOSKA_ENV_FILE=/dev/null QUOSKA_DOMAIN=localhost PLANNING_WORKER_TOKEN=ci-planning-worker-token-with-at-least-32-characters docker compose -f compose.prod.yaml -f compose.planning.yaml --profile planning config --quiet
+          docker build -t quoska-planning-worker:ci planning-worker
+
   # ── End-to-end (Playwright) ──────────────────────────────────────────────
   # Boots a local Supabase stack + the app, then runs the Playwright suite.
   # This is a required merge gate: deployment must not proceed when a real
@@ -109,6 +115,7 @@ jobs:
       NEXT_PUBLIC_APP_URL: http://localhost:3100
       BROWSER_EXTENSION_IDS: abcdefghijklmnopabcdefghijklmnop
       CRON_SECRET: ci-cron-secret-with-at-least-32-characters
+      PLANNING_WORKER_TOKEN: ci-planning-worker-token-with-at-least-32-characters
       STRIPE_SECRET_KEY: ""
       STRIPE_TEAM_PRICE_ID: ""
       STRIPE_TEAM_LEGACY_PRICE_IDS: ""
@@ -177,8 +184,24 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install and test planning worker
+        run: |
+          python -m pip install -r planning-worker/requirements.txt
+          python -m unittest discover -s planning-worker -p 'test_*.py'
+
+      - name: Start planning worker for browser tests
+        run: |
+          PLANNING_APP_URL=http://127.0.0.1:3100 PLANNING_ALLOW_LOCAL_HTTP=true python planning-worker/worker.py > /tmp/quoska-planning-worker.log 2>&1 &
+
       - name: Run Playwright tests
         run: npx playwright test
+
+      - name: Run development planning preview tests
+        run: npm run test:planning-preview
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}

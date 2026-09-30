@@ -1,3 +1,5 @@
+import { getPlanningExpectations } from "@/services/planningCockpitService";
+import { getCockpitMissingEntryStart } from "@/services/cockpitPeriodService";
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
@@ -39,6 +41,7 @@ export async function GET(request: Request) {
 
     const days = parsed.data.days as 7 | 30;
     const { startDate, endDate } = getCockpitDateRange(getTodayDate(), days);
+    const planningDays = await getPlanningExpectations(supabase,auth.data.tenantId,getCockpitMissingEntryStart(startDate,endDate));
     const result = await getAdminCockpit(
       supabase,
       auth.data.tenantId,
@@ -47,6 +50,7 @@ export async function GET(request: Request) {
       days,
       getNowIso(),
       parsed.data.employeeId,
+      planningDays,
     );
     if (result.data) {
       result.data.actions = await filterDismissedCockpitActions(

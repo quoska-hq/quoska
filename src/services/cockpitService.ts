@@ -1,3 +1,4 @@
+import type { PlanningExpectations } from "@/services/planningCockpitService";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Employee, Project, TimeEntry } from "@/types/database";
 import type { CorrectionRequestWithEntry } from "@/types/correction";
@@ -34,6 +35,7 @@ interface CockpitBuildInput {
   entries: TimeEntry[];
   recentBreakEntries: TimeEntry[];
   missingEntryEntries?: TimeEntry[];
+  planningDays?: PlanningExpectations;
   projects: Project[];
   audits: CockpitAuditRecord[];
   absences: CockpitAbsences;
@@ -64,7 +66,7 @@ function employeeTarget(
       absenceTypeOnDate(employee.id, date, absences)
     ) return total;
     return total + scheduledMinutesForDate(
-      employee.work_schedule,
+      (employee.employment_schedule ?? employee.work_schedule),
       date,
       employee.target_hours_week,
     );
@@ -145,7 +147,7 @@ function buildEmployeeRows(
       date >= joinedOn &&
       !holidays.has(date) &&
       scheduledMinutesForDate(
-        employee.work_schedule,
+        (employee.employment_schedule ?? employee.work_schedule),
         date,
         employee.target_hours_week,
       ) > 0);
@@ -221,6 +223,7 @@ export async function getAdminCockpit(
   days: 7 | 30,
   nowIso: string,
   employeeId?: string,
+  planningDays?: PlanningExpectations,
 ): Promise<ApiResponse<CockpitData>> {
   const missingEntryStart = getCockpitMissingEntryStart(startDate, endDate);
   const [
@@ -277,5 +280,6 @@ export async function getAdminCockpit(
     days,
     employeeId,
     nowIso,
+    planningDays,
   }));
 }

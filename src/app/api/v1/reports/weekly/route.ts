@@ -155,7 +155,7 @@ export async function GET(request: Request) {
 
         if (!holiday && date >= employeeStart && date <= todayDate) {
           targetMinutes += scheduledMinutesForDate(
-            emp.work_schedule,
+            (emp.employment_schedule ?? emp.work_schedule),
             date,
             emp.target_hours_week,
           );

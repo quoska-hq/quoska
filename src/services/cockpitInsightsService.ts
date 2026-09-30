@@ -1,3 +1,4 @@
+import type { PlanningExpectations } from "@/services/planningCockpitService";
 import { formatDateFullDE as formatDate } from "@/config/client/date-utils";
 import type {
   Employee,
@@ -121,6 +122,7 @@ interface CockpitActionInput {
   entries: TimeEntry[];
   recentBreakEntries: TimeEntry[];
   missingEntryEntries?: TimeEntry[];
+  planningDays?: PlanningExpectations;
   corrections: CorrectionRequestWithEntry[];
   absences: CockpitAbsences;
   holidaysByState: Map<string, ReadonlyMap<string, string>>;
