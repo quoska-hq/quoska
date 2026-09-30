@@ -45,7 +45,7 @@ test.describe("Employee Invite & Edit — Story 3.1", () => {
     ).toBeVisible();
   });
 
-  test("can invite a new employee via dialog", async ({ page }) => {
+  test("accepted invitations stop showing as pending even when the local token remains", async ({ page, browser }) => {
     const newEmail = testEmail("invite-e2e");
     await goToEmployees(page);
 
@@ -73,7 +73,43 @@ test.describe("Employee Invite & Edit — Story 3.1", () => {
     });
     await expect(page.getByText(newEmail)).toBeVisible();
 
-    await cleanupTestUser(newEmail);
+    const row = page.locator("div.rounded-lg.border > div").filter({ hasText: newEmail });
+    await expect(row.getByText("Einladung ausstehend")).toBeVisible();
+
+    const { data: link, error: linkError } = await adminClient.auth.admin.generateLink({
+      type: "invite", email: newEmail,
+    });
+    expect(linkError).toBeNull();
+    if (!link.properties) throw new Error("Supabase did not return invitation link properties");
+
+    // Accept in another browser session so the team administrator stays signed in.
+    const inviteContext = await browser.newContext();
+    try {
+      const invitePage = await inviteContext.newPage();
+      const confirmUrl = new URL("/auth/confirm", page.url());
+      confirmUrl.searchParams.set("token_hash", link.properties.hashed_token);
+      confirmUrl.searchParams.set("type", "invite");
+      confirmUrl.searchParams.set("next", "/auth/set-password");
+      await invitePage.goto(confirmUrl.href);
+      await invitePage.getByRole("button", { name: "Einladung annehmen" }).click();
+      await expect(invitePage).toHaveURL(/\/auth\/set-password/, { timeout: 10_000 });
+      await invitePage.getByLabel("Neues Passwort").fill(TEST_PASSWORD);
+      await invitePage.getByLabel("Passwort wiederholen").fill(TEST_PASSWORD);
+      await invitePage.getByRole("button", { name: /passwort speichern/i }).click();
+      await expect(invitePage).toHaveURL(/\/app\/dashboard/, { timeout: 10_000 });
+
+      const { data: employee, error: employeeError } = await adminClient
+        .from("employees").select("invitation_token").eq("email", newEmail).single();
+      expect(employeeError).toBeNull();
+      expect(employee?.invitation_token).toBeTruthy();
+
+      await page.reload();
+      await expect(row).toBeVisible();
+      await expect(row.getByText("Einladung ausstehend")).toBeHidden();
+    } finally {
+      await inviteContext.close();
+      await cleanupTestUser(newEmail);
+    }
   });
 
   test("can edit an employee's details", async ({ page }) => {

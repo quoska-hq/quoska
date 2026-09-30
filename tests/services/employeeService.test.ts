@@ -54,6 +54,7 @@ function createAdminMock(overrides: Record<string, unknown> = {}) {
           data: { user: { id: "u-new" } }, error: null,
         }),
         updateUserById: vi.fn().mockResolvedValue({ data: {}, error: null }),
+        getUserById: vi.fn(),
       },
     },
     rpc: vi.fn().mockResolvedValue({ error: null }),
@@ -195,6 +196,49 @@ describe("employeeService", () => {
       const result = await listEmployees(createRegularMock(), "t-1");
       expect(result.data!.active).toHaveLength(1);
       expect(result.data!.deactivated).toHaveLength(0);
+      expect(result.data!.invitationStatus).toEqual({ "emp-1": false });
+    });
+
+    test("checks Auth confirmation instead of stale invitation tokens in the tenant list", async () => {
+      const { getEmployeesByTenant, getDeactivatedEmployees } = await import("@/repos/employeeRepo");
+      const { listEmployees } = await import("@/services/employeeService");
+      const accepted = { ...sampleEmployee, id: "accepted", user_id: "u-accepted", invitation_token: "retained-token" };
+      const pending = { ...sampleEmployee, id: "pending", user_id: "u-pending", invited_at: "2026-06-01T00:00:00Z" };
+      const deactivated = { ...sampleEmployee, id: "deactivated", invitation_token: "old-token", deleted_at: "2026-06-02T00:00:00Z" };
+      vi.mocked(getEmployeesByTenant).mockResolvedValueOnce([sampleEmployee, accepted, pending]);
+      vi.mocked(getDeactivatedEmployees).mockResolvedValueOnce([deactivated]);
+      const admin = createAdminMock();
+      vi.mocked(admin.auth.admin.getUserById)
+        .mockResolvedValueOnce({ data: { user: { id: accepted.user_id, invited_at: "2026-06-01T00:00:00Z", email_confirmed_at: "2026-06-02T00:00:00Z" } }, error: null } as never)
+        .mockResolvedValueOnce({ data: { user: { id: pending.user_id, invited_at: "2026-06-01T00:00:00Z" } }, error: null } as never);
+
+      const result = await listEmployees(admin, "t-1");
+
+      expect(result.data!.invitationStatus).toEqual({ "emp-1": false, accepted: false, pending: true });
+      expect(result.data!.active).toEqual([sampleEmployee, accepted, pending]);
+      expect(result.data!.deactivated).toEqual([deactivated]);
+      expect(getEmployeesByTenant).toHaveBeenLastCalledWith(admin, "t-1");
+      expect(admin.auth.admin.getUserById).toHaveBeenCalledTimes(2);
+      expect(admin.auth.admin.getUserById).toHaveBeenNthCalledWith(1, accepted.user_id);
+      expect(admin.auth.admin.getUserById).toHaveBeenNthCalledWith(2, pending.user_id);
+    });
+
+    test.each(["error", "missing", "rejected"])("keeps an unavailable Auth status unknown (%s)", async (kind) => {
+      const { getEmployeesByTenant, getDeactivatedEmployees } = await import("@/repos/employeeRepo");
+      const { listEmployees } = await import("@/services/employeeService");
+      const invited = { ...sampleEmployee, invitation_token: "retained-token" };
+      vi.mocked(getEmployeesByTenant).mockResolvedValueOnce([invited]);
+      vi.mocked(getDeactivatedEmployees).mockResolvedValueOnce([]);
+      const admin = createAdminMock();
+      const lookup = vi.mocked(admin.auth.admin.getUserById);
+      if (kind === "rejected") lookup.mockRejectedValueOnce(new Error("Auth unavailable"));
+      else lookup.mockResolvedValueOnce({ data: { user: null }, error: kind === "error" ? new Error("Auth unavailable") : null } as never);
+
+      const result = await listEmployees(admin, "t-1");
+
+      expect(result.error).toBeNull();
+      expect(result.data!.active).toEqual([invited]);
+      expect(result.data!.invitationStatus).toEqual({ "emp-1": null });
     });
   });
 

@@ -13,7 +13,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Employee } from "@/types/database";
-import { LAST_ADMIN_ERROR } from "@/types/employee";
+import { LAST_ADMIN_ERROR, type EmployeeListResponse } from "@/types/employee";
 import type { ApiResponse } from "@/types/api";
 import { success, failure } from "@/types/api";
 import { employeeLimitForPlan } from "@/config/plans";
@@ -256,17 +256,39 @@ export async function deactivateEmployee(
  * List all employees for a tenant (active + deactivated).
  */
 export async function listEmployees(
-  supabase: SupabaseClient,
+  adminClient: SupabaseClient,
   tenantId: string,
 ): Promise<
-  ApiResponse<{ active: Employee[]; deactivated: Employee[] }>
+  ApiResponse<Pick<EmployeeListResponse, "active" | "deactivated" | "invitationStatus">>
 > {
   const [active, deactivated] = await Promise.all([
-    getEmployeesByTenant(supabase, tenantId),
-    getDeactivatedEmployees(supabase, tenantId),
+    getEmployeesByTenant(adminClient, tenantId),
+    getDeactivatedEmployees(adminClient, tenantId),
   ]);
 
-  return success({ active, deactivated });
+  const invitationStatus: EmployeeListResponse["invitationStatus"] = {};
+  // The local invitation token is retained after acceptance. Auth confirmation
+  // is authoritative, including for invitations accepted before this change.
+  // Bound concurrent requests to avoid a burst for larger teams.
+  for (let offset = 0; offset < active.length; offset += 5) {
+    await Promise.all(active.slice(offset, offset + 5).map(async (employee) => {
+      if (!employee.invitation_token && !employee.invited_at) {
+        invitationStatus[employee.id] = false;
+        return;
+      }
+      try {
+        const { data, error } = await adminClient.auth.admin.getUserById(employee.user_id);
+        invitationStatus[employee.id] = error || !data.user
+          ? null
+          : Boolean(data.user.invited_at && !data.user.email_confirmed_at);
+      } catch {
+        // Keep the list usable without claiming an unverified invite is pending.
+        invitationStatus[employee.id] = null;
+      }
+    }));
+  }
+
+  return success({ active, deactivated, invitationStatus });
 }
 
 /**
