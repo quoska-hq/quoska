@@ -1,3 +1,4 @@
+import { employeeInvitationStatus } from "@/services/employeeInvitationStatusService";
 /**
  * Employee Service — Business logic for employee management.
  *
@@ -13,7 +14,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Employee } from "@/types/database";
-import { LAST_ADMIN_ERROR } from "@/types/employee";
+import { LAST_ADMIN_ERROR, type EmployeeListResponse } from "@/types/employee";
 import type { ApiResponse } from "@/types/api";
 import { success, failure } from "@/types/api";
 import { employeeLimitForPlan } from "@/config/plans";
@@ -257,17 +258,19 @@ export async function deactivateEmployee(
  * List all employees for a tenant (active + deactivated).
  */
 export async function listEmployees(
-  supabase: SupabaseClient,
+  adminClient: SupabaseClient,
   tenantId: string,
 ): Promise<
-  ApiResponse<{ active: Employee[]; deactivated: Employee[] }>
+  ApiResponse<Pick<EmployeeListResponse, "active" | "deactivated" | "invitationStatus">>
 > {
   const [active, deactivated] = await Promise.all([
-    getEmployeesByTenant(supabase, tenantId),
-    getDeactivatedEmployees(supabase, tenantId),
+    getEmployeesByTenant(adminClient, tenantId),
+    getDeactivatedEmployees(adminClient, tenantId),
   ]);
 
-  return success({ active: active.map((e) => presentEmploymentSchedule(e)), deactivated });
+  const invitationStatus = await employeeInvitationStatus(adminClient, active);
+
+  return success({ active: active.map((e) => presentEmploymentSchedule(e)), deactivated, invitationStatus });
 }
 
 /**

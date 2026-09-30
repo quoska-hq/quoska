@@ -70,6 +70,7 @@ export async function GET() {
         data: {
           active: result.data.active,
           deactivated: result.data.deactivated,
+          invitationStatus: result.data.invitationStatus,
           planStatus: planResult.data ?? null,
           defaults: {
             bundesland: tenantResult.data?.bundesland ?? null,
