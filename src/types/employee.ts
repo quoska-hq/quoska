@@ -5,6 +5,8 @@ import { workScheduleSchema, type WorkSchedule } from "./work-schedule";
 export interface EmployeeListResponse {
   active: Employee[];
   deactivated: Employee[];
+  /** null means Auth could not verify the current invitation status. */
+  invitationStatus: Record<string, boolean | null>;
   planStatus: {
     plan: string | null;
     activeCount: number;

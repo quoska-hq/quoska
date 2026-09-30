@@ -131,7 +131,7 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
                     {(emp.initial_overtime_minutes ?? 0) !== 0 &&
                       ` · Startsaldo ${formatOpeningBalance(emp.initial_overtime_minutes ?? 0)}`}
                   </p>
-                  {emp.invitation_token && (
+                  {employeeData.invitationStatus?.[emp.id] === true && (
                     <Badge variant="secondary" className="mt-1 bg-amber-100 text-amber-800 border-0">
                       Einladung ausstehend
                     </Badge>
