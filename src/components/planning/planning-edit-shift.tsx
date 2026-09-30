@@ -32,6 +32,7 @@ export function PlanningEditShift({
   onSave: (shift: PlanningShift, reason: string) => void;
 }) {
   const [unlock, setUnlock] = useState(false);
+  const [pin, setPin] = useState(false);
   const [employee, setEmployee] = useState(shift.employeeId ?? ""),
     [start, setStart] = useState(planningLocal(shift.start).time),
     [end, setEnd] = useState(planningLocal(shift.end).time),
@@ -159,6 +160,17 @@ export function PlanningEditShift({
             Diese Schicht zur automatischen Neubesetzung freigeben
           </label>
         )}
+        {!shift.locked && (
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={pin}
+              disabled={!employee}
+              onChange={(e) => setPin(e.target.checked)}
+            />
+            Diese Besetzung bei einer Neuberechnung beibehalten
+          </label>
+        )}
         {shift.locked && (
           <label className="text-sm">
             Begründung für die Änderung am verbindlichen Plan
@@ -178,7 +190,7 @@ export function PlanningEditShift({
                 {
                   ...shift,
                   employeeId: employee || null,
-                  locked: shift.locked && !unlock,
+                  locked: shift.locked ? !unlock : Boolean(employee) && pin,
                   start: planningWallTime(shift.date, start),
                   end: planningWallTime(
                     nextDay ? planningAddDays(shift.date, 1) : shift.date,

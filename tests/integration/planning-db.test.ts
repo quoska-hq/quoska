@@ -9,6 +9,14 @@ afterAll(async () => {
   if (fixture) await fixture.db.close();
 });
 describe("Planning PostgreSQL authorization and atomicity", () => {
+  it("enforces the tenant through the employee relation without a redundant tenant join", async () => {
+    await expect(
+      fixture.db.query(
+        "INSERT INTO planning_rate_limits(tenant_id,employee_id,bucket) VALUES($1,$2,'cross-tenant')",
+        [DB_IDS.foreignTenant, P_IDS.employee],
+      ),
+    ).rejects.toThrow("foreign key constraint");
+  });
   it("allows only the actual live manager to read a workspace", async () => {
     const count = async () =>
       (await fixture.db.query("SELECT * FROM planning_workspaces")).rows.length;

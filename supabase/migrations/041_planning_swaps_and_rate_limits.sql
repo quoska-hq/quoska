@@ -55,8 +55,9 @@ END; $$;
 REVOKE ALL ON FUNCTION public.planning_swap_command(uuid,text,uuid,uuid,uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.planning_swap_command(uuid,text,uuid,uuid,uuid) TO service_role;
 
+-- The composite employee foreign key validates the tenant without adding a PostgREST junction.
 CREATE TABLE public.planning_rate_limits (
-  tenant_id uuid NOT NULL REFERENCES public.tenants(id), employee_id uuid NOT NULL, bucket text NOT NULL,
+  tenant_id uuid NOT NULL, employee_id uuid NOT NULL, bucket text NOT NULL,
   window_start timestamptz NOT NULL DEFAULT now(), requests integer NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), deleted_at timestamptz,
   PRIMARY KEY (tenant_id,employee_id,bucket), FOREIGN KEY (tenant_id,employee_id) REFERENCES public.employees(tenant_id,id)
