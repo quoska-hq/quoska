@@ -7,7 +7,8 @@ import {
 } from "./helpers";
 import { planningFixture } from "../fixtures/planning";
 import { formatDateFullDE } from "../../src/config/client/date-utils";
-import { planningAddDays } from "../../src/config/client/planning-calendar";
+import { planningAddMonths } from "../../src/config/client/planning-calendar";
+import type { PlanningSwapData } from "../../src/types/planning-client";
 
 test.describe("Integrated planning", () => {
   test("manager configures, computes, publishes and an employee sees only published own duties", async ({
@@ -72,6 +73,11 @@ test.describe("Integrated planning", () => {
       ).toBeVisible();
       let snapshot = (await (await page.request.get("/api/v1/planning")).json())
         .data;
+      const month = planningAddMonths(
+        snapshot.context.today.slice(0, 7) + "-01",
+        1,
+      );
+      config.firstMonth = month;
       expect(
         (
           await page.request.post("/api/v1/planning", {
@@ -81,14 +87,13 @@ test.describe("Integrated planning", () => {
       ).toBe(true);
       snapshot = (await (await page.request.get("/api/v1/planning")).json())
         .data;
-      const month =
-        planningAddDays(snapshot.context.today, 1).slice(0, 7) + "-01";
       const generate = await page.request.post("/api/v1/planning", {
-        data: { action: "generate", version: snapshot.version, month },
+        data: { action: "initialize", version: snapshot.version },
       });
       expect(generate.ok()).toBe(true);
       snapshot = (await (await page.request.get("/api/v1/planning")).json())
         .data;
+      expect(snapshot.state.periods).toHaveLength(3);
       expect(
         (
           await page.request.post("/api/v1/planning", {
@@ -139,24 +144,42 @@ test.describe("Integrated planning", () => {
           })
         ).ok(),
       ).toBe(true);
+      for (const nextMonth of [
+        planningAddMonths(month, 1),
+        planningAddMonths(month, 2),
+        month,
+      ]) {
+        snapshot = (await (await page.request.get("/api/v1/planning")).json())
+          .data;
+        expect(
+          (
+            await page.request.post("/api/v1/planning", {
+              data: {
+                action: "publish",
+                version: snapshot.version,
+                month: nextMonth,
+                status: nextMonth === month ? "fixed" : "announced",
+              },
+            })
+          ).ok(),
+        ).toBe(true);
+      }
       await page.reload();
       await page
         .getByRole("button", { name: formatDateFullDE(month), exact: true })
         .click();
       await expect(
-        page.getByText("Angekündigt", { exact: false }).first(),
+        page.getByText("Verbindlich", { exact: false }).first(),
       ).toBeVisible();
       const screenshot = test.info().outputPath("planning-manager.png");
       await page.screenshot({
         path: screenshot,
         fullPage: true,
       });
-      await test
-        .info()
-        .attach("Dienstplanung", {
-          path: screenshot,
-          contentType: "image/png",
-        });
+      await test.info().attach("Dienstplanung", {
+        path: screenshot,
+        contentType: "image/png",
+      });
       const staffContext = await browser.newContext({
         baseURL: new URL(page.url()).origin,
         timezoneId: "Europe/Berlin",
@@ -189,6 +212,50 @@ test.describe("Integrated planning", () => {
         expect(
           duties.every((s: { employeeId: string }) => s.employeeId === staffId),
         ).toBe(true);
+        const swapData = (
+          await (await staffPage.request.get("/api/v1/planning/swaps")).json()
+        ).data as PlanningSwapData;
+        const source = swapData.options.find((s) => s.employeeId === staffId)!;
+        const target = swapData.options.find(
+          (s) => s.employeeId === managerId && s.date !== source.date,
+        )!;
+        expect(source).toBeTruthy();
+        expect(target).toBeTruthy();
+        const requested = await staffPage.request.post(
+          "/api/v1/planning/swaps",
+          { data: { action: "request", source: source.id, target: target.id } },
+        );
+        expect(requested.status()).toBe(201);
+        const swapId = (await requested.json()).data.id;
+        expect(
+          (
+            await staffPage.request.post("/api/v1/planning/swaps", {
+              data: { action: "approve", id: swapId },
+            })
+          ).status(),
+        ).toBe(403);
+        expect(
+          (
+            await page.request.post("/api/v1/planning/swaps", {
+              data: { action: "accept", id: swapId },
+            })
+          ).ok(),
+        ).toBe(true);
+        expect(
+          (
+            await page.request.post("/api/v1/planning/swaps", {
+              data: { action: "approve", id: swapId },
+            })
+          ).ok(),
+        ).toBe(true);
+        const swapped = (
+          await (await staffPage.request.get("/api/v1/planning/mine")).json()
+        ).data;
+        const ownIds = swapped.periods.flatMap(
+          (p: { shifts: { id: string }[] }) => p.shifts.map((s) => s.id),
+        );
+        expect(ownIds).toContain(target.id);
+        expect(ownIds).not.toContain(source.id);
         expect((await staffPage.request.get("/api/v1/planning")).status()).toBe(
           403,
         );
