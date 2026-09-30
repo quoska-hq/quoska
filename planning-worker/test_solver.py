@@ -46,6 +46,21 @@ class SolverTests(unittest.TestCase):
         data["conflicts"] = [["a", "b"]]
         self.assertEqual(solve(data)["status"], "infeasible")
 
+    def test_fairness_includes_recent_weekend_history(self):
+        data = payload()
+        data["shifts"][0]["weekend"] = True
+        data["employees"][0]["pastWeekendDays"] = 10
+        data["employees"][1]["pastWeekendDays"] = 0
+        self.assertEqual(solve(data)["assignments"][0]["employeeId"], "two")
+
+    def test_available_work_is_shared_when_everyone_remains_below_contractual_target(self):
+        data = payload()
+        data["shifts"].append({**data["shifts"][0], "id": "b", "date": "2026-10-02"})
+        for employee in data["employees"]:
+            employee["targetMinutes"] = 2000
+        result = solve(data)
+        self.assertEqual({a["employeeId"] for a in result["assignments"]}, {"one", "two"})
+
 
 if __name__ == "__main__":
     unittest.main()

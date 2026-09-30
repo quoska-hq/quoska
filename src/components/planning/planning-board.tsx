@@ -41,7 +41,8 @@ export function PlanningBoard() {
     [feedback, setFeedback] = useState("");
   const mutation = useMutation({
     mutationFn: (command: PlanningCommand) => planningFetch("", command),
-    onSuccess: () => {
+    onSuccess: (_result, command) => {
+      if (command.action === "configure") setSettings(false);
       setFeedback("Gespeichert.");
       setEditing(null);
       void cache.invalidateQueries({ queryKey: ["planning"] });

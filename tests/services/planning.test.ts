@@ -93,6 +93,28 @@ describe("Planning period lifecycle", () => {
       }),
     ).toThrow("verändert");
   });
+  it("rejects a swap after a duty has already begun on the same calendar day", () => {
+    const f = planningFixture();
+    f.context.today = f.shift.date;
+    f.context.now = "2026-10-01T10:00:00Z";
+    const other = {
+      ...f.shift,
+      id: crypto.randomUUID(),
+      employeeId: f.context.employees[1].id,
+    };
+    f.state.periods = [
+      {
+        month: "2026-10-01",
+        status: "announced",
+        revision: 1,
+        shifts: [f.shift, other],
+        publishedShifts: [f.shift, other],
+      },
+    ];
+    expect(() =>
+      approvePlanningSwap(f.state, f.context, f.shift, other),
+    ).toThrow("begonnene");
+  });
   it("keeps Soll, actual and forecast separate and marks ongoing sickness provisional", () => {
     const f = planningFixture();
     f.state.periods.push({

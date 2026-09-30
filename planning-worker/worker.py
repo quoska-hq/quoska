@@ -8,7 +8,7 @@ from solver import solve
 
 def post(body):
     url = os.environ["PLANNING_APP_URL"].rstrip("/") + "/api/v1/planning/worker"
-    if not url.startswith("https://") and not os.environ.get("PLANNING_ALLOW_LOCAL_HTTP"):
+    if not url.startswith("https://") and os.environ.get("PLANNING_ALLOW_LOCAL_HTTP") != "true":
         raise RuntimeError("HTTPS is required; local HTTP must be explicitly enabled.")
     request = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST",
                                     headers={"Authorization": "Bearer " + os.environ["PLANNING_WORKER_TOKEN"],

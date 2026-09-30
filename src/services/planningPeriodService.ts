@@ -124,7 +124,8 @@ export function assignPlanningShift(
     !period ||
     !old ||
     period.status === "closed" ||
-    Date.parse(old.start) < Date.parse(context.now)
+    Date.parse(old.start) < Date.parse(context.now) ||
+    Date.parse(incoming.start) < Date.parse(context.now)
   )
     throw new PlanningError("Diese Schicht kann nicht mehr geändert werden.");
   if (old.locked && reason.trim().length < 10)

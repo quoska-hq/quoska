@@ -186,6 +186,8 @@ export interface PlanningJobPayload {
     weeklyMinutes: number;
     targetMinutes: number;
     initialMinutes: number;
+    pastWeekendDays: number;
+    pastNightDays: number;
     preferredDays: number[];
   }[];
   conflicts: [string, string][];

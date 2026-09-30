@@ -48,9 +48,12 @@ export function approvePlanningSwap(
       "Die betroffenen Schichten haben sich verändert. Bitte den Tausch erneut anfragen.",
       409,
     );
-  if (source.date < context.today || target.date < context.today)
+  if (
+    Date.parse(source.start) < Date.parse(context.now) ||
+    Date.parse(target.start) < Date.parse(context.now)
+  )
     throw new PlanningError(
-      "Vergangene Schichten können nicht getauscht werden.",
+      "Bereits begonnene Schichten können nicht getauscht werden.",
     );
   const employee = source.employeeId;
   source.employeeId = target.employeeId;

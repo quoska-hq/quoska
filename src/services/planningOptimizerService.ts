@@ -17,6 +17,7 @@ import {
 } from "@/services/planningShiftRules";
 import { PlanningError } from "@/services/planningPeriodService";
 import { planningTargetMinutes } from "@/services/planningBalanceService";
+const FAIRNESS_HISTORY_DAYS = 90;
 
 export function buildPlanningJob(
   state: PlanningState,
@@ -190,6 +191,32 @@ export function buildPlanningJob(
         initialMinutes: neighboring
           .filter((s) => s.employeeId === e.id)
           .reduce((sum, s) => sum + planningNetMinutes(s), 0),
+        pastWeekendDays: new Set(
+          context.actual
+            .filter(
+              (a) =>
+                a.employeeId === e.id &&
+                a.date < context.today &&
+                a.date >=
+                  planningAddDays(context.today, -FAIRNESS_HISTORY_DAYS) &&
+                [0, 6].includes(planningDay(a.date)),
+            )
+            .map((a) => a.date),
+        ).size,
+        pastNightDays: new Set(
+          context.actual
+            .filter(
+              (a) =>
+                a.employeeId === e.id &&
+                a.date < context.today &&
+                a.date >=
+                  planningAddDays(context.today, -FAIRNESS_HISTORY_DAYS) &&
+                (planningLocal(a.start).time < "05:00" ||
+                  planningLocal(a.start).time >= "22:00" ||
+                  (a.end && planningLocal(a.end).date !== a.date)),
+            )
+            .map((a) => a.date),
+        ).size,
         preferredDays: profiles.find((p) => p.employeeId === e.id)!
           .preferredDays,
       })),

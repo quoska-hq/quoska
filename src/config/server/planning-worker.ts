@@ -9,5 +9,10 @@ export function planningWorkerAuthorized(request: Request): boolean {
     actual.length !== expected.length
   )
     return false;
-  return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+  const actualBytes = Buffer.from(actual),
+    expectedBytes = Buffer.from(expected);
+  return (
+    actualBytes.length === expectedBytes.length &&
+    timingSafeEqual(actualBytes, expectedBytes)
+  );
 }

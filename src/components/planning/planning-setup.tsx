@@ -23,9 +23,12 @@ export function PlanningSetup({
   busy: boolean;
   onSave: (config: PlanningConfig, version: number) => void;
 }) {
-  const [config, setConfig] = useState(() =>
-    structuredClone(data.state.config),
-  );
+  const [config, setConfig] = useState<PlanningConfig>(() => ({
+    ...structuredClone(data.state.config),
+    firstMonth:
+      data.state.config.firstMonth ??
+      planningAddMonths(data.context.today.slice(0, 7) + "-01", 1),
+  }));
   const [version] = useState(data.version),
     [location, setLocation] = useState(""),
     [state, setState] = useState<Bundesland>("berlin"),

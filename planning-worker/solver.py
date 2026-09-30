@@ -28,6 +28,9 @@ def solve(payload):
             if (a, eid) in choices and (b, eid) in choices:
                 model.add(choices[a, eid] + choices[b, eid] <= 1)
     objective = []
+    eligible_employees = {eid for _, eid in choices}
+    total_target = sum(max(0, employees[eid]["targetMinutes"]) for eid in eligible_employees)
+    total_minutes = sum(s["minutes"] for s in shifts.values())
     for eid, employee in employees.items():
         weekly = {}
         daily = {}
@@ -57,15 +60,24 @@ def solve(payload):
         deviation = model.new_int_var(0, 10_000_000, f"deviation:{eid}")
         model.add_abs_equality(deviation, sum(terms) - employee["targetMinutes"])
         objective.append(deviation)
+        if eid in eligible_employees:
+            # Absolute contractual deficits alone are constant when everyone is below target.
+            # Distribute the available work in proportion to the adjusted contractual targets.
+            quota = round(total_minutes * max(0, employee["targetMinutes"]) / total_target) if total_target else round(total_minutes / len(eligible_employees))
+            allocation_deviation = model.new_int_var(0, 10_000_000, f"allocation:{eid}")
+            model.add_abs_equality(allocation_deviation, sum(terms) - quota)
+            objective.append(allocation_deviation)
     for category in ("weekend", "night"):
         category_shifts = [s for s in shifts.values() if s.get(category)]
         eligible = {eid for shift in category_shifts for eid in shift["candidates"] if eid in employees}
         total_weight = sum(max(1, employees[eid]["targetMinutes"]) for eid in eligible)
         if not total_weight:
             continue
+        history_key = "pastWeekendDays" if category == "weekend" else "pastNightDays"
+        total_duties = len(category_shifts) + sum(employees[eid].get(history_key, 0) for eid in eligible)
         for eid in eligible:
-            count = sum(choices[s["id"], eid] for s in category_shifts if (s["id"], eid) in choices)
-            expected = round(100 * len(category_shifts) * max(1, employees[eid]["targetMinutes"]) / total_weight)
+            count = employees[eid].get(history_key, 0) + sum(choices[s["id"], eid] for s in category_shifts if (s["id"], eid) in choices)
+            expected = round(100 * total_duties * max(1, employees[eid]["targetMinutes"]) / total_weight)
             deviation = model.new_int_var(0, 10_000_000, f"fairness:{category}:{eid}")
             model.add_abs_equality(deviation, 100 * count - expected)
             objective.append(deviation)

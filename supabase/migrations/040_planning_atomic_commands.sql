@@ -38,7 +38,7 @@ BEGIN
     IF COALESCE((previous->>'revision')::integer,0) <> (period->>'revision')::integer THEN
       INSERT INTO public.notifications(tenant_id,employee_id,type,title,message,planning_event_key)
         SELECT DISTINCT p_tenant,(s->>'employeeId')::uuid,'planning_published','Dienstplan aktualisiert',
-          'Der Dienstplan für ' || to_char((period->>'month')::date,'MM.YYYY') || ' wurde freigegeben. Deine Dienste findest du unter Meine Dienste.',
+          'Der Dienstplan ab ' || to_char((period->>'month')::date,'DD.MM.YYYY') || ' wurde freigegeben. Deine Dienste findest du unter Meine Dienste.',
           revision_id::text || ':' || (period->>'month')
         FROM jsonb_array_elements(COALESCE(previous->'publishedShifts','[]'::jsonb) || (period->'publishedShifts')) s
         WHERE s->>'employeeId' IS NOT NULL ON CONFLICT DO NOTHING;

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { PlanningCommand } from "@/types/planning-schemas";
+import { WORKDAY_KEYS } from "@/types/work-schedule";
 import { refreshPlanningPeriod } from "@/services/planningRefreshService";
 import type { PlanningJobResult, PlanningSnapshot } from "@/types/planning";
 import {
@@ -74,7 +75,16 @@ export async function executePlanningCommand(
         const requested = profile.contractChanges.filter(
           (c) => c.from <= snapshot.context.today,
         );
-        if (JSON.stringify(historical) !== JSON.stringify(requested))
+        if (
+          historical.length !== requested.length ||
+          historical.some(
+            (c, i) =>
+              c.from !== requested[i].from ||
+              WORKDAY_KEYS.some(
+                (day) => c.schedule[day] !== requested[i].schedule[day],
+              ),
+          )
+        )
           throw new PlanningError(
             "Bereits wirksame Vertragsstände dürfen hier nicht verändert werden. Neue Solländerungen brauchen einen künftigen Stichtag.",
           );

@@ -22,21 +22,23 @@ export function PlanningJobs({
           <div key={j.id} className="rounded-xl border bg-white p-4">
             <p className="text-sm font-medium">
               Rechenlauf:{" "}
-              {j.status === "queued"
-                ? "In der Warteschlange"
-                : j.status === "running"
-                  ? "Wird berechnet …"
-                  : j.result?.status === "optimal"
-                    ? "Optimaler Vorschlag gefunden"
-                    : j.result?.status === "feasible"
-                      ? "Vorschlag gefunden"
-                      : j.result?.status === "infeasible"
-                        ? "Keine vollständige Besetzung möglich"
-                        : j.result?.status === "timeout"
-                          ? "Zeitlimit erreicht; keine Lösung gefunden"
-                          : j.status === "applied"
-                            ? "Übernommen"
-                            : "Abgeschlossen"}
+              {j.status === "applied"
+                ? "Übernommen"
+                : j.status === "expired"
+                  ? "Veraltet; bitte neu berechnen"
+                  : j.status === "queued"
+                    ? "In der Warteschlange"
+                    : j.status === "running"
+                      ? "Wird berechnet …"
+                      : j.result?.status === "optimal"
+                        ? "Optimaler Vorschlag gefunden"
+                        : j.result?.status === "feasible"
+                          ? "Vorschlag gefunden"
+                          : j.result?.status === "infeasible"
+                            ? "Keine vollständige Besetzung möglich"
+                            : j.result?.status === "timeout"
+                              ? "Zeitlimit erreicht; keine Lösung gefunden"
+                              : "Abgeschlossen"}
             </p>
             {j.result?.message && (
               <p className="mt-2 text-sm">{j.result.message}</p>
