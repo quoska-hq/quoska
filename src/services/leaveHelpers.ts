@@ -9,8 +9,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getHolidaysInRange } from "@/repos/holidayRepo";
 import { isWeekend } from "@/services/holidayService";
-import { normalizeWorkSchedule, type WorkSchedule } from "@/types/work-schedule";
+import {
+  normalizeWorkSchedule,
+  type WorkSchedule,
+} from "@/types/work-schedule";
 import { isScheduledWorkday } from "@/services/workScheduleService";
+import type { EmploymentSchedule } from "@/types/employment-schedule";
 
 /** Get employee's bundesland from DB. */
 export async function getEmployeeBundesland(
@@ -33,15 +37,18 @@ export async function getEmployeeWorkSchedule(
   supabase: SupabaseClient,
   tenantId: string,
   employeeId: string,
-): Promise<WorkSchedule> {
+): Promise<WorkSchedule | EmploymentSchedule> {
   const { data } = await supabase
     .from("employees")
-    .select("work_schedule, target_hours_week")
+    .select("work_schedule, employment_schedule, target_hours_week")
     .eq("id", employeeId)
     .eq("tenant_id", tenantId)
     .is("deleted_at", null)
     .maybeSingle();
-  return normalizeWorkSchedule(data?.work_schedule, data?.target_hours_week ?? 40);
+  return (
+    data?.employment_schedule ??
+    normalizeWorkSchedule(data?.work_schedule, data?.target_hours_week ?? 40)
+  );
 }
 
 /** Get employee display name. */
@@ -79,9 +86,14 @@ export async function calculateWorkDaysCount(
   bundesland: string,
   startDate: string,
   endDate: string,
-  workSchedule?: WorkSchedule,
+  workSchedule?: WorkSchedule | EmploymentSchedule,
 ): Promise<number> {
-  const holidays = await getHolidaysInRange(supabase, bundesland, startDate, endDate);
+  const holidays = await getHolidaysInRange(
+    supabase,
+    bundesland,
+    startDate,
+    endDate,
+  );
   const holidayDates = new Set(holidays.map((h) => h.date));
 
   let count = 0;
@@ -96,7 +108,7 @@ export async function calculateWorkDaysCount(
     }
     const ms = Date.parse(current + "T12:00:00Z") + 86_400_000;
     const d = new Date(ms); // eslint-disable-line @quoska/legal/no-client-timestamps
-    current = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    current = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
 
   return count;

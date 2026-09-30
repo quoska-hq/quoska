@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
+  CalendarDays,
   Bell,
   Briefcase,
   ChevronRight,
@@ -42,6 +43,8 @@ interface MobileNavItem {
 }
 
 const MOBILE_NAV_ITEMS: MobileNavItem[] = [
+  { href: "/app/my-shifts", label: "Meine Dienste", icon: CalendarDays, roles: ["admin", "manager", "employee"] },
+  { href: "/app/planning", label: "Dienstplanung", icon: CalendarDays, roles: ["admin", "manager"] },
   { href: "/app/help", label: "Hilfe & Feedback", icon: MessageSquare, roles: ["admin", "manager", "employee"] },
   {
     href: "/app/dashboard",
@@ -164,7 +167,7 @@ export function BottomNav({
       <nav
         aria-label="Hauptnavigation"
         data-testid="mobile-bottom-nav"
-        className="fixed inset-x-0 bottom-0 z-40 w-full max-w-full border-t border-slate-900/15 bg-[#efede7]/97 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm [contain:layout_paint] md:hidden"
+        className="print:hidden fixed inset-x-0 bottom-0 z-40 w-full max-w-full border-t border-slate-900/15 bg-[#efede7]/97 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm [contain:layout_paint] md:hidden"
       >
         <div className="grid h-16 w-full grid-cols-5 items-stretch">
           {primaryItems.map((item) => (

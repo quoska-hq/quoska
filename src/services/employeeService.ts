@@ -27,6 +27,7 @@ import {
 } from "@/repos/employeeRepo";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
 import type { WorkSchedule } from "@/types/work-schedule";
+import { presentEmploymentSchedule } from "@/services/employeeScheduleService";
 
 /**
  * Invite a new employee.
@@ -266,7 +267,7 @@ export async function listEmployees(
     getDeactivatedEmployees(supabase, tenantId),
   ]);
 
-  return success({ active, deactivated });
+  return success({ active: active.map((e) => presentEmploymentSchedule(e)), deactivated });
 }
 
 /**

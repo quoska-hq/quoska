@@ -2,6 +2,7 @@
 // Reference: supabase/migrations/
 
 import type { WorkSchedule } from "@/types/work-schedule";
+import type { EmploymentSchedule } from "@/types/employment-schedule";
 import type { SignupAttribution } from "@/lib/signup-attribution";
 
 export interface Tenant {
@@ -28,6 +29,7 @@ export interface Employee {
   role: "admin" | "manager" | "employee";
   target_hours_week: number;
   work_schedule?: WorkSchedule;
+  employment_schedule?: EmploymentSchedule | null;
   /** Optional for legacy rows and test fixtures created before migration 028. */
   employment_start_date?: string;
   /** Opening balance imported when time tracking starts in Quoska. */

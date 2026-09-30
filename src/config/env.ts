@@ -36,6 +36,10 @@ const serverEnvSchema = publicEnvSchema.extend({
   STRIPE_BUSINESS_FOUNDER_PROMOTION_CODE_ID: z.string().optional(),
   STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
+  PLANNING_WORKER_TOKEN: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().min(32).optional(),
+  ),
   CRON_SECRET: z.preprocess(
     (value) => (value === "" ? undefined : value),
     z.string().min(32).optional(),
@@ -64,7 +68,8 @@ export const env: PublicEnv = new Proxy({} as PublicEnv, {
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-      NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED: process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED,
+      NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED:
+        process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED,
     });
     return parsed[prop as keyof PublicEnv];
   },
@@ -98,11 +103,13 @@ export const serverEnv: ServerEnv = new Proxy({} as ServerEnv, {
       STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID:
         process.env.STRIPE_PRO_FOUNDER_PROMOTION_CODE_ID,
       RESEND_API_KEY: process.env.RESEND_API_KEY,
+      PLANNING_WORKER_TOKEN: process.env.PLANNING_WORKER_TOKEN,
       CRON_SECRET: process.env.CRON_SECRET,
       ANALYTICS_DB_PATH: process.env.ANALYTICS_DB_PATH,
       ANALYTICS_HASH_SECRET: process.env.ANALYTICS_HASH_SECRET,
       ANALYTICS_ADMIN_EMAILS: process.env.ANALYTICS_ADMIN_EMAILS,
-      PRODUCT_ANALYTICS_EXCLUDED_TENANTS: process.env.PRODUCT_ANALYTICS_EXCLUDED_TENANTS,
+      PRODUCT_ANALYTICS_EXCLUDED_TENANTS:
+        process.env.PRODUCT_ANALYTICS_EXCLUDED_TENANTS,
       GOOGLE_SITE_VERIFICATION: process.env.GOOGLE_SITE_VERIFICATION,
       BROWSER_EXTENSION_IDS: process.env.BROWSER_EXTENSION_IDS,
     });

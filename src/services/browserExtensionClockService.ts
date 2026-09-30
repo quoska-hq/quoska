@@ -47,7 +47,7 @@ export async function getBrowserExtensionStatus(
     getMyProjects(supabase, context.tenantId, context.employeeId),
     supabase
       .from("employees")
-      .select("first_name, last_name, target_hours_week, work_schedule")
+      .select("first_name, last_name, target_hours_week, work_schedule, employment_schedule")
       .eq("id", context.employeeId)
       .eq("tenant_id", context.tenantId)
       .is("deleted_at", null)
@@ -76,7 +76,7 @@ export async function getBrowserExtensionStatus(
       activeBreak,
     ),
     todayTargetMinutes: scheduledMinutesForDate(
-      employeeResult.data.work_schedule,
+      (employeeResult.data.employment_schedule ?? employeeResult.data.work_schedule),
       todayDate,
       employeeResult.data.target_hours_week,
     ),

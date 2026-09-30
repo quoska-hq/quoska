@@ -49,3 +49,7 @@ playwright/.cache/
 # agent / planning tooling (internal, not published)
 .rpi/
 docs/free-tools-seo-plan.private.md
+
+# Python planning worker
+__pycache__/
+.venv/
