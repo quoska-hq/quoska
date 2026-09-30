@@ -8,6 +8,7 @@ import type { PlanningCommand } from "@/types/planning-schemas";
 import { planningFetch } from "@/services/planningClientService";
 import {
   planningFirstMonth,
+  planningDay,
   planningAddDays,
   planningAddMonths,
 } from "@/config/client/planning-calendar";
@@ -63,10 +64,11 @@ export function PlanningBoard() {
     month ||
     planningFirstMonth(data.context.today, data.state.config.firstMonth);
   const period = data.state.periods.find((p) => p.month === activeMonth);
-  const from = planningAddDays(activeMonth, week * 7);
-  const dates = Array.from({ length: 7 }, (_, i) =>
-    planningAddDays(from, i),
-  ).filter((d) => d < planningAddMonths(activeMonth, 1));
+  const from = planningAddDays(
+    activeMonth,
+    -((planningDay(activeMonth) + 6) % 7) + week * 7,
+  );
+  const dates = Array.from({ length: 7 }, (_, i) => planningAddDays(from, i));
   const periods = Array.from({ length: 3 }, (_, i) =>
     planningAddMonths(
       planningFirstMonth(data.context.today, data.state.config.firstMonth),
