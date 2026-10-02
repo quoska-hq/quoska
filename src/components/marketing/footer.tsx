@@ -21,6 +21,7 @@ const FOOTER_LINKS = [
   {
     title: "Ratgeber",
     links: [
+      { href: "/ratgeber", label: "Anleitungen und Checklisten" },
       { href: "/digitale-zeiterfassung", label: "Digitale Zeiterfassung" },
       { href: "/zeiterfassung-kleinbetriebe", label: "Für Kleinbetriebe" },
       {

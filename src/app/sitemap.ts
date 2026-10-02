@@ -11,7 +11,7 @@ import { site } from "@/lib/site";
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = site.url;
 
-  return [
+  return [{url:"https://quoska.de/ratgeber",lastModified:"2026-10-02T12:00:00Z"}, {url:"https://quoska.de/ratgeber/ersatzruhetag-sonntag-feiertag-planen",lastModified:"2026-10-02T12:00:00Z"}, 
     { url: base, lastModified: "2026-09-20" },
     { url: `${base}/funktionen`, lastModified: "2026-09-20" },
     { url: `${base}/ueber-uns`, lastModified: "2026-09-02" },
