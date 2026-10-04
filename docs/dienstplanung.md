@@ -3,8 +3,19 @@
 Die optionale Dienstplanung verwendet bestehende Mitarbeitende, Sollmodelle,
 genehmigte Abwesenheiten, Krankmeldungen und Zeitkonten. Sie schreibt keine
 Zeiteinträge und verändert keine bestehenden Sollstunden oder Urlaubskonten.
-Administratoren und Führungskräfte richten das Modul unter `/app/planning` ein.
+Administratoren und Führungskräfte aktivieren das Modul unter
+`/app/settings` im Abschnitt **Module**. Anschließend richten sie es unter
+`/app/planning` in vier Schritten ein: Filialen und Kompetenzen, Team und
+Arbeitszeit, Schichten und Bedarf, Prüfen und starten.
 Mitarbeitende sehen freigegebene Dienste unter `/app/my-shifts`.
+
+Das Modul ist standardmäßig ausgeschaltet. Die Menüpunkte **Dienstplanung** und
+**Meine Dienste** erscheinen nach der Aktivierung. Die mobile Hauptnavigation
+bleibt auf Zeiterfassung ausgerichtet; Planung ist im Menü **Mehr** erreichbar.
+Deaktivierung blendet die Planung aus und sperrt die Mitarbeiterendpunkte.
+Gespeicherte Pläne, Tauschanfragen und vertragliche Sollmodelle bleiben erhalten.
+Offene Rechenvorschläge verfallen. Aktivierung und Deaktivierung werden atomar
+mit Versionsprüfung im unveränderlichen Änderungsverlauf gespeichert.
 
 ## Einrichtung und Ablauf
 

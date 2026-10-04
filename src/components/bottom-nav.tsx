@@ -40,11 +40,12 @@ interface MobileNavItem {
   icon: LucideIcon;
   roles: Role[];
   siteAdminOnly?: boolean;
+  requiresPlanning?: boolean;
 }
 
 const MOBILE_NAV_ITEMS: MobileNavItem[] = [
-  { href: "/app/my-shifts", label: "Meine Dienste", icon: CalendarDays, roles: ["admin", "manager", "employee"] },
-  { href: "/app/planning", label: "Dienstplanung", icon: CalendarDays, roles: ["admin", "manager"] },
+  { href: "/app/my-shifts", label: "Meine Dienste", icon: CalendarDays, roles: ["admin", "manager", "employee"], requiresPlanning: true },
+  { href: "/app/planning", label: "Dienstplanung", icon: CalendarDays, roles: ["admin", "manager"], requiresPlanning: true },
   { href: "/app/help", label: "Hilfe & Feedback", icon: MessageSquare, roles: ["admin", "manager", "employee"] },
   {
     href: "/app/dashboard",
@@ -133,6 +134,7 @@ const PRIMARY_HREFS: Record<Role, string[]> = {
 
 interface BottomNavProps {
   role: Role;
+  planningEnabled?: boolean;
   userName: string;
   isAnalyticsAdmin: boolean;
   onSignOut: () => void | Promise<void>;
@@ -140,6 +142,7 @@ interface BottomNavProps {
 
 export function BottomNav({
   role,
+  planningEnabled = false,
   userName,
   isAnalyticsAdmin,
   onSignOut,
@@ -147,7 +150,7 @@ export function BottomNav({
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const visibleItems = MOBILE_NAV_ITEMS.filter(
-    (item) => item.roles.includes(role) && (!item.siteAdminOnly || isAnalyticsAdmin),
+    (item) => item.roles.includes(role) && (!item.requiresPlanning || planningEnabled) && (!item.siteAdminOnly || isAnalyticsAdmin),
   );
   const primaryHrefs = PRIMARY_HREFS[role];
   const primaryItems = primaryHrefs

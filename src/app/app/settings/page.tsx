@@ -16,6 +16,7 @@ import { BrowserExtensionConnectionsCard } from "@/components/browser-extension-
 import { TimeTrackingSettingsCard } from "@/components/time-tracking-settings-card";
 import { TimeImportCard } from "@/components/time-import-card";
 import { FeedbackSettingsCard } from "@/components/feedback-settings-card";
+import { PlanningModuleCard } from "@/components/planning/planning-module-card";
 import type { ApiResponse } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,9 +116,10 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Einstellungen" description="Import, Export, DSGVO und Account" />
+      <PageHeader title="Einstellungen" description="Module, Import, Export, DSGVO und Account" />
 
       <div className="space-y-8">
+        {(isAdmin || authInfo?.role === "manager") && <PlanningModuleCard />}
         {/* Billing (only renders on the hosted/commercial build) */}
         <BillingCard />
 

@@ -2,13 +2,23 @@ import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/config/supabase/server";
 import { readPlanningActor } from "@/repos/planningRepo";
 import { PlanningError } from "@/services/planningPeriodService";
+import { readPlanningModule } from "@/services/planningModuleService";
 
-export async function planningRequest(write = false, manager = true) {
+export async function planningRequest(
+  write = false,
+  manager = true,
+  allowDisabled = false,
+) {
   const client = await createClient(),
     actor = await readPlanningActor(client);
   if (!actor) throw new PlanningError("Bitte anmelden.", 401);
   if (manager && !["admin", "manager"].includes(actor.role))
     throw new PlanningError("Keine Berechtigung.", 403);
+  if (!manager && !allowDisabled && !(await readPlanningModule(client)).enabled)
+    throw new PlanningError(
+      "Die Dienstplanung ist für diesen Betrieb deaktiviert.",
+      403,
+    );
   const admin = createAdminClient();
   const limit = await admin.rpc("planning_take_limit", {
     p_user: actor.userId,

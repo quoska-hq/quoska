@@ -24,6 +24,7 @@ import { PlanningEditShift } from "@/components/planning/planning-edit-shift";
 import { PlanningSwaps } from "@/components/planning/planning-swaps";
 import { PlanningBalances } from "@/components/planning/planning-balances";
 import { useSupabase } from "@/providers/supabase-provider";
+import { PlanningModuleIntro } from "@/components/planning/planning-module-intro";
 
 export function PlanningBoard() {
   const { user } = useSupabase(),
@@ -47,6 +48,7 @@ export function PlanningBoard() {
       setFeedback("Gespeichert.");
       setEditing(null);
       void cache.invalidateQueries({ queryKey: ["planning"] });
+      void cache.invalidateQueries({ queryKey: ["planning-module"] });
     },
     onError: (error) => setFeedback(error.message),
   });
@@ -80,6 +82,16 @@ export function PlanningBoard() {
   );
   const send = (command: Omit<PlanningCommand, "version">) =>
     mutation.mutate({ ...command, version: data.version } as PlanningCommand);
+  const config = data.state.config;
+  const needsSetup =
+    !config.firstMonth ||
+    [
+      config.locations,
+      config.skills,
+      config.profiles,
+      config.templates,
+      config.demands,
+    ].some((items) => items.length === 0);
   return (
     <div className="space-y-6 print:space-y-3">
       <header className="flex flex-wrap items-start justify-between gap-4">
@@ -93,10 +105,12 @@ export function PlanningBoard() {
           </p>
         </div>
         <div className="flex gap-2 print:hidden">
-          <Button variant="outline" onClick={() => setSettings(!settings)}>
-            <Settings2 className="size-4" />
-            Einrichtung
-          </Button>
+          {data.state.config.enabled && (
+            <Button variant="outline" onClick={() => setSettings(!settings)}>
+              <Settings2 className="size-4" />
+              Einrichtung
+            </Button>
+          )}
           <Button variant="outline" onClick={() => window.print()}>
             <Printer className="size-4" />
             Drucken
@@ -108,8 +122,11 @@ export function PlanningBoard() {
           {feedback}
         </p>
       )}
-      {settings || !data.state.config.enabled ? (
+      {!config.enabled ? (
+        <PlanningModuleIntro />
+      ) : settings || needsSetup ? (
         <PlanningSetup
+          key={settings ? "settings" : "initial"}
           data={data}
           busy={mutation.isPending}
           onSave={(config, version) =>

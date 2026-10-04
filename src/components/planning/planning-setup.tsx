@@ -1,18 +1,29 @@
 "use client";
-import { formatDateFullDE, parseGermanDate } from "@/config/client/date-utils";
 import { useState } from "react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import type { PlanningConfig } from "@/types/planning";
+import { planningConfigSchema } from "@/types/planning-schemas";
 import type { PlanningBoardData } from "@/types/planning-client";
-import { GermanDateInput } from "@/components/german-date-input";
 import { planningAddMonths } from "@/config/client/planning-calendar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { BUNDESLAENDER_ENUM } from "@/types/leave";
-import { BUNDESLAND_LABELS } from "@/types/tenant";
-import type { Bundesland } from "@/types/tenant";
+import { PlanningSetupLocations } from "@/components/planning/planning-setup-locations";
+import { PlanningSetupReview } from "@/components/planning/planning-setup-review";
 import { PlanningProfileEditor } from "@/components/planning/planning-profile-editor";
 import { PlanningTemplateEditor } from "@/components/planning/planning-template-editor";
 import { PlanningDemandEditor } from "@/components/planning/planning-demand-editor";
+
+const STEPS = [
+  "Filialen & Kompetenzen",
+  "Team & Arbeitszeit",
+  "Schichten & Bedarf",
+  "Prüfen & starten",
+];
+const DESCRIPTIONS = [
+  "Lege eure Standorte und die benötigten Kompetenzen fest.",
+  "Ordne vorhandene Mitarbeitende zu und vereinbare ihre Verfügbarkeit.",
+  "Lege fest, wann Dienste stattfinden und welche Besetzung benötigt wird.",
+  "Prüfe die Einrichtung. Anschließend kannst du euren ersten Dienstplan berechnen.",
+];
 
 export function PlanningSetup({
   data,
@@ -26,187 +37,118 @@ export function PlanningSetup({
   const [config, setConfig] = useState<PlanningConfig>(() => ({
     ...structuredClone(data.state.config),
     profiles: structuredClone(data.state.config.profiles).filter((profile) =>
-      data.context.employees.some((employee) => employee.id === profile.employeeId),
+      data.context.employees.some(
+        (employee) => employee.id === profile.employeeId,
+      ),
     ),
     firstMonth:
       data.state.config.firstMonth ??
       planningAddMonths(data.context.today.slice(0, 7) + "-01", 1),
   }));
-  const [version] = useState(data.version),
-    [location, setLocation] = useState(""),
-    [state, setState] = useState<Bundesland>("berlin"),
-    [skill, setSkill] = useState("");
+  const [initialConfig] = useState(() => JSON.stringify(data.state.config)),
+    [step, setStep] = useState(0),
+    [error, setError] = useState("");
   const update = (patch: Partial<PlanningConfig>) =>
-    setConfig({ ...config, ...patch });
+    setConfig((previous) => ({ ...previous, ...patch }));
+  function stepError() {
+    if (step === 0) {
+      if (
+        !config.firstMonth ||
+        !planningConfigSchema.shape.firstMonth.safeParse(config.firstMonth)
+          .success
+      )
+        return "Bitte den ersten Planungsmonat als TT.MM.JJJJ mit dem ersten Tag des Monats angeben.";
+      if (
+        config.firstMonth !== data.state.config.firstMonth &&
+        (config.firstMonth < data.context.today.slice(0, 7) + "-01" ||
+          config.firstMonth >
+            planningAddMonths(data.context.today.slice(0, 7) + "-01", 1))
+      )
+        return "Der erste Planungsmonat muss der aktuelle oder nächste Monat sein.";
+      if (!config.locations.length || !config.skills.length)
+        return "Bitte mindestens eine Filiale und eine Kompetenz hinzufügen.";
+      if (
+        !planningConfigSchema.shape.locations.safeParse(config.locations)
+          .success
+      )
+        return "Bitte die Filialangaben und örtlichen Feiertage prüfen (TT.MM.JJJJ).";
+      if (config.locations.some((l) => !l.localHolidaysConfirmed))
+        return "Bitte die örtlichen Feiertage für jede Filiale prüfen und bestätigen.";
+    }
+    if (step === 1) {
+      if (!config.profiles.length)
+        return "Bitte mindestens ein Mitarbeitendenprofil einrichten.";
+      if (
+        !planningConfigSchema.shape.profiles.safeParse(config.profiles).success
+      )
+        return "Bitte die Verfügbarkeiten und Arbeitszeitangaben der Mitarbeitenden prüfen.";
+    }
+    if (step === 2) {
+      if (!config.templates.length || !config.demands.length)
+        return "Bitte mindestens eine Schichtvorlage und eine Besetzungsregel hinzufügen.";
+      if (
+        !planningConfigSchema.shape.templates.safeParse(config.templates)
+          .success ||
+        !planningConfigSchema.shape.demands.safeParse(config.demands).success
+      )
+        return "Bitte die Zeitangaben, Pausen und Besetzungsregeln prüfen.";
+    }
+    return "";
+  }
+  function next() {
+    const message = stepError();
+    setError(message);
+    if (!message) setStep((value) => value + 1);
+  }
+  const stale = initialConfig !== JSON.stringify(data.state.config);
   return (
-    <section className="space-y-6 rounded-2xl border bg-white p-5">
+    <section
+      aria-label="Dienstplanung einrichten"
+      className="space-y-6 rounded-2xl border border-[#dcd7cb] bg-white p-5 sm:p-7"
+    >
       <div>
-        <h2 className="text-xl font-semibold">Dienstplanung einrichten</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6658d3]">
+          Einrichtung · Schritt {step + 1} von 4
+        </p>
+        <h2 className="mt-2 text-xl font-semibold">Dienstplanung einrichten</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Verwendet eure vorhandenen Mitarbeitenden. Sollstunden, Urlaub und
-          Krankmeldungen kommen aus Quoska. Verfügbarkeit wird separat
-          vereinbart.
+          Mitarbeitende, Sollstunden, Urlaub und Krankmeldungen kommen aus
+          Quoska.
         </p>
       </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={config.enabled}
-          onChange={(e) => update({ enabled: e.target.checked })}
-        />
-        Dienstplanung für diesen Betrieb aktivieren
-      </label>
-      <label className="block text-sm">
-        Erster Planungsmonat (erster Tag des Monats)
-        <GermanDateInput
-          value={config.firstMonth ?? ""}
-          min={data.context.today.slice(0, 7) + "-01"}
-          max={planningAddMonths(data.context.today.slice(0, 7) + "-01", 1)}
-          onChange={(date) => update({ firstMonth: date })}
-        />
-      </label>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="space-y-3">
-          <h3 className="font-semibold">1. Filialen & Feiertage</h3>
-          {config.locations.map((l) => (
-            <div key={l.id} className="rounded-xl border p-3 text-sm">
-              <strong>{l.name}</strong>
-              <p>
-                {
-                  BUNDESLAND_LABELS[
-                    l.bundesland as keyof typeof BUNDESLAND_LABELS
-                  ]
-                }
-              </p>
-              <label className="mt-2 flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  checked={l.localHolidaysConfirmed}
-                  onChange={(e) =>
-                    update({
-                      locations: config.locations.map((v) =>
-                        v.id === l.id
-                          ? { ...v, localHolidaysConfirmed: e.target.checked }
-                          : v,
-                      ),
-                    })
-                  }
-                />
-                Örtliche Feiertage geprüft; ergänzende Termine unten eintragen
-              </label>
-              <Input
-                className="mt-2"
-                aria-label={`Örtliche Feiertage ${l.name}`}
-                placeholder="TT.MM.JJJJ, TT.MM.JJJJ"
-                defaultValue={l.additionalHolidays
-                  .map(formatDateFullDE)
-                  .join(", ")}
-                onBlur={(e) => {
-                  const dates = e.target.value
-                    .split(",")
-                    .map((d) => d.trim())
-                    .filter(Boolean)
-                    .map((d) => parseGermanDate(d) ?? d);
-                  update({
-                    locations: config.locations.map((v) =>
-                      v.id === l.id ? { ...v, additionalHolidays: dates } : v,
-                    ),
-                  });
-                }}
-              />
-            </div>
-          ))}
-          <Input
-            aria-label="Neue Filiale"
-            placeholder="Name der Filiale"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-          <select
-            aria-label="Bundesland der Filiale"
-            className="w-full rounded-md border p-2"
-            value={state}
-            onChange={(e) => setState(e.target.value as Bundesland)}
+      <ol
+        aria-label="Einrichtungsschritte"
+        className="grid gap-2 sm:grid-cols-4"
+      >
+        {STEPS.map((label, index) => (
+          <li
+            key={label}
+            aria-current={step === index ? "step" : undefined}
+            className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-sm ${step === index ? "border-[#6658d3]/30 bg-[#f1eefb] text-[#5548ba]" : "border-slate-200 text-slate-500"}`}
           >
-            {BUNDESLAENDER_ENUM.map((b) => (
-              <option key={b} value={b}>
-                {BUNDESLAND_LABELS[b]}
-              </option>
-            ))}
-          </select>
-          <Button
-            variant="outline"
-            disabled={!location.trim()}
-            onClick={() => {
-              update({
-                locations: [
-                  ...config.locations,
-                  {
-                    id: crypto.randomUUID(),
-                    name: location.trim(),
-                    bundesland: state,
-                    additionalHolidays: [],
-                    localHolidaysConfirmed: false,
-                  },
-                ],
-              });
-              setLocation("");
-            }}
-          >
-            Filiale hinzufügen
-          </Button>
-        </section>
-        <section className="space-y-3">
-          <h3 className="font-semibold">2. Kompetenzen</h3>
-          <div className="flex flex-wrap gap-2">
-            {config.skills.map((s) => (
-              <span
-                key={s.id}
-                className="rounded-full bg-[#f1eefb] px-3 py-1 text-sm text-[#6658d3]"
-              >
-                {s.name}
-              </span>
-            ))}
-          </div>
-          <Input
-            aria-label="Neue Kompetenz"
-            placeholder="z. B. Verkauf oder Backstube"
-            value={skill}
-            onChange={(e) => setSkill(e.target.value)}
-          />
-          <Button
-            variant="outline"
-            disabled={!skill.trim()}
-            onClick={() => {
-              update({
-                skills: [
-                  ...config.skills,
-                  { id: crypto.randomUUID(), name: skill.trim() },
-                ],
-              });
-              setSkill("");
-            }}
-          >
-            Kompetenz hinzufügen
-          </Button>
-          <label className="block text-sm">
-            Zeit für einen Filialwechsel in Minuten
-            <Input
-              type="number"
-              min={0}
-              max={240}
-              value={config.travelMinutes}
-              onChange={(e) =>
-                update({ travelMinutes: Number(e.target.value) })
-              }
-            />
-          </label>
-        </section>
+            <span
+              className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs ${index <= step ? "bg-[#6658d3] text-white" : "bg-slate-100"}`}
+            >
+              {index < step ? <Check className="size-3.5" /> : index + 1}
+            </span>
+            <span>{label}</span>
+          </li>
+        ))}
+      </ol>
+      <div>
+        <h3 className="text-lg font-semibold">{STEPS[step]}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {DESCRIPTIONS[step]}
+        </p>
       </div>
-      <section>
-        <h3 className="mb-3 font-semibold">
-          3. Mitarbeitende & Arbeitszeitregeln
-        </h3>
+      {step === 0 && (
+        <PlanningSetupLocations
+          config={config}
+          today={data.context.today}
+          onChange={update}
+        />
+      )}
+      {step === 1 && (
         <div className="space-y-3">
           {data.context.employees.map((employee) => (
             <PlanningProfileEditor
@@ -227,32 +169,69 @@ export function PlanningSetup({
             />
           ))}
         </div>
-      </section>
-      <PlanningTemplateEditor
-        config={config}
-        onChange={(templates) => update({ templates })}
-      />
-      <PlanningDemandEditor
-        config={config}
-        onChange={(demands) => update({ demands })}
-      />
-      <p className="text-sm text-muted-foreground">
-        Die Einrichtung bestätigt keine Tarifausnahmen oder besonderen
-        Schutzvorschriften. Für Minderjährige, Mutterschutz und sonstige
-        Sonderprofile bleibt die Freigabe gesperrt.
-      </p>
-      {version !== data.version && (
-        <p className="text-sm text-amber-900">
-          Die Daten haben sich während der Einrichtung geändert. Bitte neu laden
-          und die Änderungen erneut prüfen.
+      )}
+      {step === 2 && (
+        <div className="space-y-6">
+          <PlanningTemplateEditor
+            config={config}
+            onChange={(templates) => update({ templates })}
+          />
+          <PlanningDemandEditor
+            config={config}
+            onChange={(demands) => update({ demands })}
+          />
+        </div>
+      )}
+      {step === 3 && <PlanningSetupReview config={config} />}
+      {error && (
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 p-3 text-sm text-red-800"
+        >
+          {error}
         </p>
       )}
-      <Button
-        disabled={busy || version !== data.version}
-        onClick={() => onSave(config, version)}
-      >
-        Einrichtung speichern
-      </Button>
+      {stale && (
+        <p role="alert" className="text-sm text-amber-900">
+          Die Einrichtung wurde während deiner Bearbeitung geändert. Bitte neu
+          laden und die Änderungen erneut prüfen.
+        </p>
+      )}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-5">
+        <Button
+          variant="outline"
+          disabled={step === 0 || busy}
+          onClick={() => {
+            setError("");
+            setStep((value) => value - 1);
+          }}
+        >
+          <ChevronLeft className="size-4" />
+          Zurück
+        </Button>
+        {step < 3 ? (
+          <Button disabled={busy || stale} onClick={next}>
+            Weiter
+            <ChevronRight className="size-4" />
+          </Button>
+        ) : (
+          <Button
+            disabled={busy || stale}
+            onClick={() => {
+              if (!planningConfigSchema.safeParse(config).success) {
+                setError(
+                  "Bitte die Einrichtung prüfen. Es fehlen gültige Angaben.",
+                );
+                return;
+              }
+              onSave(config, data.version);
+            }}
+          >
+            {busy ? "Wird gespeichert …" : "Einrichtung speichern"}
+            <Check className="size-4" />
+          </Button>
+        )}
+      </div>
     </section>
   );
 }

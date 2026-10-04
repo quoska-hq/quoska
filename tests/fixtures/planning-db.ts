@@ -29,6 +29,7 @@ export async function planningDatabase() {
     "042_planning_initialization",
     "043_planning_preferences_and_worker_recovery",
     "044_effective_employment_schedules",
+    "045_optional_planning_module",
   ]) {
     await db.exec(await readFile(`supabase/migrations/${file}.sql`, "utf8"));
   }

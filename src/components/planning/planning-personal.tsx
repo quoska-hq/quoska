@@ -7,12 +7,14 @@ import { formatDateFullDE, formatTimeLocal } from "@/config/client/date-utils";
 import { PlanningPreferences } from "@/components/planning/planning-preferences";
 import { PlanningSwaps } from "@/components/planning/planning-swaps";
 import { Button } from "@/components/ui/button";
+import { usePlanningModule } from "@/hooks/use-planning-module";
 export function PlanningPersonal() {
   const { user } = useSupabase();
+  const moduleStatus = usePlanningModule();
   const query = useQuery({
     queryKey: ["planning-mine", user?.id],
     queryFn: () => planningFetch<PlanningPersonalData | null>("/mine"),
-    enabled: Boolean(user),
+    enabled: Boolean(user) && Boolean(moduleStatus.data?.enabled),
     refetchInterval: 30000,
   });
   return (
@@ -33,15 +35,30 @@ export function PlanningPersonal() {
           Drucken
         </Button>
       </header>
-      {query.isPending && <p role="status">Deine Dienste werden geladen …</p>}
-      {query.error && <p role="alert">{query.error.message}</p>}
-      {query.isSuccess &&
+      {moduleStatus.isPending && (
+        <p role="status">Deine Dienste werden geladen …</p>
+      )}
+      {moduleStatus.error && <p role="alert">{moduleStatus.error.message}</p>}
+      {moduleStatus.data && !moduleStatus.data.enabled && (
+        <p className="rounded-xl border bg-white p-5">
+          Die Dienstplanung ist für euren Betrieb nicht aktiviert.
+        </p>
+      )}
+      {moduleStatus.data?.enabled && query.isPending && (
+        <p role="status">Deine Dienste werden geladen …</p>
+      )}
+      {moduleStatus.data?.enabled && query.error && (
+        <p role="alert">{query.error.message}</p>
+      )}
+      {moduleStatus.data?.enabled &&
+        query.isSuccess &&
         (!query.data?.enabled || !query.data.periods.length) && (
           <p className="rounded-xl border bg-white p-5">
             Für dich ist noch kein Dienstplan veröffentlicht.
           </p>
         )}
-      {query.data?.enabled &&
+      {moduleStatus.data?.enabled &&
+        query.data?.enabled &&
         query.data.periods.map((p) => (
           <section key={p.month} className="rounded-xl border bg-white p-5">
             <h2 className="mb-4 text-lg font-semibold">
@@ -96,7 +113,7 @@ export function PlanningPersonal() {
             )}
           </section>
         ))}
-      {query.data?.enabled && (
+      {moduleStatus.data?.enabled && query.data?.enabled && (
         <>
           <PlanningPreferences initial={query.data.preferredDays} />
           <PlanningSwaps />

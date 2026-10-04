@@ -37,6 +37,8 @@ export async function executePlanningCommand(
       "Der Plan wurde inzwischen geändert. Bitte neu laden.",
       409,
     );
+  if (!snapshot.state.config.enabled && command.action !== "configure")
+    throw new PlanningError("Die Dienstplanung ist für diesen Betrieb deaktiviert.", 403);
   let next = structuredClone(snapshot.state),
     jobId: string | undefined,
     reason = "";
