@@ -142,7 +142,7 @@ export function PlanningSetup({
       </div>
       <ol
         aria-label="Einrichtungsschritte"
-        className="grid gap-2 sm:grid-cols-4"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-4"
       >
         {STEPS.map((label, index) => (
           <li
