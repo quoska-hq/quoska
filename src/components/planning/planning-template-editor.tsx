@@ -2,8 +2,10 @@
 import { useState } from "react";
 import type { PlanningConfig, PlanningTemplate } from "@/types/planning";
 import { Input } from "@/components/ui/input";
+import { GermanTimeInput } from "@/components/german-time-input";
 import { Button } from "@/components/ui/button";
-import { GermanDateInput } from "@/components/german-date-input";
+import { planningTemplateSchema } from "@/types/planning-schemas";
+import { PlanningTemplateSpecialRules } from "@/components/planning/planning-template-special-rules";
 
 export function PlanningTemplateEditor({
   config,
@@ -16,8 +18,12 @@ export function PlanningTemplateEditor({
   const [name, setName] = useState("Frühdienst"),
     [start, setStart] = useState("06:00"),
     [end, setEnd] = useState("12:00"),
-    [location, setLocation] = useState(""),
-    [skill, setSkill] = useState("");
+    [location, setLocation] = useState(
+      config.locations.length === 1 ? config.locations[0].id : "",
+    ),
+    [skill, setSkill] = useState(
+      config.skills.length === 1 ? config.skills[0].id : "",
+    );
   const [holidayMode, setHolidayMode] = useState<"skip" | "include">("skip");
   const [days, setDays] = useState([1, 2, 3, 4, 5, 6]),
     [count, setCount] = useState(1),
@@ -29,7 +35,12 @@ export function PlanningTemplateEditor({
     [reference, setReference] = useState(""),
     [from, setFrom] = useState(""),
     [until, setUntil] = useState("");
+  const [error, setError] = useState("");
+  const [otherBreaks, setOtherBreaks] = useState<PlanningTemplate["breaks"]>(
+    [],
+  );
   function edit(t: PlanningTemplate) {
+    setError("");
     setEditing(t.id);
     setName(t.name);
     setStart(t.start);
@@ -39,6 +50,7 @@ export function PlanningTemplateEditor({
     setDays(t.days);
     setCount(t.count);
     setPause(t.breaks[0]?.minutes ?? 0);
+    setOtherBreaks(t.breaks.slice(1));
     setOffset(t.breaks[0]?.offsetMinutes ?? 240);
     setNextDay(t.nextDay);
     setAuthorization(t.authorization);
@@ -48,12 +60,11 @@ export function PlanningTemplateEditor({
     setHolidayMode(t.holidayMode);
   }
   return (
-    <section className="space-y-3">
-      <h3 className="font-semibold">4. Wiederkehrende Schichten</h3>
+    <section aria-label="Wiederkehrende Schichten" className="space-y-3">
+      <h3 className="font-semibold">Welche Schichten braucht ihr?</h3>
       <p className="text-sm text-muted-foreground">
-        Eine Vorlage beschreibt einen Arbeitsplatz und dessen Kompetenz. Pausen
-        können pro Schicht angepasst werden. Für durchgängige Besetzung sind
-        überlappende Schichten nötig.
+        Beispiel: Frühdienst, Verkauf, 06:00–12:00, zwei Personen. Du legst die
+        Zeiten einmal fest; Quoska verteilt die Dienste später auf euer Team.
       </p>
       {config.templates.map((t) => (
         <div key={t.id} className="rounded-lg bg-[#f8f6ef] p-3 text-sm">
@@ -99,7 +110,7 @@ export function PlanningTemplateEditor({
           </select>
         </label>
         <label className="text-sm">
-          Kompetenz
+          Aufgabe
           <select
             className="block w-full rounded-md border p-2"
             value={skill}
@@ -115,19 +126,11 @@ export function PlanningTemplateEditor({
         </label>
         <label className="text-sm">
           Beginn
-          <Input
-            type="time"
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-          />
+          <GermanTimeInput value={start} onChange={setStart} />
         </label>
         <label className="text-sm">
           Ende
-          <Input
-            type="time"
-            value={end}
-            onChange={(e) => setEnd(e.target.value)}
-          />
+          <GermanTimeInput value={end} onChange={setEnd} />
         </label>
         <label className="text-sm">
           Personen
@@ -155,14 +158,6 @@ export function PlanningTemplateEditor({
             {d}
           </label>
         ))}
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={nextDay}
-            onChange={(e) => setNextDay(e.target.checked)}
-          />
-          Ende am Folgetag
-        </label>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm">
@@ -175,108 +170,109 @@ export function PlanningTemplateEditor({
             onChange={(e) => setPause(Number(e.target.value))}
           />
         </label>
-        <label className="text-sm">
-          Pausenbeginn nach Arbeitsbeginn in Minuten
-          <Input
-            type="number"
-            min={1}
-            max={600}
-            value={offset}
-            onChange={(e) => setOffset(Number(e.target.value))}
-          />
-        </label>
+        {pause > 0 && (
+          <label className="text-sm">
+            Pause nach wie vielen Minuten?
+            <Input
+              type="number"
+              min={1}
+              max={600}
+              value={offset}
+              onChange={(e) => setOffset(Number(e.target.value))}
+            />
+          </label>
+        )}
       </div>
-      <details>
-        <summary className="cursor-pointer text-sm font-medium">
-          Berechtigung für Sonn- und Feiertage
-        </summary>
-        <div className="mt-3 space-y-3">
-          <select
-            aria-label="Berechtigung Sonn- und Feiertage"
-            className="w-full rounded-md border p-2"
-            value={authorization}
-            onChange={(e) =>
-              setAuthorization(
-                e.target.value as PlanningTemplate["authorization"],
-              )
-            }
-          >
-            <option value="none">
-              Keine Berechtigung – Beschäftigung gesperrt
-            </option>
-            <option value="bakery_production">
-              Bäckerei: Herstellung/Auslieferung, höchstens drei Stunden
-            </option>
-            <option value="catering">
-              Gaststättenbetrieb: Voraussetzungen des § 10 Abs. 1 Nr. 4 geprüft
-            </option>
-            <option value="documented_permission">
-              Gesonderte behördliche / gesetzliche Berechtigung geprüft
-            </option>
-          </select>
-          <Input
-            aria-label="Dokumentierte Rechtsgrundlage"
-            placeholder="Dokumentierte Rechtsgrundlage, Tätigkeit und Voraussetzungen"
-            value={reference}
-            onChange={(e) => setReference(e.target.value)}
-          />
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm">
-              Gültig ab
-              <GermanDateInput value={from} onChange={setFrom} />
-            </label>
-            <label className="text-sm">
-              Gültig bis
-              <GermanDateInput value={until} onChange={setUntil} />
-            </label>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Ladenöffnungszeiten allein erlauben keine Beschäftigung. Verkauf ist
-            von der Bäckerei-Ausnahme für Herstellung und Auslieferung nicht
-            erfasst.
-          </p>
-        </div>
-      </details>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={holidayMode === "include"}
-          onChange={(e) =>
-            setHolidayMode(e.target.checked ? "include" : "skip")
-          }
-        />
-        Auch an gesetzlichen Feiertagen einplanen
-      </label>
+      {otherBreaks.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          Weitere hinterlegte Pausen:{" "}
+          {otherBreaks
+            .map(
+              (pause) =>
+                `${pause.minutes} Minuten nach ${pause.offsetMinutes} Minuten`,
+            )
+            .join(" · ")}
+          .
+        </p>
+      )}
+      <PlanningTemplateSpecialRules
+        value={{
+          nextDay,
+          authorization,
+          authorizationReference: reference,
+          authorizationFrom: from || null,
+          authorizationUntil: until || null,
+          holidayMode,
+        }}
+        onChange={(patch) => {
+          if (patch.nextDay !== undefined) setNextDay(patch.nextDay);
+          if (patch.authorization !== undefined)
+            setAuthorization(patch.authorization);
+          if (patch.authorizationReference !== undefined)
+            setReference(patch.authorizationReference);
+          if (patch.authorizationFrom !== undefined)
+            setFrom(patch.authorizationFrom ?? "");
+          if (patch.authorizationUntil !== undefined)
+            setUntil(patch.authorizationUntil ?? "");
+          if (patch.holidayMode !== undefined)
+            setHolidayMode(patch.holidayMode);
+        }}
+      />
+      {(days.includes(0) || holidayMode === "include") && (
+        <p className="text-sm text-amber-900">
+          Bitte die Berechtigung für Sonn- und Feiertage im Bereich oben prüfen.
+          Ohne gültige Berechtigung bleibt die Freigabe gesperrt.
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="text-sm text-red-800">
+          {error}
+        </p>
+      )}
       <Button
         variant="outline"
         disabled={!name || !location || !skill || !days.length}
-        onClick={() =>
+        onClick={() => {
+          const template: PlanningTemplate = {
+            id: editing ?? crypto.randomUUID(),
+            active: editing
+              ? config.templates.find((t) => t.id === editing)!.active
+              : true,
+            name,
+            locationId: location,
+            skillId: skill,
+            days,
+            start,
+            end,
+            nextDay,
+            count,
+            breaks: [
+              ...(pause ? [{ offsetMinutes: offset, minutes: pause }] : []),
+              ...otherBreaks,
+            ],
+            authorization,
+            authorizationReference: reference,
+            authorizationFrom: from || null,
+            authorizationUntil: until || null,
+            holidayMode,
+          };
+          if (!planningTemplateSchema.safeParse(template).success) {
+            setError(
+              "Bitte Beginn, Ende und Personenzahl prüfen. Eine Pause muss mindestens 15 Minuten dauern.",
+            );
+            return;
+          }
           onChange([
             ...config.templates.filter((t) => t.id !== editing),
-            {
-              id: editing ?? crypto.randomUUID(),
-              active: editing
-                ? config.templates.find((t) => t.id === editing)!.active
-                : true,
-              name,
-              locationId: location,
-              skillId: skill,
-              days,
-              start,
-              end,
-              nextDay,
-              count,
-              breaks: pause ? [{ offsetMinutes: offset, minutes: pause }] : [],
-              authorization,
-              authorizationReference: reference,
-              authorizationFrom: from || null,
-              authorizationUntil: until || null,
-              holidayMode,
-            },
-          ])
-        }
+            template,
+          ]);
+          setEditing(null);
+          setName("");
+          setOtherBreaks([]);
+          setError("");
+        }}
       >
-        {editing ? "Schichtvorlage speichern" : "Schichtvorlage hinzufügen"}
+        {editing ? "Schicht speichern" : "Schicht hinzufügen"}
       </Button>
     </section>
   );

@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { PlanningProfile } from "@/types/planning";
 import { formatDateFullDE } from "@/config/client/date-utils";
 import { GermanDateInput } from "@/components/german-date-input";
-import { Input } from "@/components/ui/input";
+import { GermanTimeInput } from "@/components/german-time-input";
 import { Button } from "@/components/ui/button";
 export function PlanningProfileDates({
   profile,
@@ -84,19 +84,11 @@ export function PlanningProfileDates({
         <div className="my-2 flex gap-2">
           <label>
             Von
-            <Input
-              type="time"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-            />
+            <GermanTimeInput value={start} onChange={setStart} />
           </label>
           <label>
             Bis
-            <Input
-              type="time"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-            />
+            <GermanTimeInput value={end} onChange={setEnd} />
           </label>
         </div>
       )}

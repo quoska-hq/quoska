@@ -5,8 +5,8 @@ genehmigte Abwesenheiten, Krankmeldungen und Zeitkonten. Sie schreibt keine
 Zeiteinträge und verändert keine bestehenden Sollstunden oder Urlaubskonten.
 Administratoren und Führungskräfte aktivieren das Modul unter
 `/app/settings` im Abschnitt **Module**. Anschließend richten sie es unter
-`/app/planning` in vier Schritten ein: Filialen und Kompetenzen, Team und
-Arbeitszeit, Schichten und Bedarf, Prüfen und starten.
+`/app/planning` in vier Schritten ein: Filialen und Aufgaben, Mitarbeitende,
+Schichten, Prüfen und starten.
 Mitarbeitende sehen freigegebene Dienste unter `/app/my-shifts`.
 
 Das Modul ist standardmäßig ausgeschaltet. Die Menüpunkte **Dienstplanung** und
@@ -18,6 +18,23 @@ Offene Rechenvorschläge verfallen. Aktivierung und Deaktivierung werden atomar
 mit Versionsprüfung im unveränderlichen Änderungsverlauf gespeichert.
 
 ## Einrichtung und Ablauf
+
+Der Startmonat wird aus dem aktuellen und nächsten Monat gewählt. Aufgaben wie
+Verkauf, Backstube und Filialleitung lassen sich mit einem Klick hinzufügen.
+Für Mitarbeitende werden vereinbarte Zeiten auf ausgewählte Wochentage
+übernommen; Sollstunden begründen keine automatische Verfügbarkeit. Hinweise
+nennen fehlende Angaben direkt bei der Person. Arbeitszeithistorie und weitere
+Beschäftigungen müssen ausdrücklich geprüft werden. Vertragsänderungen,
+Tagesausnahmen und Nachtarbeit sind in aufklappbaren Bereichen erreichbar.
+
+Bei einer neuen Einrichtung wird die benötigte Besetzung automatisch aus den
+aktiven Schichten übernommen. Sie gilt auch während der Pausen; fehlende
+Pausenvertretung bleibt ein Freigabehindernis. Eigene Mindestbesetzungen können
+weiterhin getrennt bearbeitet werden. Bestehende Besetzungsregeln werden beim
+Bearbeiten nicht automatisch ersetzt. Schichten über Mitternacht benötigen
+ausdrücklich festgelegte Besetzungszeiträume. Die Einrichtung wird erst am Ende
+gespeichert; danach führt ein eigener Einstieg zum Anlegen der ersten drei Monate.
+Diese Vereinfachung benötigt keine weitere Datenbankmigration.
 
 1. Ersten Planungsmonat wählen; Filialen mit Bundesland und örtlichen Feiertagen eintragen.
 2. Kompetenzen und die berechtigten Personen je Filiale festlegen.

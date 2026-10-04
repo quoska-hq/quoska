@@ -1,9 +1,5 @@
 import { test, expect } from "@playwright/test";
-import {
-  adminClient,
-  testEmail,
-  TEST_PASSWORD,
-} from "../../scripts/e2e-helpers";
+import { adminClient, testEmail, TEST_PASSWORD } from "../../scripts/e2e-helpers";
 import { planningFixture } from "../fixtures/planning";
 import {
   login,
@@ -11,7 +7,6 @@ import {
   cleanup,
   updateEmployeeDuringSetup,
 } from "./helpers/planning-module";
-
 test.describe("Optional planning module", () => {
   test("keeps navigation simple until activation and guides an empty setup", async ({
     page,
@@ -58,6 +53,9 @@ test.describe("Optional planning module", () => {
         .getByRole("textbox", { name: "Neue Filiale" })
         .fill("Marktstraße");
       await page
+        .getByRole("combobox", { name: "Bundesland der Filiale" })
+        .selectOption("berlin");
+      await page
         .getByRole("button", { name: "Filiale hinzufügen", exact: true })
         .click();
       await page
@@ -99,7 +97,6 @@ test.describe("Optional planning module", () => {
       await cleanup(owner.tenantId, owner.userId);
     }
   });
-
   test("saves all setup steps and preserves plans when toggled on desktop and mobile", async ({
     page,
     browser,
@@ -169,7 +166,7 @@ test.describe("Optional planning module", () => {
       const periods = (
         await (await page.request.get("/api/v1/planning")).json()
       ).data.state.periods;
-      expect(periods).toHaveLength(3);
+      expect(periods.length).toBe(3);
       const employeeEmail = testEmail("planning-module-employee");
       const auth = await adminClient.auth.admin.createUser({
         email: employeeEmail,

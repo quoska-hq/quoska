@@ -1,6 +1,6 @@
 "use client";
 import type { PlanningProfile } from "@/types/planning";
-import { Input } from "@/components/ui/input";
+import { GermanTimeInput } from "@/components/german-time-input";
 import { useState } from "react";
 import { GermanDateInput } from "@/components/german-date-input";
 import { Button } from "@/components/ui/button";
@@ -48,19 +48,17 @@ export function PlanningExternalWork({
           value={date}
           onChange={setDate}
         />
-        <Input
+        <GermanTimeInput
           className="w-24"
           aria-label="Beginn weitere Beschäftigung"
-          type="time"
           value={start}
-          onChange={(e) => setStart(e.target.value)}
+          onChange={setStart}
         />
-        <Input
+        <GermanTimeInput
           className="w-24"
           aria-label="Ende weitere Beschäftigung"
-          type="time"
           value={end}
-          onChange={(e) => setEnd(e.target.value)}
+          onChange={setEnd}
         />
         <Button
           variant="outline"

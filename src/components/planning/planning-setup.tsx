@@ -1,27 +1,27 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import type { PlanningConfig } from "@/types/planning";
 import { planningConfigSchema } from "@/types/planning-schemas";
 import type { PlanningBoardData } from "@/types/planning-client";
 import { planningAddMonths } from "@/config/client/planning-calendar";
+import { planningProfileMissing } from "@/config/client/planning-setup";
 import { Button } from "@/components/ui/button";
 import { PlanningSetupLocations } from "@/components/planning/planning-setup-locations";
 import { PlanningSetupReview } from "@/components/planning/planning-setup-review";
 import { PlanningProfileEditor } from "@/components/planning/planning-profile-editor";
-import { PlanningTemplateEditor } from "@/components/planning/planning-template-editor";
-import { PlanningDemandEditor } from "@/components/planning/planning-demand-editor";
+import { PlanningSetupShifts } from "@/components/planning/planning-setup-shifts";
 
 const STEPS = [
-  "Filialen & Kompetenzen",
-  "Team & Arbeitszeit",
-  "Schichten & Bedarf",
+  "Filialen & Aufgaben",
+  "Mitarbeitende",
+  "Schichten",
   "Prüfen & starten",
 ];
 const DESCRIPTIONS = [
-  "Lege eure Standorte und die benötigten Kompetenzen fest.",
-  "Ordne vorhandene Mitarbeitende zu und vereinbare ihre Verfügbarkeit.",
-  "Lege fest, wann Dienste stattfinden und welche Besetzung benötigt wird.",
+  "Wo arbeitet ihr und welche Aufgaben müssen besetzt werden?",
+  "Öffne eine Person und wähle Filialen, Aufgaben und verfügbare Zeiten. Nicht eingerichtete Personen werden nicht eingeplant.",
+  "Wann braucht ihr wie viele Personen? Lege zum Beispiel einen Frühdienst für den Verkauf an.",
   "Prüfe die Einrichtung. Anschließend kannst du euren ersten Dienstplan berechnen.",
 ];
 
@@ -48,6 +48,14 @@ export function PlanningSetup({
   const [initialConfig] = useState(() => JSON.stringify(data.state.config)),
     [step, setStep] = useState(0),
     [error, setError] = useState("");
+  const [automaticCoverage, setAutomaticCoverage] = useState(
+    !config.templates.length && !config.demands.length,
+  );
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    heading.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0 });
+  }, [step]);
   const update = (patch: Partial<PlanningConfig>) =>
     setConfig((previous) => ({ ...previous, ...patch }));
   function stepError() {
@@ -76,8 +84,21 @@ export function PlanningSetup({
         return "Bitte die örtlichen Feiertage für jede Filiale prüfen und bestätigen.";
     }
     if (step === 1) {
-      if (!config.profiles.length)
-        return "Bitte mindestens ein Mitarbeitendenprofil einrichten.";
+      const profiles = config.profiles.filter(
+        (profile) => profile.eligibility !== "unsupported",
+      );
+      if (!profiles.length)
+        return "Bitte mindestens eine Person für die Planung einrichten.";
+      const incomplete = profiles.find(
+        (profile) => planningProfileMissing(profile).length > 0,
+      );
+      if (incomplete) {
+        const name =
+          data.context.employees.find(
+            (employee) => employee.id === incomplete.employeeId,
+          )?.name ?? "Diese Person";
+        return `${name}: Bitte ${planningProfileMissing(incomplete).join(", ")}.`;
+      }
       if (
         !planningConfigSchema.shape.profiles.safeParse(config.profiles).success
       )
@@ -85,7 +106,9 @@ export function PlanningSetup({
     }
     if (step === 2) {
       if (!config.templates.length || !config.demands.length)
-        return "Bitte mindestens eine Schichtvorlage und eine Besetzungsregel hinzufügen.";
+        return "Bitte mindestens eine aktive Schicht und die benötigte Besetzung hinzufügen.";
+      if (!config.templates.some((template) => template.active))
+        return "Bitte mindestens eine Schicht aktivieren.";
       if (
         !planningConfigSchema.shape.templates.safeParse(config.templates)
           .success ||
@@ -112,8 +135,9 @@ export function PlanningSetup({
         </p>
         <h2 className="mt-2 text-xl font-semibold">Dienstplanung einrichten</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Mitarbeitende, Sollstunden, Urlaub und Krankmeldungen kommen aus
-          Quoska.
+          Vier kurze Schritte. Mitarbeitende, Sollstunden, Urlaub und
+          Krankmeldungen sind bereits aus Quoska übernommen. Gespeichert wird
+          erst am Ende.
         </p>
       </div>
       <ol
@@ -136,7 +160,13 @@ export function PlanningSetup({
         ))}
       </ol>
       <div>
-        <h3 className="text-lg font-semibold">{STEPS[step]}</h3>
+        <h3
+          ref={heading}
+          tabIndex={-1}
+          className="text-lg font-semibold outline-none"
+        >
+          {STEPS[step]}
+        </h3>
         <p className="mt-1 text-sm text-muted-foreground">
           {DESCRIPTIONS[step]}
         </p>
@@ -156,6 +186,13 @@ export function PlanningSetup({
               employee={employee}
               config={config}
               today={data.context.today}
+              onRemove={() =>
+                update({
+                  profiles: config.profiles.filter(
+                    (profile) => profile.employeeId !== employee.id,
+                  ),
+                })
+              }
               onChange={(profile) =>
                 update({
                   profiles: [
@@ -172,13 +209,11 @@ export function PlanningSetup({
       )}
       {step === 2 && (
         <div className="space-y-6">
-          <PlanningTemplateEditor
+          <PlanningSetupShifts
             config={config}
-            onChange={(templates) => update({ templates })}
-          />
-          <PlanningDemandEditor
-            config={config}
-            onChange={(demands) => update({ demands })}
+            onChange={update}
+            automatic={automaticCoverage}
+            onAutomaticChange={setAutomaticCoverage}
           />
         </div>
       )}

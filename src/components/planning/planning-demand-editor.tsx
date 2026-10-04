@@ -2,6 +2,7 @@
 import { useState } from "react";
 import type { PlanningConfig, PlanningDemand } from "@/types/planning";
 import { Input } from "@/components/ui/input";
+import { GermanTimeInput } from "@/components/german-time-input";
 import { Button } from "@/components/ui/button";
 export function PlanningDemandEditor({
   config,
@@ -19,10 +20,10 @@ export function PlanningDemandEditor({
   const [holidayMode, setHolidayMode] = useState<"skip" | "include">("skip");
   return (
     <section className="space-y-3">
-      <h3 className="font-semibold">5. Besetzungsbedarf</h3>
+      <h3 className="font-semibold">Benötigte Besetzung</h3>
       <p className="text-sm text-muted-foreground">
-        Wie viele Personen mit einer Kompetenz müssen gleichzeitig arbeiten?
-        Dieser Bedarf wird auch während der Pausen geprüft.
+        Wie viele Personen für eine Aufgabe müssen gleichzeitig arbeiten? Dieser
+        Bedarf wird auch während der Pausen geprüft.
       </p>
       {config.demands.map((d) => (
         <div
@@ -61,7 +62,7 @@ export function PlanningDemandEditor({
           </select>
         </label>
         <label className="text-sm">
-          Kompetenz
+          Aufgabe
           <select
             className="block w-full rounded-md border p-2"
             value={skill}
@@ -87,19 +88,11 @@ export function PlanningDemandEditor({
         </label>
         <label className="text-sm">
           Beginn
-          <Input
-            type="time"
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-          />
+          <GermanTimeInput value={start} onChange={setStart} />
         </label>
         <label className="text-sm">
           Ende
-          <Input
-            type="time"
-            value={end}
-            onChange={(e) => setEnd(e.target.value)}
-          />
+          <GermanTimeInput value={end} onChange={setEnd} />
         </label>
       </div>
       <div className="flex flex-wrap gap-4 text-sm">

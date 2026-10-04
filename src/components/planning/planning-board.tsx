@@ -25,6 +25,7 @@ import { PlanningSwaps } from "@/components/planning/planning-swaps";
 import { PlanningBalances } from "@/components/planning/planning-balances";
 import { useSupabase } from "@/providers/supabase-provider";
 import { PlanningModuleIntro } from "@/components/planning/planning-module-intro";
+import { PlanningFirstPlan } from "@/components/planning/planning-first-plan";
 
 export function PlanningBoard() {
   const { user } = useSupabase(),
@@ -105,16 +106,18 @@ export function PlanningBoard() {
           </p>
         </div>
         <div className="flex gap-2 print:hidden">
-          {data.state.config.enabled && (
+          {config.enabled && !needsSetup && (
             <Button variant="outline" onClick={() => setSettings(!settings)}>
               <Settings2 className="size-4" />
-              Einrichtung
+              {settings ? "Zurück zum Plan" : "Einrichtung"}
             </Button>
           )}
-          <Button variant="outline" onClick={() => window.print()}>
-            <Printer className="size-4" />
-            Drucken
-          </Button>
+          {config.enabled && !needsSetup && !settings && (
+            <Button variant="outline" onClick={() => window.print()}>
+              <Printer className="size-4" />
+              Drucken
+            </Button>
+          )}
         </div>
       </header>
       {feedback && (
@@ -131,6 +134,14 @@ export function PlanningBoard() {
           busy={mutation.isPending}
           onSave={(config, version) =>
             mutation.mutate({ action: "configure", config, version })
+          }
+        />
+      ) : data.state.periods.length === 0 ? (
+        <PlanningFirstPlan
+          config={config}
+          busy={mutation.isPending}
+          onStart={() =>
+            mutation.mutate({ action: "initialize", version: data.version })
           }
         />
       ) : (
