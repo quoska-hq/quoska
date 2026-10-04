@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
+  CalendarDays,
   Bell,
   Briefcase,
   ChevronRight,
@@ -39,9 +40,12 @@ interface MobileNavItem {
   icon: LucideIcon;
   roles: Role[];
   siteAdminOnly?: boolean;
+  requiresPlanning?: boolean;
 }
 
 const MOBILE_NAV_ITEMS: MobileNavItem[] = [
+  { href: "/app/my-shifts", label: "Meine Dienste", icon: CalendarDays, roles: ["admin", "manager", "employee"], requiresPlanning: true },
+  { href: "/app/planning", label: "Dienstplanung", icon: CalendarDays, roles: ["admin", "manager"], requiresPlanning: true },
   { href: "/app/help", label: "Hilfe & Feedback", icon: MessageSquare, roles: ["admin", "manager", "employee"] },
   {
     href: "/app/dashboard",
@@ -130,6 +134,7 @@ const PRIMARY_HREFS: Record<Role, string[]> = {
 
 interface BottomNavProps {
   role: Role;
+  planningEnabled?: boolean;
   userName: string;
   isAnalyticsAdmin: boolean;
   onSignOut: () => void | Promise<void>;
@@ -137,6 +142,7 @@ interface BottomNavProps {
 
 export function BottomNav({
   role,
+  planningEnabled = false,
   userName,
   isAnalyticsAdmin,
   onSignOut,
@@ -144,7 +150,7 @@ export function BottomNav({
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const visibleItems = MOBILE_NAV_ITEMS.filter(
-    (item) => item.roles.includes(role) && (!item.siteAdminOnly || isAnalyticsAdmin),
+    (item) => item.roles.includes(role) && (!item.requiresPlanning || planningEnabled) && (!item.siteAdminOnly || isAnalyticsAdmin),
   );
   const primaryHrefs = PRIMARY_HREFS[role];
   const primaryItems = primaryHrefs
@@ -164,7 +170,7 @@ export function BottomNav({
       <nav
         aria-label="Hauptnavigation"
         data-testid="mobile-bottom-nav"
-        className="fixed inset-x-0 bottom-0 z-40 w-full max-w-full border-t border-slate-900/15 bg-[#efede7]/97 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm [contain:layout_paint] md:hidden"
+        className="print:hidden fixed inset-x-0 bottom-0 z-40 w-full max-w-full border-t border-slate-900/15 bg-[#efede7]/97 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm [contain:layout_paint] md:hidden"
       >
         <div className="grid h-16 w-full grid-cols-5 items-stretch">
           {primaryItems.map((item) => (

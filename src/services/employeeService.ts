@@ -1,3 +1,4 @@
+import { employeeInvitationStatus } from "@/services/employeeInvitationStatusService";
 /**
  * Employee Service — Business logic for employee management.
  *
@@ -27,6 +28,7 @@ import {
 } from "@/repos/employeeRepo";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
 import type { WorkSchedule } from "@/types/work-schedule";
+import { presentEmploymentSchedule } from "@/services/employeeScheduleService";
 
 /**
  * Invite a new employee.
@@ -266,29 +268,9 @@ export async function listEmployees(
     getDeactivatedEmployees(adminClient, tenantId),
   ]);
 
-  const invitationStatus: EmployeeListResponse["invitationStatus"] = {};
-  // The local invitation token is retained after acceptance. Auth confirmation
-  // is authoritative, including for invitations accepted before this change.
-  // Bound concurrent requests to avoid a burst for larger teams.
-  for (let offset = 0; offset < active.length; offset += 5) {
-    await Promise.all(active.slice(offset, offset + 5).map(async (employee) => {
-      if (!employee.invitation_token && !employee.invited_at) {
-        invitationStatus[employee.id] = false;
-        return;
-      }
-      try {
-        const { data, error } = await adminClient.auth.admin.getUserById(employee.user_id);
-        invitationStatus[employee.id] = error || !data.user
-          ? null
-          : Boolean(data.user.invited_at && !data.user.email_confirmed_at);
-      } catch {
-        // Keep the list usable without claiming an unverified invite is pending.
-        invitationStatus[employee.id] = null;
-      }
-    }));
-  }
+  const invitationStatus = await employeeInvitationStatus(adminClient, active);
 
-  return success({ active, deactivated, invitationStatus });
+  return success({ active: active.map((e) => presentEmploymentSchedule(e)), deactivated, invitationStatus });
 }
 
 /**

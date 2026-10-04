@@ -21,6 +21,7 @@ import {
   LayoutDashboard,
   Globe2,
   MessageSquare,
+  CalendarDays,
 } from "lucide-react";
 
 interface NavItem {
@@ -30,9 +31,20 @@ interface NavItem {
   roles: Role[];
   group: "main" | "manage";
   siteAdminOnly?: boolean;
+  developmentOnly?: boolean;
+  requiresPlanning?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { href: "/app/my-shifts", label: "Meine Dienste", icon: <CalendarDays className="size-[18px]" />, roles: ["admin", "manager", "employee"], group: "main", requiresPlanning: true },
+  {
+    href: "/app/planning",
+    label: "Dienstplanung",
+    requiresPlanning: true,
+    icon: <CalendarDays className="size-[18px]" />,
+    roles: ["admin", "manager"],
+    group: "manage",
+  },
   {
     href: "/app/dashboard",
     label: "Cockpit",
@@ -123,22 +135,23 @@ const NAV_ITEMS: NavItem[] = [
 
 interface SidebarProps {
   role: Role;
+  planningEnabled?: boolean;
   userName: string;
   isAnalyticsAdmin: boolean;
   onSignOut: () => void;
 }
 
-export function Sidebar({ role, userName, isAnalyticsAdmin, onSignOut }: SidebarProps) {
+export function Sidebar({ role, planningEnabled = false, userName, isAnalyticsAdmin, onSignOut }: SidebarProps) {
   const pathname = usePathname();
 
   const visibleItems = NAV_ITEMS.filter(
-    (item) => item.roles.includes(role) && (!item.siteAdminOnly || isAnalyticsAdmin),
+    (item) => item.roles.includes(role) && (!item.requiresPlanning || planningEnabled) && (!item.siteAdminOnly || isAnalyticsAdmin) && (!item.developmentOnly || process.env.NODE_ENV === "development"),
   );
   const mainItems = visibleItems.filter((i) => i.group === "main");
   const manageItems = visibleItems.filter((i) => i.group === "manage");
 
   return (
-    <aside className="fixed inset-y-0 hidden border-r border-slate-900/15 bg-[#efede7] md:flex md:w-[260px] md:flex-col">
+    <aside className="print:hidden fixed inset-y-0 hidden border-r border-slate-900/15 bg-[#efede7] md:flex md:w-[260px] md:flex-col">
       {/* Logo */}
       <Link
         href="/app/dashboard"

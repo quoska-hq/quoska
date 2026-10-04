@@ -24,6 +24,8 @@ const ROUTE_LABELS: { match: string; label: string }[] = [
   { match: "/app/dashboard", label: "Cockpit" },
   { match: "/app/clock", label: "Stempeln" },
   { match: "/app/my-times", label: "Meine Zeiten" },
+  { match: "/app/my-shifts", label: "Meine Dienste" },
+  { match: "/app/planning", label: "Dienstplanung" },
   { match: "/app/notifications", label: "Benachrichtigungen" },
   { match: "/app/vacation", label: "Urlaub" },
   { match: "/app/sick", label: "Krankmeldung" },

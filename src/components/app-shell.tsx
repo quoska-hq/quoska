@@ -11,6 +11,7 @@ import { ClockTabTitle } from "@/components/clock-tab-title";
 import { FeedbackInvitation } from "@/components/feedback-invitation";
 import type { ReactNode } from "react";
 import type { Role } from "@/types";
+import { usePlanningModule } from "@/hooks/use-planning-module";
 
 interface AppShellProps {
   role: Role;
@@ -21,6 +22,7 @@ interface AppShellProps {
 
 export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShellProps) {
   const { supabase } = useSupabase();
+  const planningModule = usePlanningModule();
   const [presenceOpen, setPresenceOpen] = useState(false);
   const pathname = usePathname();
   const firstRoute = useRef(true);
@@ -55,13 +57,14 @@ export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShel
     <div className="min-h-dvh w-full min-w-0 overflow-x-clip bg-canvas">
       <Sidebar
         role={role}
+        planningEnabled={planningModule.data?.enabled ?? false}
         userName={userName}
         isAnalyticsAdmin={isAnalyticsAdmin}
         onSignOut={handleSignOut}
       />
 
       {/* Main content — offset for sidebar on desktop, padding for bottom nav on mobile */}
-      <main className="min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pl-[260px] md:pb-0">
+      <main className="print:pl-0 print:pb-0 min-w-0 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pl-[260px] md:pb-0">
         <AppHeader
           presenceOpen={presenceOpen}
           onTogglePresence={() => setPresenceOpen((o) => !o)}
@@ -82,6 +85,7 @@ export function AppShell({ role, userName, isAnalyticsAdmin, children }: AppShel
 
       <BottomNav
         role={role}
+        planningEnabled={planningModule.data?.enabled ?? false}
         userName={userName}
         isAnalyticsAdmin={isAnalyticsAdmin}
         onSignOut={handleSignOut}

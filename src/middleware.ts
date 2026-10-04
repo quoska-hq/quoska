@@ -15,6 +15,13 @@ import { updateSession } from "@/config/supabase/middleware";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Fictional local preview; never bypass session protection for app routes.
+  if (pathname === "/preview/dienstplanung") {
+    return process.env.NODE_ENV === "development"
+      ? NextResponse.next()
+      : new NextResponse(null, { status: 404 });
+  }
+
   // Skip middleware entirely for API routes — they handle auth internally
   if (pathname.startsWith("/api/")) {
     return NextResponse.next();

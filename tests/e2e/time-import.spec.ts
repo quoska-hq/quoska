@@ -29,7 +29,7 @@ test.describe("Historical time import", () => {
     await expect(upload).toHaveCSS("cursor", "pointer");
     await upload.focus();
     const chooserPromise = page.waitForEvent("filechooser");
-    await page.keyboard.press("Enter");
+    await upload.press("Enter");
     const chooser = await chooserPromise;
     await chooser.setFiles({ name: "arbeitszeiten.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: Buffer.from("PK") });
     await expect(card.getByRole("alert")).toContainText("Excel-Dateien lassen sich hier nicht direkt hochladen");

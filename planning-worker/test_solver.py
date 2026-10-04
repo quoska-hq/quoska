@@ -1,0 +1,76 @@
+import unittest
+from solver import solve
+
+
+def payload():
+    return {"version": 1, "timeLimitSeconds": 2, "conflicts": [], "reservedWeekly": [],
+            "shifts": [{"id": "a", "start": 0, "end": 360, "minutes": 360,
+                        "date": "2026-10-01", "locationId": "location", "candidates": ["one", "two"],
+                        "fixedEmployeeId": None}],
+            "employees": [{"id": eid, "weeklyMinutes": 2880, "targetMinutes": 360,
+                           "initialMinutes": 0, "preferredDays": []} for eid in ["one", "two"]]}
+
+
+class SolverTests(unittest.TestCase):
+    def test_full_assignment(self):
+        result = solve(payload())
+        self.assertIn(result["status"], ["optimal", "feasible"])
+        self.assertEqual(len(result["assignments"]), 1)
+
+    def test_empty_candidate_set_is_infeasible(self):
+        data = payload()
+        data["shifts"][0]["candidates"] = []
+        self.assertEqual(solve(data)["status"], "infeasible")
+
+    def test_fixed_assignment_is_preserved(self):
+        data = payload()
+        data["shifts"][0]["fixedEmployeeId"] = "two"
+        self.assertEqual(solve(data)["assignments"][0]["employeeId"], "two")
+
+    def test_other_employment_counts_towards_weekly_limit(self):
+        data = payload()
+        data["shifts"][0]["candidates"] = ["one"]
+        data["reservedWeekly"] = [{"employeeId": "one", "week": "2026-09-28", "minutes": 2880}]
+        self.assertEqual(solve(data)["status"], "infeasible")
+
+    def test_other_employment_counts_towards_daily_limit(self):
+        data = payload()
+        data["shifts"][0]["candidates"] = ["one"]
+        data["reservedDaily"] = [{"employeeId": "one", "date": "2026-10-01", "minutes": 180}]
+        self.assertEqual(solve(data)["status"], "infeasible")
+
+    def test_conflicting_shifts_cannot_share_a_person(self):
+        data = payload()
+        data["shifts"][0]["candidates"] = ["one"]
+        data["shifts"].append({**data["shifts"][0], "id": "b"})
+        data["conflicts"] = [["a", "b"]]
+        self.assertEqual(solve(data)["status"], "infeasible")
+
+    def test_fairness_includes_recent_weekend_history(self):
+        data = payload()
+        data["shifts"][0]["weekend"] = True
+        data["employees"][0]["pastWeekendDays"] = 10
+        data["employees"][1]["pastWeekendDays"] = 0
+        self.assertEqual(solve(data)["assignments"][0]["employeeId"], "two")
+
+    def test_available_work_is_shared_when_everyone_remains_below_contractual_target(self):
+        data = payload()
+        data["shifts"].append({**data["shifts"][0], "id": "b", "date": "2026-10-02"})
+        for employee in data["employees"]:
+            employee["targetMinutes"] = 2000
+        result = solve(data)
+        self.assertEqual({a["employeeId"] for a in result["assignments"]}, {"one", "two"})
+
+    def test_available_work_is_also_shared_within_each_month(self):
+        data = payload()
+        data["shifts"] = [{**data["shifts"][0], "id": str(i), "date": day} for i, day in enumerate(["2026-10-01", "2026-10-02", "2026-11-02", "2026-11-03"])]
+        for employee in data["employees"]:
+            employee["targetMinutes"] = 4000
+        result = solve(data)
+        assignments = {a["shiftId"]: a["employeeId"] for a in result["assignments"]}
+        for ids in [("0", "1"), ("2", "3")]:
+            self.assertEqual({assignments[sid] for sid in ids}, {"one", "two"})
+
+
+if __name__ == "__main__":
+    unittest.main()

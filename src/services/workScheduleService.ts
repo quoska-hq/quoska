@@ -1,9 +1,6 @@
 import { addDays } from "@/services/holidayService";
-import {
-  normalizeWorkSchedule,
-  type WorkdayKey,
-  type WorkSchedule,
-} from "@/types/work-schedule";
+import { normalizeEmploymentScheduleForDate } from "@/types/employment-schedule";
+import { type WorkdayKey } from "@/types/work-schedule";
 
 const JS_DAY_TO_WORKDAY: readonly WorkdayKey[] = [
   "sunday",
@@ -27,7 +24,11 @@ export function scheduledMinutesForDate(
   date: string,
   fallbackWeeklyHours = 40,
 ): number {
-  const schedule = normalizeWorkSchedule(scheduleValue, fallbackWeeklyHours);
+  const schedule = normalizeEmploymentScheduleForDate(
+    scheduleValue,
+    date,
+    fallbackWeeklyHours,
+  );
   return schedule[workdayForDate(date)];
 }
 
@@ -69,9 +70,9 @@ export function calculateScheduleTargetMinutesForRange(
 }
 
 export function isScheduledWorkday(
-  schedule: WorkSchedule,
+  schedule: unknown,
   date: string,
   holidayDates: ReadonlySet<string>,
 ): boolean {
-  return !holidayDates.has(date) && schedule[workdayForDate(date)] > 0;
+  return !holidayDates.has(date) && scheduledMinutesForDate(schedule, date) > 0;
 }

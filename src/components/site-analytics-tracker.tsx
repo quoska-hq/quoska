@@ -6,7 +6,7 @@ import { captureSignupAttribution } from "@/lib/signup-attribution";
 
 const PRIVATE_PREFIXES = [
   "/_next", "/api", "/app", "/auth", "/setup", "/login",
-  "/register", "/forgot-password", "/icons", "/product",
+  "/register", "/forgot-password", "/icons", "/product", "/preview",
 ];
 
 export function SiteAnalyticsTracker() {

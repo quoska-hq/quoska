@@ -10,6 +10,7 @@ import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import type { ApiResponse } from "@/types/api";
 import { setupProfileSchema, setupScheduleSchema } from "@/types/setup";
 import { z } from "zod";
+import { presentEmploymentSchedule } from "@/services/employeeScheduleService";
 
 export async function GET() {
   try {
@@ -27,7 +28,7 @@ export async function GET() {
 
     const { data: employee } = await supabase
       .from("employees")
-      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, bundesland")
+      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, employment_schedule, employment_start_date, initial_overtime_minutes, bundesland")
       .eq("id", employeeId)
       .single();
 
@@ -39,7 +40,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { data: employee, error: null },
+      { data: presentEmploymentSchedule(employee), error: null },
       { status: 200 },
     );
   } catch (error) {
@@ -126,7 +127,7 @@ export async function PATCH(request: Request) {
       .update(updates)
       .eq("id", authResult.data.employeeId)
       .eq("tenant_id", authResult.data.tenantId)
-      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, bundesland")
+      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, employment_schedule, employment_start_date, initial_overtime_minutes, bundesland")
       .single();
 
     if (error || !employee) {
@@ -136,7 +137,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    return NextResponse.json({ data: employee, error: null });
+    return NextResponse.json({ data: presentEmploymentSchedule(employee), error: null });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
