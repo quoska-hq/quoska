@@ -25,9 +25,10 @@ export function PlanningModuleCard() {
   const { user } = useSupabase();
   const [confirm, setConfirm] = useState(false);
   const mutation = useMutation({
-    mutationFn: (enabled: boolean) => {
+    mutationFn: async (enabled: boolean) => {
       if (!status.data) throw new Error("Bitte den Modulstatus erneut laden.");
-      return planningModuleFetch({ enabled, version: status.data.version });
+      const current = await planningModuleFetch();
+      return planningModuleFetch({ enabled, version: current.version });
     },
     onSuccess: (data) => {
       cache.setQueryData(["planning-module", user?.id], data);

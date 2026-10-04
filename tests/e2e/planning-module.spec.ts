@@ -211,7 +211,9 @@ test.describe("Optional planning module", () => {
             })
           ).status(),
         ).toBe(403);
-        await page.goto("/app/settings");
+        await page
+          .getByRole("link", { name: "Einstellungen", exact: true })
+          .click();
         await page
           .getByRole("button", { name: "Modul deaktivieren", exact: true })
           .click();
