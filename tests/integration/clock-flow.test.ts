@@ -8,6 +8,7 @@ import { describe, test, expect, vi } from "vitest";
 import {
   calculateNetWorkMinutes,
   getBreakWarnings,
+  getFullComplianceStatus,
 } from "@/services/complianceService";
 import type { TimeEntry, BreakSession } from "@/types/database";
 
@@ -288,6 +289,26 @@ describe("Network failure handling", () => {
 // ---------------------------------------------------------------------------
 
 describe("Full day cycle", () => {
+  test("a project switch keeps the shift's break and rest checks while weekly hours count each segment once", () => {
+    const first: TimeEntry = {
+      id: "first", tenant_id: "tenant", employee_id: "worker", date: "2026-05-31",
+      clock_in: "2026-05-31T18:00:00Z", clock_out: "2026-06-01T00:00:00Z",
+      break_minutes: 15, status: "completed", notes: null, created_at: "", updated_at: "", deleted_at: null,
+      clock_session_id: "first", clock_session_started_at: "2026-05-31T18:00:00Z",
+    };
+    const active: TimeEntry = { ...first, id: "second", date: "2026-06-01", status: "running",
+      clock_in: first.clock_out!, clock_out: null, break_minutes: 0 };
+    const previousShift = { ...first, clock_in: "2026-05-31T08:00:00Z", clock_out: "2026-05-31T12:00:00Z" };
+    const params = { activeEntry: active, completedSessionEntries: [first], lastCompletedEntry: previousShift,
+      weekEntries: [], nowIso: "2026-06-01T02:00:00Z" };
+    const status = getFullComplianceStatus(params);
+    expect(status).toMatchObject({ weekMinutes: 120, workMinutesToday: 465, breakMinutesToday: 15 });
+    expect(status.warnings.map(warning => warning.category)).toContain("rest_period");
+    expect(status.warnings.map(warning => warning.category)).toContain("break");
+    expect(getFullComplianceStatus({ ...params, weekEntries: [first], lastCompletedEntry: null })).toMatchObject({
+      weekMinutes: 465, warnings: [expect.objectContaining({ category: "break" })],
+    });
+  });
   test("8h shift with 35min break = 8h25m net", () => {
     const net = calculateNetWorkMinutes("2026-05-30T08:00:00.000Z", "2026-05-30T17:00:00.000Z", 35, "2026-05-30T08:00:00.000Z");
     expect(net).toBe(505);

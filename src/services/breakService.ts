@@ -68,8 +68,15 @@ export async function startBreak(
     .from("time_entries")
     .update({ status: "paused" })
     .eq("id", timeEntryId)
-    .eq("tenant_id", tenantId);
+    .eq("tenant_id", tenantId)
+    .eq("employee_id", employeeId)
+    .eq("status", "running")
+    .is("clock_out", null)
+    .is("deleted_at", null)
+    .select("id")
+    .single();
 
+  if (statusError?.code === "PGRST116") return failure("Du musst eingestempelt sein, um eine Pause zu starten");
   if (statusError) {
     console.error("Failed to pause time entry:", statusError);
     return failure("Pause konnte nicht gestartet werden");
@@ -91,7 +98,12 @@ export async function startBreak(
     await supabase
       .from("time_entries")
       .update({ status: "running" })
-      .eq("id", timeEntryId);
+      .eq("id", timeEntryId)
+      .eq("tenant_id", tenantId)
+      .eq("employee_id", employeeId)
+      .eq("status", "paused")
+      .is("clock_out", null)
+      .is("deleted_at", null);
 
     console.error("Failed to create break session:", breakError);
     return failure("Pause konnte nicht gestartet werden");
@@ -151,7 +163,7 @@ export async function endBreak(
     tenantId,
     breakSession.time_entry_id,
   );
-  if (!entry || entry.employee_id !== employeeId) {
+  if (!entry || entry.employee_id !== employeeId || entry.status !== "paused") {
     return failure("Ungültiger Zeiteintrag");
   }
 
@@ -174,9 +186,11 @@ export async function endBreak(
     })
     .eq("id", breakSessionId)
     .eq("tenant_id", tenantId)
+    .is("break_end", null)
     .select("*")
     .single();
 
+  if (breakUpdateError?.code === "PGRST116") return failure("Diese Pause ist bereits beendet");
   if (breakUpdateError || !updatedBreak) {
     console.error("Failed to end break:", breakUpdateError);
     return failure("Pause konnte nicht beendet werden");
@@ -202,7 +216,11 @@ export async function endBreak(
       status: "running",
     })
     .eq("id", breakSession.time_entry_id)
-    .eq("tenant_id", tenantId);
+    .eq("tenant_id", tenantId)
+    .eq("employee_id", employeeId)
+    .eq("status", "paused")
+    .is("clock_out", null)
+    .is("deleted_at", null);
 
   if (entryUpdateError) {
     console.error("Failed to update time entry after break:", entryUpdateError);

@@ -20,6 +20,7 @@ import { ActivityGrid, type DayActivity } from "@/components/activity-grid";
 import { DayEntryCard } from "@/components/day-entry-card";
 import { ManualTimeEntryDialog } from "@/components/manual-time-entry-dialog";
 import { EmployeeTimeBalanceCards } from "@/components/employee-time-balance-cards";
+import { PersonalProjectGoalsCard } from "@/components/personal-project-goals-card";
 import { getWeekBoundsForOffset } from "@/config/client/date-utils";
 import { formatDateFullDE } from "@/config/client/date-utils";
 import { correctionChangeSummary } from "@/lib/correction-format";
@@ -168,6 +169,7 @@ export function EmployeeSelfService() {
               variant="ghost"
               size="icon-xs"
               className="size-7"
+              aria-label="Vorwoche"
               onClick={() => setWeekOffset((w) => w - 1)}
             >
               <ChevronLeft className="size-4" />
@@ -179,6 +181,7 @@ export function EmployeeSelfService() {
               variant="ghost"
               size="icon-xs"
               className="size-7"
+              aria-label="Folgewoche"
               onClick={() => setWeekOffset((w) => w + 1)}
               disabled={weekOffset >= 0}
             >
@@ -206,6 +209,8 @@ export function EmployeeSelfService() {
             isCurrentWeek={weekOffset === 0}
           />
         )}
+
+        <PersonalProjectGoalsCard weekStart={start} />
 
         {authInfo?.role === "employee" && corrections?.some((request) => request.request_type === "missing_entry") && (
           <Card className="my-4">

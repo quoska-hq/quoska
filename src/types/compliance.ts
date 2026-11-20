@@ -88,6 +88,7 @@ export interface ClockStatusResponse {
   employeeId: string;
   lastProjectId: string | null;
   staleActiveEntry?: boolean;
+  projectSwitchRequiresReview?: boolean;
   activeEntry: TimeEntry | null;
   activeBreak: BreakSession | null;
   shortInterruptions?: BreakSession[];
@@ -97,4 +98,8 @@ export interface ClockStatusResponse {
   /** Cumulative surplus (+) or deficit (-) from previous days in the current month.
    *  Resets at the start of each month. Used to show a running balance. */
   monthCarryOverMinutes: number;
+}
+
+export function requiresClockOutReview(clockIn: string, now: string): boolean {
+  return Date.parse(now) - Date.parse(clockIn) > 10 * 60 * 60_000;
 }

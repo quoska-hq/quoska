@@ -119,6 +119,33 @@ test.describe("Project search and remembered selection", () => {
     }
   });
 
+  test("switches directly to the other assigned project and keeps the two time entries contiguous", async ({ page }) => {
+    await loginAs(page, env.employeeEmail);
+    await page.goto("/app/clock");
+    await chooseProject(page, PROJECT_NAME);
+    await page.getByRole("button", { name: /^stempeln$/i }).click();
+    const switched = page.waitForResponse((response) => response.url().endsWith("/api/v1/clock/switch-project"));
+    await page.getByRole("button", { name: /heizung wartung.*wechseln/i }).click();
+    expect((await switched).ok()).toBe(true);
+    await expect(page.getByRole("button", { name: /website redesign.*wechseln/i })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("button", { name: /website redesign.*wechseln/i })).toBeVisible();
+    const { data: entries, error } = await adminClient.from("time_entries")
+      .select("id, project_id, clock_in, clock_out, status")
+      .eq("employee_id", env.employeeEmpId).order("clock_in");
+    expect(error).toBeNull();
+    expect(entries).toHaveLength(2);
+    expect(entries![0]).toMatchObject({ project_id: env.projectId, status: "completed" });
+    expect(entries![1]).toMatchObject({ project_id: secondProjectId, status: "running", clock_out: null });
+    expect(entries![0].clock_out).toBe(entries![1].clock_in);
+    const staleRequest = await page.request.post("/api/v1/clock/switch-project", {
+      data: { entryId: entries![0].id, projectId: secondProjectId },
+    });
+    expect(staleRequest.status()).toBe(409);
+    await page.getByRole("button", { name: /ausstempeln/i }).click();
+    await expect(selector(page)).toContainText("Heizung Wartung");
+  });
+
   test("keeps choices separate for different employees in the same browser", async ({ page }) => {
     await adminClient.from("project_assignments").insert({
       tenant_id: env.tenantId, project_id: secondProjectId, employee_id: env.employee2EmpId,

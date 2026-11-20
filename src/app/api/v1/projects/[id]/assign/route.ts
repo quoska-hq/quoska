@@ -12,7 +12,7 @@ import { createClient } from "@/config/supabase/server";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { assignEmployees, unassignEmployee, replaceAssignments } from "@/services/projectService";
 import { getAssignmentsForProject } from "@/repos/projectRepo";
-import { assignEmployeesSchema } from "@/types/project";
+import { assignEmployeesSchema, replaceProjectAssignmentsSchema } from "@/types/project";
 import type { ApiResponse } from "@/types/api";
 import { z } from "zod";
 
@@ -134,8 +134,8 @@ export async function PUT(
       );
     }
 
-    const body: unknown = await request.json();
-    const parsed = assignEmployeesSchema.safeParse(body);
+    const body: unknown = await request.json().catch(() => null);
+    const parsed = replaceProjectAssignmentsSchema.safeParse(body);
     if (!parsed.success) {
       const firstError = parsed.error.issues[0];
       return NextResponse.json<ApiResponse<boolean>>(

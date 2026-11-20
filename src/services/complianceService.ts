@@ -198,6 +198,7 @@ export function getWeeklyLimitWarnings(
 
 interface FullComplianceParams {
   activeEntry: TimeEntry | null;
+  completedSessionEntries?: TimeEntry[];
   weekEntries: TimeEntry[];
   lastCompletedEntry: TimeEntry | null;
   nowIso: string;
@@ -212,17 +213,23 @@ export function getFullComplianceStatus(
   const warnings: ComplianceWarning[] = [];
 
   // Calculate today's net work minutes from active entry
+  let activeMinutes = 0;
   let workMinutesToday = 0;
   let breakMinutesToday = 0;
 
   if (activeEntry) {
     breakMinutesToday = activeEntry.break_minutes;
-    workMinutesToday = calculateNetWorkMinutes(
+    activeMinutes = calculateNetWorkMinutes(
       activeEntry.clock_in,
       activeEntry.clock_out,
       activeEntry.break_minutes,
       nowIso,
     );
+    workMinutesToday = activeMinutes;
+    for (const entry of params.completedSessionEntries ?? []) {
+      workMinutesToday += calculateNetWorkMinutes(entry.clock_in, entry.clock_out, entry.break_minutes, nowIso);
+      breakMinutesToday += entry.break_minutes;
+    }
 
     // Break warnings
     warnings.push(...getBreakWarnings(workMinutesToday, breakMinutesToday));
@@ -230,7 +237,7 @@ export function getFullComplianceStatus(
     // Rest period warning (comparing against last completed entry)
     const restWarning = getRestPeriodWarning(
       lastCompletedEntry?.clock_out ?? null,
-      activeEntry.clock_in,
+      activeEntry.clock_session_started_at ?? activeEntry.clock_in,
     );
     if (restWarning) warnings.push(restWarning);
   }
@@ -238,29 +245,10 @@ export function getFullComplianceStatus(
   // Daily limit warnings
   warnings.push(...getDailyLimitWarnings(workMinutesToday));
 
-  // Weekly total — weekEntries excludes the active running entry (filtered by
-  // getWeekEntries), so we must add its net minutes separately.
-  let weekMinutes = weekEntries.reduce(
-    (sum, entry) => {
-      if (entry.clock_out) {
-        return sum + diffInMinutes(entry.clock_in, entry.clock_out);
-      }
-      // Shouldn't happen (weekEntries excludes running), but handle gracefully
-      return sum + diffInMinutes(entry.clock_in, nowIso);
-    },
-    0,
-  );
-
-  // Subtract breaks from completed week entries
-  weekMinutes -= weekEntries.reduce(
-    (sum, entry) => sum + entry.break_minutes,
-    0,
-  );
-
-  // Add the active (running) entry's net minutes to the weekly total
-  if (activeEntry) {
-    weekMinutes += workMinutesToday;
-  }
+  // Earlier project segments in this week already count as completed entries.
+  const weekMinutes = weekEntries.reduce((sum, entry) => entry.clock_out
+    ? sum + calculateNetWorkMinutes(entry.clock_in, entry.clock_out, entry.break_minutes, nowIso)
+    : sum, activeMinutes);
 
   const weeklyWarning = getWeeklyLimitWarnings(weekMinutes);
   if (weeklyWarning) warnings.push(weeklyWarning);

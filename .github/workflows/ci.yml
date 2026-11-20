@@ -183,6 +183,13 @@ jobs:
           docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/completed-entry-corrections.sql
           docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/employee-work-schedule-history.sql
 
+      - name: Check project targets and clock project switching
+        run: |
+          TEST_DB_CONTAINER=$(docker ps --filter name=supabase_db_ --format '{{.ID}}')
+          test -n "$TEST_DB_CONTAINER"
+          docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/project-weekly-targets.sql
+          docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/clock-project-switch.sql
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 

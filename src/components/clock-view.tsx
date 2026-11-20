@@ -15,7 +15,7 @@ import type { ApiResponse } from "@/types/api";
 import type { ClockStatusResponse } from "@/types/compliance";
 import { ComplianceWarnings } from "@/components/compliance-warnings";
 import { useClockMutations } from "@/components/clock-mutations";
-import { ProjectSelector } from "@/components/project-selector";
+import { ProjectSelector, ProjectSwitchButton } from "@/components/project-selector";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +29,7 @@ import {
 import { formatDuration } from "@/components/clock-format";
 import { ClockMainCard } from "@/components/clock-main-card";
 import { ClockDayProgress } from "@/components/clock-day-progress";
+import { ClockProjectGoal } from "@/components/clock-project-goal";
 import { TodaySummaryCard } from "@/components/clock-today-summary";
 import { WeekSummaryCard } from "@/components/clock-week-summary";
 import { useLiveElapsedSeconds } from "@/components/use-live-clock";
@@ -39,7 +40,7 @@ import { useClockProject } from "@/hooks/use-clock-project";
 
 export function ClockView() {
   const [confirmEarlyEnd, setConfirmEarlyEnd] = useState(false);
-  const [displayMinutes, setDisplayMinutes] = useState(0);
+  const [elapsed, setElapsed] = useState<{ entryId: string; minutes: number } | null>(null);
   const [pulsePhase, setPulsePhase] = useState(false);
   // Optimistic UI state: tracks what the user just pressed
   const [optimisticAction, setOptimisticAction] = useState<OptimisticAction>(null);
@@ -71,7 +72,8 @@ export function ClockView() {
   const activeBreakSeconds = useLiveElapsedSeconds(activeBreak?.break_start, 0);
 
   const { projects: myProjects, selectedProject, setSelectedProject, isLoading: projectsLoading } = useClockProject(statusData);
-  const projectName = myProjects?.find((p) => p.id === activeEntry?.project_id)?.name;
+  const projectName = myProjects.find((p) => p.id === activeEntry?.project_id)?.name;
+  const alternateProjects = myProjects.filter((project) => project.id !== activeEntry?.project_id);
 
   const updateProjectMutation = useMutation({
     mutationFn: async ({ entryId, projectId }: { entryId: string; projectId: string }) => {
@@ -87,8 +89,10 @@ export function ClockView() {
 
   const {
     clockInMutation, clockOutMutation, pauseMutation, resumeMutation,
-    isProcessing, error,
+    switchProject, isSwitchingProject, projectSwitchError,
+    isProcessing: clockMutationPending, error,
   } = useClockMutations(activeEntry, activeBreak, selectedProject);
+  const isProcessing = clockMutationPending || updateProjectMutation.isPending;
 
   // Live duration counter
   useEffect(() => {
@@ -98,6 +102,7 @@ export function ClockView() {
     }
     if (!activeEntry?.clock_in) return;
 
+    const entryId = activeEntry.id;
     const clockInMs = Date.parse(activeEntry.clock_in);
     const breakMin = activeEntry.break_minutes ?? 0;
 
@@ -106,14 +111,14 @@ export function ClockView() {
         ? Date.parse(activeBreak.break_start)
         // eslint-disable-next-line @quoska/legal/no-client-timestamps
         : Date.now();
-      setDisplayMinutes(Math.round(Math.abs(endMs - clockInMs) / 60_000) - breakMin);
+      setElapsed({ entryId, minutes: Math.round(Math.abs(endMs - clockInMs) / 60_000) - breakMin });
     };
 
     tick();
     if (activeBreak) return;
     intervalRef.current = setInterval(tick, 30_000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [activeBreak, activeEntry?.clock_in, activeEntry?.break_minutes]);
+  }, [activeBreak, activeEntry?.id, activeEntry?.clock_in, activeEntry?.break_minutes]);
 
   // --- Balance calculation ---
   const dailyTargetMinutes = weekSummary
@@ -124,9 +129,9 @@ export function ClockView() {
   // When running: live counter + previously completed sessions today
   // When not running: all completed sessions from the API summary
   const completedTodayMinutes = todaySummary?.netMinutes ?? 0;
-  const todayWorkedMinutes = activeEntry
-    ? displayMinutes + completedTodayMinutes
-    : completedTodayMinutes;
+  const activeMinutes = activeEntry && elapsed?.entryId === activeEntry.id ? elapsed.minutes : 0;
+  const todayWorkedMinutes = completedTodayMinutes + activeMinutes;
+  const todayBreakMinutes = (todaySummary?.breakMinutes ?? 0) + (activeEntry?.break_minutes ?? 0);
 
   const todayBalance = todayWorkedMinutes - dailyTargetMinutes;
 
@@ -252,31 +257,51 @@ export function ClockView() {
               <ProjectSelector projects={myProjects} value={selectedProject} onValueChange={setSelectedProject} />
             )}
 
-            {activeEntry?.status === "running" && !activeBreak && !activeEntry.project_id && (
-              <ProjectSelector projects={myProjects} value={null} disabled={updateProjectMutation.isPending} onValueChange={(v) => {
-                if (v && activeEntry) updateProjectMutation.mutate({ entryId: activeEntry.id, projectId: v }, {
-                  onSuccess: () => setSelectedProject(v),
-                });
-              }} />
-            )}
-
             {activeEntry?.status === "running" && !activeBreak && (
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handlePause}
-                disabled={isProcessing && !optimisticAction}
-                className="w-full gap-2"
-              >
-                <Pause className="size-4" />
-                Pause starten
-              </Button>
+              <div className="flex flex-wrap gap-2 [&>*]:flex-1">
+                {!statusData?.staleActiveEntry && !statusData?.projectSwitchRequiresReview && (
+                  <ProjectSwitchButton
+                    projects={alternateProjects}
+                    onSwitch={(projectId) => switchProject(activeEntry.id, projectId)}
+                    disabled={isProcessing || Boolean(optimisticAction)}
+                    pending={isSwitchingProject}
+                  />
+                )}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handlePause}
+                  disabled={isProcessing || Boolean(optimisticAction)}
+                  className="min-h-11 gap-2 px-3"
+                >
+                  <Pause className="size-4" />
+                  Pause starten
+                </Button>
+              </div>
             )}
 
-            {activeEntry && activeEntry.break_minutes > 0 && (
+            {projectSwitchError && (
+              <Alert variant="destructive">
+                <AlertDescription>{projectSwitchError}</AlertDescription>
+              </Alert>
+            )}
+
+            {activeEntry?.status === "running" && !activeBreak && !activeEntry.project_id && (
+              <ProjectSelector projects={myProjects} label="Projekt nachträglich zuordnen" value={null} disabled={isProcessing || Boolean(optimisticAction)}
+                onValueChange={(projectId) => {
+                  if (projectId) updateProjectMutation.mutate({ entryId: activeEntry.id, projectId }, {
+                    onSuccess: () => setSelectedProject(projectId),
+                  });
+                }}
+              />
+            )}
+
+            <ClockProjectGoal projectId={activeEntry ? activeEntry.project_id ?? null : selectedProject} isTracking={Boolean(activeEntry)} />
+
+            {activeEntry && todayBreakMinutes > 0 && (
               <div className="flex items-center gap-1.5 px-1 text-sm text-muted-foreground">
                 <Coffee className="size-3.5" />
-                Pause heute: {formatDuration(activeEntry.break_minutes)}
+                Pause heute: {formatDuration(todayBreakMinutes)}
               </div>
             )}
 

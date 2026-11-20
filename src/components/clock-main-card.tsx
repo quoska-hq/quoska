@@ -69,6 +69,8 @@ export function ClockMainCard({
   const breakRemainingSeconds = activeBreak
     ? Math.max(0, MIN_BREAK_BLOCK_SECONDS - activeBreakSeconds)
     : 0;
+  const isSwitchedProject = activeEntry?.clock_session_started_at
+    && Date.parse(activeEntry.clock_session_started_at) !== Date.parse(activeEntry.clock_in);
   const buttonHint = btn.label === "Ausstempeln"
     ? "Arbeitszeit beenden"
     : btn.label === "Pause beenden"
@@ -93,7 +95,7 @@ export function ClockMainCard({
               {activeBreak
                 ? `Pause seit ${formatTimeLocal(activeBreak.break_start)}`
                 : activeEntry
-                  ? `Seit ${formatTimeLocal(activeEntry.clock_in)}`
+                  ? `${isSwitchedProject ? "Projekt seit" : "Seit"} ${formatTimeLocal(activeEntry.clock_in)}`
                   : "Aktiv"
               }
             </Badge>
@@ -210,9 +212,9 @@ export function ClockMainCard({
 
         {/* Project info while running */}
         {activeEntry?.project_id && projectName && !activeBreak && (
-          <Badge variant="outline" className="gap-1 text-xs rounded-full">
-            <Briefcase className="size-3" />
-            {projectName}
+          <Badge role="status" variant="outline" className="h-auto max-w-full gap-1 rounded-full whitespace-normal text-xs">
+            <Briefcase className="size-3 shrink-0" aria-hidden />
+            <span className="min-w-0 [overflow-wrap:anywhere]">{projectName}</span>
           </Badge>
         )}
 

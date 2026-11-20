@@ -26,7 +26,7 @@ function diffInMinutes(isoA: string, isoB: string): number {
 // ---------------------------------------------------------------------------
 
 /** Calculate net work minutes for a completed time entry. */
-export function netMinutesForEntry(entry: TimeEntry): number {
+export function netMinutesForEntry(entry: Pick<TimeEntry, "clock_in" | "clock_out" | "break_minutes">): number {
   if (!entry.clock_out) return 0;
   return diffInMinutes(entry.clock_in, entry.clock_out) - entry.break_minutes;
 }

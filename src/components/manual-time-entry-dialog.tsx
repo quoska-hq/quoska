@@ -69,6 +69,10 @@ export function ManualTimeEntryDialog({
     },
     enabled: allowEmployeeSelection,
   });
+  const employeeOptions = (employees ?? []).map((employee) => ({
+    value: employee.id,
+    label: `${employee.first_name} ${employee.last_name}`,
+  }));
 
   const automaticEnabled = automaticOverride ?? settings?.automaticBreaksEnabled ?? true;
   const requiresApproval = selfService && (settings?.missingTimeApprovalRequired ?? true);
@@ -104,6 +108,7 @@ export function ManualTimeEntryDialog({
         queryClient.invalidateQueries({ queryKey: ["employeeEntries"] }),
         queryClient.invalidateQueries({ queryKey: ["weeklyReport"] }),
         queryClient.invalidateQueries({ queryKey: ["projectReport"] }),
+        queryClient.invalidateQueries({ queryKey: ["projectBalances"] }),
         queryClient.invalidateQueries({ queryKey: ["adminCockpit"] }),
         queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
         queryClient.invalidateQueries({ queryKey: ["managerDashboard"] }),
@@ -137,12 +142,12 @@ export function ManualTimeEntryDialog({
         <div className="space-y-4">
           {allowEmployeeSelection && !targetEmployee && (
             <div className="space-y-2">
-              <Label>Mitarbeiter</Label>
-              <Select value={employeeId} onValueChange={(value) => setEmployeeId(value ?? "")}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="Mitarbeiter auswählen" /></SelectTrigger>
+              <Label htmlFor="manual-employee">Mitarbeiter</Label>
+              <Select items={employeeOptions} value={employeeId || null} onValueChange={(value) => setEmployeeId(value ?? "")}>
+                <SelectTrigger id="manual-employee" className="w-full"><SelectValue placeholder="Mitarbeiter auswählen" /></SelectTrigger>
                 <SelectContent>
-                  {(employees ?? []).map((employee) => (
-                    <SelectItem key={employee.id} value={employee.id}>{employee.first_name} {employee.last_name}</SelectItem>
+                  {employeeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

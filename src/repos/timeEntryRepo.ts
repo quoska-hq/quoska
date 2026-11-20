@@ -141,6 +141,34 @@ export async function getLatestCompletedEntry(
   return data;
 }
 
+/** Segments already booked during the running shift, and the last clock-out before it. */
+export async function getClockSessionHistory(supabase: SupabaseClient, activeEntry: TimeEntry) {
+  const { tenant_id, employee_id, clock_session_id, clock_session_started_at } = activeEntry;
+  const completed = () => supabase.from("time_entries").select("*")
+    .eq("tenant_id", tenant_id).eq("employee_id", employee_id)
+    .eq("status", "completed").is("deleted_at", null);
+  const pageOfSegments = (offset: number) => completed().eq("clock_session_id", clock_session_id)
+    .order("id").range(offset, offset + 999);
+  const [firstPage, previous] = await Promise.all([
+    pageOfSegments(0),
+    completed().or(`clock_session_id.is.null,clock_session_id.neq.${clock_session_id}`)
+      .lte("clock_out", clock_session_started_at).order("clock_out", { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  if (previous.error) throw previous.error;
+  const completedSessionEntries: TimeEntry[] = [];
+  let page = firstPage;
+  while (true) {
+    if (page.error) throw page.error;
+    completedSessionEntries.push(...page.data);
+    if (page.data.length < 1000) break;
+    page = await pageOfSegments(completedSessionEntries.length);
+  }
+  return {
+    completedSessionEntries,
+    lastCompletedEntry: previous.data as TimeEntry | null,
+  };
+}
+
 /**
  * Get all completed time entries for an employee in a given week.
  * Used for weekly hours total and 48h/week compliance check.
