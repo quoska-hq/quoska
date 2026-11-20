@@ -56,7 +56,8 @@ test.describe("Wochenziele und Projektstundenkonten", () => {
       expect.objectContaining({ projectId, employeeId: employeeEmpId, targetMinutes: 180, actualMinutes: 210, balanceMinutes: 30 }),
       expect.objectContaining({ projectId: secondId, targetMinutes: 300, actualMinutes: 0, balanceMinutes: -300 }),
     ]));
-    await page.goto("/app/reports?tab=projects");
+    await page.goto("/app/reports");
+    await page.getByRole("tab", { name: "Projekte", exact: true }).click();
     await page.getByRole("button", { name: "Vorwoche", exact: true }).click();
     await expect(page.getByRole("region", { name: "Projektkonten" }).getByRole("cell", { name: "Zweite Arbeitsstelle", exact: true })).toBeVisible();
 
