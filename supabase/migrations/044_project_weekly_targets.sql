@@ -2,7 +2,9 @@ ALTER TABLE public.projects
   ADD CONSTRAINT projects_tenant_id_unique UNIQUE (tenant_id, id);
 
 CREATE TABLE public.project_weekly_targets (
-  tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
+  -- Both composite foreign keys enforce tenant membership. A third foreign key
+  -- here would expose a second PostgREST relationship from employees to tenants.
+  tenant_id uuid NOT NULL,
   project_id uuid NOT NULL,
   employee_id uuid NOT NULL,
   effective_from date NOT NULL CHECK (effective_from BETWEEN '0001-01-01' AND '9999-12-31'),
