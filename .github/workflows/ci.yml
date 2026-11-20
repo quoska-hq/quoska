@@ -139,7 +139,8 @@ jobs:
       - name: Setup Supabase
         uses: supabase/setup-cli@v3
         with:
-          version: latest
+          # CLI 3 removes the [inbucket] config used by this test setup.
+          version: 2.119.0
 
       - name: Start local Supabase
         run: supabase start
