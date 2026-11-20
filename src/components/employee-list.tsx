@@ -42,6 +42,10 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["projectAssignments"] });
+      queryClient.invalidateQueries({ queryKey: ["projectTargets"] });
+      queryClient.invalidateQueries({ queryKey: ["projectReport"] });
+      queryClient.invalidateQueries({ queryKey: ["projectBalances"] });
     },
   });
 

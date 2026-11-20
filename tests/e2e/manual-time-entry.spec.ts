@@ -119,8 +119,12 @@ test.describe("Manual time entries and automatic breaks", () => {
     await page.getByRole("button", { name: "Zeit hinzufügen" }).click();
 
     const dialog = page.getByRole("dialog", { name: "Zeit manuell hinzufügen" });
-    await dialog.getByRole("combobox").click();
+    const employeeSelector = dialog.getByRole("combobox", { name: "Mitarbeiter", exact: true });
+    const employeeLabel = employeeSelector.locator('[data-slot="select-value"]');
+    await expect(employeeLabel).toHaveText("Mitarbeiter auswählen");
+    await employeeSelector.click();
     await page.getByRole("option", { name: "Tina Team" }).click();
+    await expect(employeeLabel).toHaveText("Tina Team");
     await dialog.getByLabel("Datum").click();
     await page.locator(`[data-day="${calendarDay(previousDay)}"]`).click();
     // Wait for the calendar to close and restore focus before typing.

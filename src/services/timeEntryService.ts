@@ -168,6 +168,22 @@ export async function clockOut(
     return failure("Du bist nicht eingestempelt");
   }
 
+  if (entry.clock_session_id) {
+    const { data, error } = await supabase.rpc("transition_clock_project", {
+      p_tenant_id: tenantId,
+      p_employee_id: employeeId,
+      p_entry_id: timeEntryId,
+      p_project_id: null,
+    });
+    if (error?.code === "P0002") return failure("Du bist nicht eingestempelt");
+    if (error?.code === "P0001") return failure(error.message);
+    if (error || !data) {
+      console.error("Clock out after project switch failed:", error);
+      return failure("Ausstempeln fehlgeschlagen. Bitte versuche es erneut.");
+    }
+    return success(data as TimeEntry);
+  }
+
   const grossMinutes = Math.round((Date.parse(nowIso) - Date.parse(entry.clock_in)) / 60_000);
   const { data: tenant } = await supabase
     .from("tenants")
@@ -191,9 +207,15 @@ export async function clockOut(
     })
     .eq("id", timeEntryId)
     .eq("tenant_id", tenantId)
+    .eq("employee_id", employeeId)
+    .eq("status", "running")
+    .eq("updated_at", entry.updated_at)
+    .is("clock_out", null)
+    .is("deleted_at", null)
     .select("*")
     .single();
 
+  if (updateError?.code === "PGRST116") return failure("Du bist nicht eingestempelt");
   if (updateError || !updated) {
     console.error("Clock out failed:", updateError);
     return failure("Ausstempeln fehlgeschlagen. Bitte versuche es erneut.");

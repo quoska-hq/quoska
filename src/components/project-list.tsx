@@ -7,12 +7,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
 import type { ProjectWithStats } from "@/types";
 import { ProjectFormDialog } from "@/components/project-form-dialog";
 import { ProjectAssignPanel } from "@/components/project-assign-panel";
+import { ProjectTargetsPanel } from "@/components/project-targets-panel";
+import { getLocalToday } from "@/config/client/date-utils";
 import { useEmployees } from "@/hooks/use-employees";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +34,7 @@ export function ProjectList({ canManage, canViewReports }: ProjectListProps) {
   const [search, setSearch] = useState("");
   const [editProject, setEditProject] = useState<ProjectWithStats | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [assignProjectId, setAssignProjectId] = useState<string | null>(null);
+  const [openPanel, setOpenPanel] = useState<{ projectId: string; view: "assignments" | "targets" } | null>(null);
 
   const { data: projects, isLoading, error: loadError, refetch } = useQuery<ProjectWithStats[]>({
     queryKey: ["projects", showInactive],
@@ -48,14 +50,9 @@ export function ProjectList({ canManage, canViewReports }: ProjectListProps) {
 
   const employees = useEmployees();
 
-  const openAssign = useCallback(
-    (projectId: string) => {
-      setAssignProjectId((prev) =>
-        prev === projectId ? null : projectId,
-      );
-    },
-    [],
-  );
+  function togglePanel(projectId: string, view: "assignments" | "targets") {
+    setOpenPanel((previous) => previous?.projectId === projectId && previous.view === view ? null : { projectId, view });
+  }
 
   const createMutation = useMutation({
     mutationFn: async (data: {
@@ -110,9 +107,13 @@ export function ProjectList({ canManage, canViewReports }: ProjectListProps) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Projekt konnte nicht gelöscht werden.");
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["myProjects"] });
+      queryClient.invalidateQueries({ queryKey: ["projectTargets", id] });
+      queryClient.invalidateQueries({ queryKey: ["projectReport"] });
+      queryClient.invalidateQueries({ queryKey: ["projectBalances"] });
+      setOpenPanel((current) => current?.projectId === id ? null : current);
     },
   });
 
@@ -249,6 +250,14 @@ export function ProjectList({ canManage, canViewReports }: ProjectListProps) {
                           Projektbericht
                         </Link>
                       )}
+                      {canManage && (
+                        <Button variant="link" size="xs" className="-mx-1 px-1"
+                          aria-label={`Wochenziele für ${project.name}`}
+                          aria-expanded={openPanel?.projectId === project.id && openPanel.view === "targets"}
+                          onClick={() => togglePanel(project.id, "targets")}>
+                          Wochenziele
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -256,8 +265,9 @@ export function ProjectList({ canManage, canViewReports }: ProjectListProps) {
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    onClick={() => openAssign(project.id)}
+                    onClick={() => togglePanel(project.id, "assignments")}
                     title="Mitarbeiter zuordnen"
+                    aria-expanded={openPanel?.projectId === project.id && openPanel.view === "assignments"}
                   >
                     <Users className="size-3.5" />
                   </Button>
@@ -281,15 +291,23 @@ export function ProjectList({ canManage, canViewReports }: ProjectListProps) {
                 </div>}
               </div>
 
-              {canManage && assignProjectId === project.id && (
+              {canManage && openPanel?.projectId === project.id && (
                 employees.isLoading ? <p className="mt-3 text-sm text-muted-foreground">Mitarbeiter werden geladen…</p>
                 : employees.error ? <div role="alert" className="mt-3 space-y-2 text-sm text-red-700">
                   <p>{employees.error.message}</p>
                   <Button variant="outline" size="sm" onClick={() => employees.refetch()}>Erneut laden</Button>
-                </div> : <ProjectAssignPanel
+                </div> : openPanel.view === "targets" ? <ProjectTargetsPanel
+                  projectId={project.id}
+                  projectName={project.name}
+                  projectActive={project.active}
+                  activeEmployees={employees.data?.active ?? []}
+                  formerEmployees={employees.data?.deactivated ?? []}
+                  today={employees.data?.defaults.employmentStartDate ?? getLocalToday()}
+                  onOpenAssignments={() => setOpenPanel({ projectId: project.id, view: "assignments" })}
+                /> : <ProjectAssignPanel
                   projectId={project.id}
                   employees={employees.data?.active ?? []}
-                  onClose={() => setAssignProjectId(null)}
+                  onClose={() => setOpenPanel((current) => current?.projectId === project.id && current.view === "assignments" ? null : current)}
                 />
               )}
             </CardContent>

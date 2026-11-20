@@ -58,6 +58,8 @@ export interface TimeEntry {
   // Optional: a time entry may have no project assigned (DB column defaults to NULL).
   // Made optional so legacy mocks and freshly-created entries are valid.
   project_id?: string | null;
+  clock_session_id?: string | null;
+  clock_session_started_at?: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

@@ -15,6 +15,7 @@ import {
 } from "@/config/client/date-utils";
 import { summarizeProjectBookings } from "@/services/projectReportBuilder";
 import { ExportButtons } from "@/components/export-buttons";
+import { ProjectBalanceTable, useProjectBalances } from "@/components/project-balance-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -113,6 +114,8 @@ export function ProjectReportTable({ initialProjectId }: { initialProjectId?: st
       return json.data;
     },
   });
+  const showBalances = project?.id !== UNASSIGNED_PROJECT;
+  const { data: balances, error: balanceError } = useProjectBalances(start, end, showBalances);
 
   const projects = new Map<string, string>();
   const employees = new Map<string, string>();
@@ -122,6 +125,13 @@ export function ProjectReportTable({ initialProjectId }: { initialProjectId?: st
       employees.set(booking.employee_id, booking.employee_name);
     }
   }
+  for (const row of balances ?? []) {
+    projects.set(row.projectId, row.projectName);
+    employees.set(row.employeeId, row.employeeName);
+  }
+  const visibleBalances = (balances ?? []).filter((row) =>
+    (!project || row.projectId === project.id) && (!employee || row.employeeId === employee.id),
+  );
 
   const { data: linkedProject } = useQuery({
     queryKey: ["reportProjectName", initialProjectId],
@@ -199,6 +209,8 @@ export function ProjectReportTable({ initialProjectId }: { initialProjectId?: st
         <ExportButtons startDate={start} endDate={end} projectId={project?.id} employeeId={employee?.id}
           disabled={isLoading || !!error} />
       </div>
+
+      {showBalances && <ProjectBalanceTable rows={visibleBalances} endDate={end} error={balanceError} />}
 
       {isLoading ? (
         <Skeleton className="h-40 w-full rounded-sm" />

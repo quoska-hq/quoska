@@ -195,6 +195,21 @@ export async function unassignEmployeeFromProject(
   return !error;
 }
 
+/** Replace only changed assignments in one transaction. */
+export async function replaceProjectAssignments(
+  supabase: SupabaseClient,
+  tenantId: string,
+  projectId: string,
+  employeeIds: string[],
+) {
+  const { error } = await supabase.rpc("replace_project_assignments", {
+    p_tenant_id: tenantId,
+    p_project_id: projectId,
+    p_employee_ids: employeeIds,
+  });
+  return error;
+}
+
 /** Get all project assignments for an employee (active projects only). */
 export async function getAssignmentsForEmployee(
   supabase: SupabaseClient,

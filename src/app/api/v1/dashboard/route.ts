@@ -12,7 +12,7 @@ import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import { getTeamStatus, getMissingEntries } from "@/repos/dashboardRepo";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import { getFullComplianceStatus } from "@/services/complianceService";
-import { getWeekEntries, getLatestCompletedEntry } from "@/repos/timeEntryRepo";
+import { getWeekEntries, getLatestCompletedEntry, getClockSessionHistory } from "@/repos/timeEntryRepo";
 import { holidaysToSet } from "@/services/holidayService";
 import type { ApiResponse } from "@/types/api";
 import type { ComplianceWarning } from "@/types/compliance";
@@ -87,16 +87,14 @@ export async function GET() {
           weekStart,
           weekEnd,
         );
-        const lastCompleted = await getLatestCompletedEntry(
-          supabase,
-          tenantId,
-          employee.id,
-        );
+        const sessionHistory = activeEntry.clock_session_id
+          ? await getClockSessionHistory(supabase, activeEntry)
+          : { lastCompletedEntry: await getLatestCompletedEntry(supabase, tenantId, employee.id) };
 
         const compliance = getFullComplianceStatus({
           activeEntry,
           weekEntries,
-          lastCompletedEntry: lastCompleted,
+          ...sessionHistory,
           nowIso,
         });
         warnings = compliance.warnings;

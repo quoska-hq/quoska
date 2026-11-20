@@ -59,7 +59,7 @@ export function TimeEntryEditDialog({
 
   const refresh = () => {
     const keys = new Set([
-      "myTimes", "employeeEntries", "auditTrail", "weeklyReport", "projectReport",
+      "myTimes", "employeeEntries", "auditTrail", "weeklyReport", "projectReport", "projectBalances",
       "projects", "adminCockpit", "managerDashboard", "dashboard", "datev", "clockStatus", "corrections", "myCorrections",
     ]);
     void queryClient.invalidateQueries({

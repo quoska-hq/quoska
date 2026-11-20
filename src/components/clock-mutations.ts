@@ -6,7 +6,10 @@
 
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ApiResponse } from "@/types/api";
+
+const projectSwitchKey = ["clockSwitchProject"];
 
 function useClockMutations(
   activeEntry: { id: string } | null,
@@ -15,6 +18,7 @@ function useClockMutations(
 ) {
   const queryClient = useQueryClient();
   const networkErrorMsg = "Verbindung fehlgeschlagen. Bitte versuche es erneut.";
+  const isSwitchingProject = useIsMutating({ mutationKey: projectSwitchKey }) > 0;
 
   const clockInMutation = useMutation({
     mutationFn: async (notes?: string) => {
@@ -55,6 +59,7 @@ function useClockMutations(
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["clockStatus"] }),
+        queryClient.invalidateQueries({ queryKey: ["projectBalances"] }),
         queryClient.invalidateQueries({ queryKey: ["notificationUnreadCount"] }),
         queryClient.invalidateQueries({ queryKey: ["notifications"] }),
       ]);
@@ -101,7 +106,40 @@ function useClockMutations(
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["clockStatus"] }),
   });
 
+  const switchProjectMutation = useMutation({
+    mutationKey: projectSwitchKey,
+    mutationFn: async ({ entryId, projectId }: { entryId: string; projectId: string }) => {
+      let res;
+      try {
+        res = await fetch("/api/v1/clock/switch-project", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ entryId, projectId }),
+        });
+      } catch {
+        throw new Error(networkErrorMsg);
+      }
+      if (!res.ok) {
+        const json: ApiResponse<unknown> | null = await res.json().catch(() => null);
+        throw new Error(json?.error ?? "Das Projekt konnte nicht gewechselt werden.");
+      }
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        "clockStatus", "myTimes", "employeeEntries", "weeklyReport", "projectReport",
+        "projectBalances", "adminCockpit", "managerDashboard", "presence", "datev",
+      ].map((key) => queryClient.invalidateQueries({ queryKey: [key] })));
+    },
+    onError: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["clockStatus"] }),
+        queryClient.invalidateQueries({ queryKey: ["myProjects"] }),
+      ]);
+    },
+  });
+
   const isProcessing =
+    isSwitchingProject ||
     clockInMutation.isPending ||
     clockOutMutation.isPending ||
     pauseMutation.isPending ||
@@ -125,6 +163,12 @@ function useClockMutations(
     clockOutMutation,
     pauseMutation,
     resumeMutation,
+    switchProject: (entryId: string, projectId: string) => {
+      if (isProcessing || queryClient.isMutating({ mutationKey: projectSwitchKey })) return;
+      switchProjectMutation.mutate({ entryId, projectId });
+    },
+    isSwitchingProject,
+    projectSwitchError: switchProjectMutation.error?.message,
     isProcessing,
     error,
     clearError,

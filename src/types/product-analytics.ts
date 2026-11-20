@@ -22,7 +22,7 @@ export interface ProductData {
   entries: ProductEntry[]; projects: ProductActivity[]; payments?: ProductPayment[];
 }
 export const PRODUCT_ACTIONS = [
-  "clock_in", "clock_out", "clock_pause", "clock_resume", "extension_clock",
+  "clock_in", "clock_out", "clock_pause", "clock_resume", "clock_switch_project", "extension_clock",
   "import", "invite", "setup", "setup_complete", "register", "app_open",
   "report_export", "checkout_start", "upgrade_view", "checkout_cancelled", "plan_limit",
 ] as const;

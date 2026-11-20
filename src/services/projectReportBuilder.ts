@@ -6,7 +6,7 @@ export function reportProjectName(entry: Pick<ReportEntry, "project_id" | "proje
   return entry.project_name ?? (entry.project_id ? "Unbekanntes Projekt" : "Ohne Projekt");
 }
 
-export function reportNetMinutes(entry: ReportEntry): number {
+export function reportNetMinutes(entry: Parameters<typeof netMinutesForEntry>[0]): number {
   return Math.max(0, netMinutesForEntry(entry));
 }
 

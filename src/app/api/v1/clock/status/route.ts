@@ -13,13 +13,14 @@ import { getNowIso, getTodayDate, getWeekBounds, getMonthStart } from "@/config/
 import { getEmployeeFromAuth, getClockStatus } from "@/services/timeEntryService";
 import { isShortInterruption } from "@/config/break-policy";
 import { getActiveBreak, getCompletedBreaksForEntries } from "@/repos/breakSessionRepo";
-import { getMonthEntriesBeforeToday } from "@/repos/timeEntryRepo";
+import { getClockSessionHistory, getMonthEntriesBeforeToday } from "@/repos/timeEntryRepo";
 import {
   getFullComplianceStatus,
   calculateNetWorkMinutes,
 } from "@/services/complianceService";
 import type { ApiResponse } from "@/types/api";
 import type { ClockStatusResponse } from "@/types/compliance";
+import { requiresClockOutReview } from "@/types/compliance";
 import { getEmployeeAbsenceDates } from "@/services/absenceService";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import { addDays } from "@/services/holidayService";
@@ -80,10 +81,15 @@ export async function GET() {
 
     // Calculate compliance
     const nowIso = getNowIso();
+    const sessionStart = activeEntry?.clock_session_started_at ?? activeEntry?.clock_in;
+    const sessionHistory = activeEntry?.clock_session_id
+      ? await getClockSessionHistory(supabase, activeEntry)
+      : undefined;
     const compliance = getFullComplianceStatus({
       activeEntry,
       weekEntries,
       lastCompletedEntry,
+      ...sessionHistory,
       nowIso,
     });
 
@@ -104,7 +110,7 @@ export async function GET() {
     );
 
     if (activeEntry || todayCompletedEntries.length > 0) {
-      const earliestClockIn = activeEntry?.clock_in ?? todayCompletedEntries[0]?.clock_in;
+      const earliestClockIn = todayEntries[0]?.clock_in ?? activeEntry?.clock_in;
       const latestClockOut = todayCompletedEntries.length > 0
         ? todayCompletedEntries[todayCompletedEntries.length - 1].clock_out
         : null;
@@ -209,7 +215,8 @@ export async function GET() {
     const response: ClockStatusResponse = {
       employeeId,
       lastProjectId: (activeEntry ?? lastCompletedEntry)?.project_id ?? null,
-      staleActiveEntry: Boolean(activeEntry && isStaleEntry(activeEntry.clock_in, getNowIso())),
+      staleActiveEntry: Boolean(sessionStart && isStaleEntry(sessionStart, nowIso)),
+      projectSwitchRequiresReview: Boolean(sessionStart && requiresClockOutReview(sessionStart, nowIso)),
       activeEntry,
       activeBreak,
       shortInterruptions,

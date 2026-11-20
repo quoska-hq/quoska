@@ -8,8 +8,8 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ApiResponse } from "@/types/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useProjectAssignments } from "@/hooks/use-project-assignments";
 import { Button } from "@/components/ui/button";
 
 interface Employee {
@@ -32,15 +32,7 @@ export function ProjectAssignPanel({
   const queryClient = useQueryClient();
 
   // Fetch current assignments
-  const { data: assignedIds = [], isLoading, error: loadError, refetch } = useQuery<string[]>({
-    queryKey: ["projectAssignments", projectId],
-    queryFn: async () => {
-      const res = await fetch(`/api/v1/projects/${projectId}/assign`);
-      const json: ApiResponse<string[]> = await res.json();
-      if (!res.ok || !json.data) throw new Error(json.error ?? "Zuordnungen konnten nicht geladen werden.");
-      return json.data;
-    },
-  });
+  const { data: assignedIds = [], isLoading, error: loadError, refetch } = useProjectAssignments(projectId);
 
   // Track local selection starting from server state
   const [selected, setSelected] = useState<Set<string> | null>(null);
@@ -59,10 +51,14 @@ export function ProjectAssignPanel({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Zuordnungen konnten nicht gespeichert werden.");
     },
-    onSuccess: (_data, employeeIds) => {
+    onSuccess: async (_data, employeeIds) => {
+      await queryClient.cancelQueries({ queryKey: ["projectAssignments", projectId] });
       queryClient.setQueryData(["projectAssignments", projectId], employeeIds);
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["myProjects"] });
+      queryClient.invalidateQueries({ queryKey: ["projectTargets", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["projectReport"] });
+      queryClient.invalidateQueries({ queryKey: ["projectBalances"] });
       onClose();
     },
   });

@@ -64,6 +64,7 @@ export function CorrectionReviewList() {
       queryClient.invalidateQueries({ queryKey: ["myTimes"] });
       queryClient.invalidateQueries({ queryKey: ["weeklyReport"] });
       queryClient.invalidateQueries({ queryKey: ["projectReport"] });
+      queryClient.invalidateQueries({ queryKey: ["projectBalances"] });
       queryClient.invalidateQueries({ queryKey: ["employeeEntries"] });
       setExpandedId(null);
       setRejectNote("");

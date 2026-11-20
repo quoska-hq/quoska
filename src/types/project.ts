@@ -28,6 +28,10 @@ export const assignEmployeesSchema = z.object({
   employee_ids: z.array(z.string().uuid()).min(1, "Mindestens ein Mitarbeiter"),
 });
 
+export const replaceProjectAssignmentsSchema = z.object({
+  employee_ids: z.array(z.string().uuid()),
+});
+
 export const UNASSIGNED_PROJECT = "none";
 export const projectFilterSchema = z.union([z.string().uuid(), z.literal(UNASSIGNED_PROJECT)]);
 

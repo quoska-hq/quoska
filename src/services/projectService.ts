@@ -30,6 +30,7 @@ import {
   projectNameExists,
   assignEmployeeToProject,
   unassignEmployeeFromProject,
+  replaceProjectAssignments,
   getAssignmentsForEmployee,
   getAssignmentsForProject,
   getProjectDetailRows,
@@ -187,28 +188,11 @@ export async function replaceAssignments(
   projectId: string,
   desiredEmployeeIds: string[],
 ): Promise<ApiResponse<boolean>> {
-  const existing = await getAssignmentsForProject(supabase, tenantId, projectId);
-  const existingIds = new Set(existing.map((a) => a.employee_id));
-  const desiredSet = new Set(desiredEmployeeIds);
-
-  // Add new assignments
-  for (const empId of desiredEmployeeIds) {
-    if (!existingIds.has(empId)) {
-      await assignEmployeeToProject(supabase, {
-        tenant_id: tenantId,
-        project_id: projectId,
-        employee_id: empId,
-      });
-    }
+  const error = await replaceProjectAssignments(supabase, tenantId, projectId, desiredEmployeeIds);
+  if (error?.code === "P0002" || error?.code === "22023" || error?.code === "42501") {
+    return failure(error.message);
   }
-
-  // Remove old assignments
-  for (const empId of existingIds) {
-    if (!desiredSet.has(empId)) {
-      await unassignEmployeeFromProject(supabase, tenantId, projectId, empId);
-    }
-  }
-
+  if (error) return failure("Projektzuordnung konnte nicht gespeichert werden.");
   return success(true);
 }
 
