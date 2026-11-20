@@ -129,11 +129,10 @@ END;
 $$;
 
 RESET ROLE;
--- Move the boundary back five minutes so the final segment has too little
--- capacity for the whole deduction. Keep both sides of the boundary aligned.
-UPDATE public.time_entries SET clock_out = clock_out - interval '5 minutes'
+-- A segment of 1m40s can hold only one whole minute of break.
+UPDATE public.time_entries SET clock_out = clock_out - interval '100 seconds'
   WHERE id = 'e5000000-0000-4000-8000-000000000001';
-UPDATE public.time_entries SET clock_in = clock_in - interval '5 minutes'
+UPDATE public.time_entries SET clock_in = clock_in - interval '100 seconds'
   WHERE clock_session_id = 'e5000000-0000-4000-8000-000000000001' AND status = 'running';
 
 -- The extension uses a server-verified service-role client for clock-out.
@@ -149,9 +148,11 @@ DECLARE
 BEGIN
   SELECT id INTO STRICT successor_id FROM public.time_entries WHERE employee_id = worker AND status = 'running';
   result := public.transition_clock_project(team, worker, successor_id, NULL);
-  ASSERT result->>'status' = 'completed' AND (result->>'automatic_break_minutes')::int = 5;
+  ASSERT result->>'status' = 'completed' AND (result->>'automatic_break_minutes')::int = 1;
   ASSERT (SELECT sum(break_minutes) FROM public.time_entries WHERE clock_session_id = session_id) = 30;
-  ASSERT (SELECT automatic_break_minutes FROM public.time_entries WHERE id = session_id) = 5;
+  ASSERT (SELECT automatic_break_minutes FROM public.time_entries WHERE id = session_id) = 9;
+  ASSERT NOT EXISTS (SELECT FROM public.time_entries WHERE clock_session_id = session_id
+    AND break_minutes * interval '1 minute' >= clock_out - clock_in);
   ASSERT (SELECT count(*) FROM public.notifications WHERE employee_id = worker AND type = 'automatic_break_added') = 1;
   ASSERT (SELECT count(*) FROM public.time_entry_audit WHERE time_entry_id IN (session_id, successor_id)) = 6;
   BEGIN

@@ -129,7 +129,7 @@ BEGIN
       WHEN v_gross_minutes > 540 THEN 45 WHEN v_gross_minutes > 360 THEN 30 ELSE 0
     END - v_booked_break);
 
-    -- A short final segment may not have enough capacity for the deduction.
+    -- A break must be strictly shorter than its segment, also for fractional minutes.
     FOR v_segment IN SELECT * FROM public.time_entries
       WHERE tenant_id = p_tenant_id AND employee_id = p_employee_id
         AND clock_session_id = v_session_id AND status = 'completed' AND clock_out IS NOT NULL
@@ -138,7 +138,7 @@ BEGIN
     LOOP
       EXIT WHEN v_missing_break = 0;
       v_added := least(v_missing_break, greatest(0,
-        round(extract(epoch FROM (v_segment.clock_out - v_segment.clock_in)) / 60)::integer - v_segment.break_minutes));
+        ceil(extract(epoch FROM (v_segment.clock_out - v_segment.clock_in)) / 60)::integer - 1 - v_segment.break_minutes));
       CONTINUE WHEN v_added = 0;
 
       UPDATE public.time_entries SET break_minutes = break_minutes + v_added,
