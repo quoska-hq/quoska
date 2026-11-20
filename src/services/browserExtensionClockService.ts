@@ -5,7 +5,7 @@ import { getActiveEntry, getTodayEntries } from "@/repos/timeEntryRepo";
 import { endBreak, startBreak } from "@/services/breakService";
 import { getMyProjects } from "@/services/projectService";
 import { clockIn, clockOut } from "@/services/timeEntryService";
-import { scheduledMinutesForDate } from "@/services/workScheduleService";
+import { scheduledEmployeeMinutesForDate } from "@/services/workScheduleService";
 import type { ApiResponse } from "@/types/api";
 import { failure, success } from "@/types/api";
 import type { BreakSession, TimeEntry } from "@/types/database";
@@ -47,7 +47,7 @@ export async function getBrowserExtensionStatus(
     getMyProjects(supabase, context.tenantId, context.employeeId),
     supabase
       .from("employees")
-      .select("first_name, last_name, target_hours_week, work_schedule")
+      .select("first_name, last_name, target_hours_week, work_schedule, work_schedule_history")
       .eq("id", context.employeeId)
       .eq("tenant_id", context.tenantId)
       .is("deleted_at", null)
@@ -75,11 +75,7 @@ export async function getBrowserExtensionStatus(
       serverNow,
       activeBreak,
     ),
-    todayTargetMinutes: scheduledMinutesForDate(
-      employeeResult.data.work_schedule,
-      todayDate,
-      employeeResult.data.target_hours_week,
-    ),
+    todayTargetMinutes: scheduledEmployeeMinutesForDate(employeeResult.data, todayDate),
     activeEntry: activeEntry
       ? {
           id: activeEntry.id,

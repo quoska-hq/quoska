@@ -86,6 +86,18 @@ describe("Missing Cockpit entries for shorter working weeks", () => {
     expect(actions).toEqual([expect.objectContaining({ id: "missing-employee-1-2026-08-13" })]);
   });
 
+  it("uses the schedule for each week and each expected date", () => {
+    const actions = missingEntryActions(input({
+      employees: [{
+        ...employee,
+        work_schedule: DEFAULT_WORK_SCHEDULE,
+        work_schedule_history: { "2026-08-17": FOUR_DAY_WORK_SCHEDULE },
+      }],
+      startDate: "2026-08-10", endDate: "2026-08-18",
+    }));
+    expect(actions.map((action) => action.date)).toEqual(["2026-08-13", "2026-08-14"]);
+  });
+
   it("keeps completed-week hints available throughout the following week", () => {
     expect(missingEntryActions(input({ endDate: "2026-08-23" }))).toHaveLength(1);
     expect(getCockpitMissingEntryStart("2026-08-17", "2026-08-23")).toBe("2026-08-10");

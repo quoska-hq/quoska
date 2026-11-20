@@ -139,7 +139,8 @@ jobs:
       - name: Setup Supabase
         uses: supabase/setup-cli@v3
         with:
-          version: latest
+          # CLI 3 removes the [inbucket] config used by this test setup.
+          version: 2.119.0
 
       - name: Start local Supabase
         run: supabase start
@@ -173,6 +174,14 @@ jobs:
           TEST_DB_CONTAINER=$(docker ps --filter name=supabase_db_ --format '{{.ID}}')
           test -n "$TEST_DB_CONTAINER"
           docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/admin-contact.sql
+
+      - name: Check time correction and work-schedule history permissions
+        run: |
+          TEST_DB_CONTAINER=$(docker ps --filter name=supabase_db_ --format '{{.ID}}')
+          test -n "$TEST_DB_CONTAINER"
+          docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/missing-time-requests.sql
+          docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/completed-entry-corrections.sql
+          docker exec -i "$TEST_DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < tests/integration/employee-work-schedule-history.sql
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

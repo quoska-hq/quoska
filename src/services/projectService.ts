@@ -32,9 +32,10 @@ import {
   unassignEmployeeFromProject,
   getAssignmentsForEmployee,
   getAssignmentsForProject,
-  getProjectReportRows,
   getProjectDetailRows,
 } from "@/repos/projectRepo";
+import { getReportEntries } from "@/repos/exportRepo";
+import { buildProjectReport } from "@/services/projectReportBuilder";
 
 // ---------------------------------------------------------------------------
 // CRUD
@@ -235,8 +236,8 @@ export async function getProjectReport(
   startDate: string,
   endDate: string,
 ): Promise<ApiResponse<ProjectReportRow[]>> {
-  const rows = await getProjectReportRows(supabase, tenantId, startDate, endDate);
-  return success(rows);
+  const entries = await getReportEntries(supabase, tenantId, startDate, endDate);
+  return success(buildProjectReport(entries));
 }
 
 export async function getProjectDetail(

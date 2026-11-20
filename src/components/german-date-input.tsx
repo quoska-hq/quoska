@@ -11,9 +11,10 @@ interface GermanDateInputProps extends Omit<ComponentProps<typeof Input>, "type"
   onChange: (value: string) => void;
   min?: string;
   max?: string;
+  calendarLabel?: string;
 }
 
-export function GermanDateInput({ value, onChange, min, max, className, ...props }: GermanDateInputProps) {
+export function GermanDateInput({ value, onChange, min, max, calendarLabel, className, ...props }: GermanDateInputProps) {
   const [draft, setDraft] = useState(() => formatDateFullDE(value));
   const [previousValue, setPreviousValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,7 +45,7 @@ export function GermanDateInput({ value, onChange, min, max, className, ...props
           if (parsed) setDraft(formatDateFullDE(parsed));
           props.onBlur?.(event);
         }} />
-      <DatePicker iconOnly value={value} disabled={props.disabled} minDate={min} maxDate={max}
+      <DatePicker iconOnly calendarLabel={calendarLabel} value={value} disabled={props.disabled} minDate={min} maxDate={max}
         onChange={(next) => {
           setPreviousValue(next);
           setDraft(formatDateFullDE(next));

@@ -161,7 +161,7 @@ export function WeeklyReportTable() {
               <ChevronRight className="size-4" />
             </Button>
           </div>
-          <ExportButtons weekStart={weekStart} weekEnd={weekEnd} />
+          <ExportButtons startDate={weekStart} endDate={weekEnd} />
         </div>
       </div>
 

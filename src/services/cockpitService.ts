@@ -5,7 +5,7 @@ import type { CockpitData, CockpitDailyPoint, CockpitEmployeeRow } from "@/types
 import { completedWorkMinutes as netMinutes, buildCockpitProjects } from "@/services/cockpitWorkService";
 import { success, failure, type ApiResponse } from "@/types/api";
 import { getCockpitDates, getCockpitMissingEntryStart } from "@/services/cockpitPeriodService";
-import { scheduledMinutesForDate } from "@/services/workScheduleService";
+import { scheduledEmployeeMinutesForDate } from "@/services/workScheduleService";
 import { buildCockpitActivity } from "@/services/cockpitActivityService";
 import { employmentStartDate } from "@/services/overtimeService";
 import {
@@ -63,11 +63,7 @@ function employeeTarget(
       holidays.has(date) ||
       absenceTypeOnDate(employee.id, date, absences)
     ) return total;
-    return total + scheduledMinutesForDate(
-      employee.work_schedule,
-      date,
-      employee.target_hours_week,
-    );
+    return total + scheduledEmployeeMinutesForDate(employee, date);
   }, 0);
 }
 
@@ -144,11 +140,7 @@ function buildEmployeeRows(
     const scheduledDates = dates.filter((date) =>
       date >= joinedOn &&
       !holidays.has(date) &&
-      scheduledMinutesForDate(
-        employee.work_schedule,
-        date,
-        employee.target_hours_week,
-      ) > 0);
+      scheduledEmployeeMinutesForDate(employee, date) > 0);
     const { leaveDays, sickDays } = countEmployeeAbsenceDays(
       employee.id,
       scheduledDates,

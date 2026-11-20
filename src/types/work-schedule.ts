@@ -17,6 +17,15 @@ export const WORKDAY_KEYS = [
 export type WorkdayKey = (typeof WORKDAY_KEYS)[number];
 export type WorkSchedule = Record<WorkdayKey, number>;
 
+/** Changes to an employee's original weekly schedule, keyed by ISO start date. */
+export type WorkScheduleHistory = Record<string, WorkSchedule>;
+
+export interface EmployeeWorkSchedule {
+  work_schedule?: WorkSchedule;
+  target_hours_week?: number;
+  work_schedule_history?: WorkScheduleHistory;
+}
+
 export const WORKDAY_LABELS: Record<WorkdayKey, string> = {
   monday: "Montag",
   tuesday: "Dienstag",
@@ -88,6 +97,10 @@ export function scheduleHours(schedule: WorkSchedule): number {
   return totalScheduleMinutes(schedule) / MINUTES_PER_HOUR;
 }
 
+export function sameSchedule(a: WorkSchedule, b: WorkSchedule): boolean {
+  return WORKDAY_KEYS.every((day) => a[day] === b[day]);
+}
+
 export function formatWorkMinutes(totalMinutes: number): string {
   const safeMinutes = Math.max(0, Math.round(totalMinutes));
   const hours = Math.floor(safeMinutes / MINUTES_PER_HOUR);
@@ -147,4 +160,19 @@ export function normalizeWorkSchedule(
   return parsed.success
     ? parsed.data
     : workScheduleFromWeeklyHours(fallbackWeeklyHours);
+}
+
+export function employeeScheduleForDate(
+  employee: EmployeeWorkSchedule | null | undefined,
+  date: string,
+): WorkSchedule {
+  const history = employee?.work_schedule_history;
+  let effectiveDate = "";
+  for (const fromDate in history) {
+    if (fromDate <= date && fromDate > effectiveDate) effectiveDate = fromDate;
+  }
+  return normalizeWorkSchedule(
+    history?.[effectiveDate] ?? employee?.work_schedule,
+    employee?.target_hours_week,
+  );
 }

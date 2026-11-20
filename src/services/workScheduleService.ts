@@ -1,6 +1,8 @@
 import { addDays } from "@/services/holidayService";
 import {
+  employeeScheduleForDate,
   normalizeWorkSchedule,
+  type EmployeeWorkSchedule,
   type WorkdayKey,
   type WorkSchedule,
 } from "@/types/work-schedule";
@@ -18,8 +20,30 @@ const JS_DAY_TO_WORKDAY: readonly WorkdayKey[] = [
 export function workdayForDate(date: string): WorkdayKey {
   const milliseconds = Date.parse(`${date}T12:00:00Z`);
   const daysSinceEpoch = Math.floor(milliseconds / 86_400_000);
-  const day = (daysSinceEpoch + 4) % 7;
+  const day = ((daysSinceEpoch + 4) % 7 + 7) % 7;
   return JS_DAY_TO_WORKDAY[day] ?? "monday";
+}
+
+export function scheduledEmployeeMinutesForDate(
+  employee: EmployeeWorkSchedule | null | undefined,
+  date: string,
+): number {
+  return employeeScheduleForDate(employee, date)[workdayForDate(date)];
+}
+
+export function calculateEmployeeScheduleTargetMinutesForRange(
+  startDate: string,
+  endDate: string,
+  excludedDates: ReadonlySet<string> | ReadonlyMap<string, unknown>,
+  employee: EmployeeWorkSchedule | null | undefined,
+): number {
+  let target = 0;
+  for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
+    if (!excludedDates.has(date)) {
+      target += scheduledEmployeeMinutesForDate(employee, date);
+    }
+  }
+  return target;
 }
 
 export function scheduledMinutesForDate(
@@ -54,18 +78,10 @@ export function calculateScheduleTargetMinutesForRange(
   scheduleValue: unknown,
   fallbackWeeklyHours = 40,
 ): number {
-  if (endDate < startDate) return 0;
-  let target = 0;
-  for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
-    if (!holidayDates.has(date)) {
-      target += scheduledMinutesForDate(
-        scheduleValue,
-        date,
-        fallbackWeeklyHours,
-      );
-    }
-  }
-  return target;
+  return calculateEmployeeScheduleTargetMinutesForRange(startDate, endDate, holidayDates, {
+    work_schedule: normalizeWorkSchedule(scheduleValue, fallbackWeeklyHours),
+    target_hours_week: fallbackWeeklyHours,
+  });
 }
 
 export function isScheduledWorkday(

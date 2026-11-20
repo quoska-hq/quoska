@@ -3,6 +3,7 @@
  * PATCH /api/v1/leave-entitlements/[employeeId] — Update entitlement (admin).
  */
 
+import { getTodayDate } from "@/config/server/timestamps";
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
@@ -40,7 +41,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
       );
     }
 
-    const year = new Date().getFullYear(); // eslint-disable-line @quoska/legal/no-client-timestamps
+    const year = Number(getTodayDate().slice(0, 4));
     const balance = await getLeaveBalance(supabase, tenantId, employeeId, year);
 
     return NextResponse.json<ApiResponse<LeaveBalance>>(
@@ -88,7 +89,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       );
     }
 
-    const year = new Date().getFullYear(); // eslint-disable-line @quoska/legal/no-client-timestamps
+    const year = Number(getTodayDate().slice(0, 4));
     const entitlement = await upsertLeaveEntitlement(supabase, {
       tenant_id: tenantId,
       employee_id: employeeId,

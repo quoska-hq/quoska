@@ -127,7 +127,7 @@ describe("entriesToExportRows", () => {
         ...createMockEntry("2026-06-03", "2026-06-03T08:00:00Z", null),
         employee_first_name: "Anna",
         employee_last_name: "Schmidt",
-        break_minutes: 0,
+        break_minutes: 10,
         status: "running" as const,
       },
     ];
@@ -154,17 +154,15 @@ describe("generateCSV", () => {
         breakMinutes: 30,
         netMinutes: 510,
         notes: null,
+        projectName: 'Kunde A, "Web"',
       },
     ];
 
     const csv = generateCSV(rows);
     const lines = csv.split("\n");
 
-    expect(lines[0]).toBe("Mitarbeiter,Datum,Beginn,Ende,Pause (Min),Netto-Stunden,Notizen");
-    expect(lines[1]).toContain("Max Mustermann");
-    expect(lines[1]).toContain("03.06.2026");
-    expect(lines[1]).toContain("08:00");
-    expect(lines[1]).toContain("17:00");
+    expect(lines[0]).toBe("Mitarbeiter,Datum,Beginn,Ende,Pause (Min),Netto-Stunden,Notizen,Projekt");
+    expect(lines[1]).toBe('Max Mustermann,03.06.2026,10:00,19:00,30,8:30,,"Kunde A, ""Web"""');
   });
 
   test("handles empty rows", () => {

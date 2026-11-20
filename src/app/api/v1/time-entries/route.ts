@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient, createClient } from "@/config/supabase/server";
 import { getNowIso } from "@/config/server/timestamps";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
-import { getTimeEntriesByDateRange } from "@/repos/timeEntryRepo";
+import { getEntryProjectNames, getTimeEntriesByDateRange } from "@/repos/timeEntryRepo";
 import { netMinutesForEntry, netMinutesForRunningEntry } from "@/services/overtimeService";
 import type { ApiResponse } from "@/types/api";
 import type { TimeEntry } from "@/types/database";
@@ -19,6 +19,7 @@ import { createManualTimeEntry } from "@/services/manualTimeEntryService";
 
 export interface TimeEntryWithNet extends TimeEntry {
   netMinutes: number;
+  projectName: string | null;
 }
 
 export interface EmployeeEntriesResponse {
@@ -76,11 +77,14 @@ export async function GET(request: Request) {
       employeeId,
       startDate,
       endDate,
+      { includeDeleted: true },
     );
 
+    const projectNames = await getEntryProjectNames(supabase, tenantId, entries.map((entry) => entry.project_id));
     const entriesWithNet: TimeEntryWithNet[] = entries.map((entry) => ({
       ...entry,
-      netMinutes: entry.clock_out
+      projectName: entry.project_id ? projectNames.get(entry.project_id) ?? null : null,
+      netMinutes: entry.deleted_at ? 0 : entry.clock_out
         ? netMinutesForEntry(entry)
         : netMinutesForRunningEntry(entry, nowIso),
     }));

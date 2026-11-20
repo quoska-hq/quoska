@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
+  calculateEmployeeScheduleTargetMinutesForRange,
   calculateScheduleTargetMinutes,
   calculateScheduleTargetMinutesForRange,
   isScheduledWorkday,
   scheduledMinutesForDate,
+  scheduledEmployeeMinutesForDate,
   workdayForDate,
 } from "@/services/workScheduleService";
 import {
   DEFAULT_WORK_SCHEDULE,
   FOUR_DAY_WORK_SCHEDULE,
+  THIRTY_HOUR_WORK_SCHEDULE,
   evenlyDistributeWorkMinutes,
   formatWorkMinutes,
   normalizeWorkSchedule,
@@ -69,6 +72,30 @@ describe("workScheduleService", () => {
 
   it("falls back to a conventional five-day week for legacy rows", () => {
     expect(normalizeWorkSchedule(null, 40)).toEqual(DEFAULT_WORK_SCHEDULE);
+  });
+
+  it("applies each dated model from its first day and leaves earlier targets intact", () => {
+    const employee = {
+      work_schedule: DEFAULT_WORK_SCHEDULE,
+      work_schedule_history: {
+        "2026-09-01": FOUR_DAY_WORK_SCHEDULE,
+        "2026-08-12": THIRTY_HOUR_WORK_SCHEDULE,
+      },
+    };
+
+    expect(scheduledEmployeeMinutesForDate(employee, "2026-08-11")).toBe(480);
+    expect(scheduledEmployeeMinutesForDate(employee, "2026-08-12")).toBe(360);
+    expect(scheduledEmployeeMinutesForDate(employee, "2026-08-28")).toBe(360);
+    expect(scheduledEmployeeMinutesForDate(employee, "2026-09-04")).toBe(0);
+    expect(calculateEmployeeScheduleTargetMinutesForRange(
+      "2026-08-10", "2026-08-16", new Set(["2026-08-13"]), employee,
+    )).toBe(1680);
+  });
+
+  it("calculates targets for dates before 1970", () => {
+    expect(calculateEmployeeScheduleTargetMinutesForRange(
+      "1969-12-29", "1969-12-31", new Set(), { work_schedule: DEFAULT_WORK_SCHEDULE },
+    )).toBe(1440);
   });
 
   it("distributes hours and minutes without decimal conversion", () => {

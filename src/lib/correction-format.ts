@@ -1,5 +1,12 @@
 import type { CorrectionRequestWithEntry } from "@/types/correction";
 
+export function correctionEntryDate(
+  request: Pick<CorrectionRequestWithEntry, "timeEntry" | "proposed_change" | "created_at">,
+): string {
+  const date = request.proposed_change?.date;
+  return request.timeEntry?.date ?? (typeof date === "string" ? date : request.created_at.slice(0, 10));
+}
+
 const CORRECTION_FIELDS = [
   "clock_in",
   "clock_out",

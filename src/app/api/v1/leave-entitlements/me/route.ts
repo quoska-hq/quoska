@@ -2,6 +2,7 @@
  * GET /api/v1/leave-entitlements/me — Get own leave balance.
  */
 
+import { getTodayDate } from "@/config/server/timestamps";
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
@@ -22,7 +23,7 @@ export async function GET() {
     }
 
     const { tenantId, employeeId } = authResult.data;
-    const year = new Date().getFullYear(); // eslint-disable-line @quoska/legal/no-client-timestamps
+    const year = Number(getTodayDate().slice(0, 4));
     const balance = await getLeaveBalance(supabase, tenantId, employeeId, year);
 
     return NextResponse.json<ApiResponse<LeaveBalance>>(

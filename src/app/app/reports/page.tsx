@@ -17,11 +17,13 @@ import { Button } from "@/components/ui/button";
 import { ManualTimeEntryDialog } from "@/components/manual-time-entry-dialog";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
+import { projectFilterSchema } from "@/types/project";
 
 export default function ReportsPage() {
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
   const searchParams = useSearchParams();
   const requestedTab = searchParams.get("tab");
+  const initialProjectId = projectFilterSchema.safeParse(searchParams.get("projectId")).data;
   const initialTab = requestedTab === "projects" || requestedTab === "corrections" || requestedTab === "datev"
     ? requestedTab
     : "weekly";
@@ -65,7 +67,7 @@ export default function ReportsPage() {
           <WeeklyReportTable />
         </TabsContent>
         <TabsContent value="projects" className="min-w-0">
-          <ProjectReportTable />
+          <ProjectReportTable key={initialProjectId} initialProjectId={initialProjectId} />
         </TabsContent>
         <TabsContent value="corrections" className="min-w-0">
           <CorrectionReviewList />

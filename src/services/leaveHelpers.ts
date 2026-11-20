@@ -8,9 +8,9 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getHolidaysInRange } from "@/repos/holidayRepo";
-import { isWeekend } from "@/services/holidayService";
-import { normalizeWorkSchedule, type WorkSchedule } from "@/types/work-schedule";
-import { isScheduledWorkday } from "@/services/workScheduleService";
+import { addDays } from "@/services/holidayService";
+import type { EmployeeWorkSchedule } from "@/types/work-schedule";
+import { scheduledEmployeeMinutesForDate } from "@/services/workScheduleService";
 
 /** Get employee's bundesland from DB. */
 export async function getEmployeeBundesland(
@@ -28,20 +28,20 @@ export async function getEmployeeBundesland(
   return data?.bundesland ?? null;
 }
 
-/** Get an employee's contractual weekday schedule. */
+/** Get the employee's original and dated contractual schedules. */
 export async function getEmployeeWorkSchedule(
   supabase: SupabaseClient,
   tenantId: string,
   employeeId: string,
-): Promise<WorkSchedule> {
+): Promise<EmployeeWorkSchedule> {
   const { data } = await supabase
     .from("employees")
-    .select("work_schedule, target_hours_week")
+    .select("work_schedule, work_schedule_history, target_hours_week")
     .eq("id", employeeId)
     .eq("tenant_id", tenantId)
     .is("deleted_at", null)
     .maybeSingle();
-  return normalizeWorkSchedule(data?.work_schedule, data?.target_hours_week ?? 40);
+  return data ?? {};
 }
 
 /** Get employee display name. */
@@ -71,32 +71,23 @@ export function getYear(dateStr: string): number {
 }
 
 /**
- * Calculate the number of work days in a date range.
- * Excludes weekends and public holidays for the given Bundesland.
+ * Count scheduled days outside public holidays for the given Bundesland.
  */
 export async function calculateWorkDaysCount(
   supabase: SupabaseClient,
   bundesland: string,
   startDate: string,
   endDate: string,
-  workSchedule?: WorkSchedule,
+  employee?: EmployeeWorkSchedule,
 ): Promise<number> {
   const holidays = await getHolidaysInRange(supabase, bundesland, startDate, endDate);
   const holidayDates = new Set(holidays.map((h) => h.date));
 
   let count = 0;
-  let current = startDate;
-
-  while (current <= endDate) {
-    const isWorkday = workSchedule
-      ? isScheduledWorkday(workSchedule, current, holidayDates)
-      : !isWeekend(current) && !holidayDates.has(current);
-    if (isWorkday) {
+  for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
+    if (!holidayDates.has(date) && scheduledEmployeeMinutesForDate(employee, date) > 0) {
       count++;
     }
-    const ms = Date.parse(current + "T12:00:00Z") + 86_400_000;
-    const d = new Date(ms); // eslint-disable-line @quoska/legal/no-client-timestamps
-    current = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   }
 
   return count;

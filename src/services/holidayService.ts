@@ -28,7 +28,7 @@ function getDayOfWeek(dateStr: string): number {
   if (isNaN(ms)) return 0;
   // 1970-01-01 was a Thursday (day 4)
   const daysSinceEpoch = Math.floor(ms / 86_400_000);
-  return (daysSinceEpoch + 4) % 7;
+  return ((daysSinceEpoch + 4) % 7 + 7) % 7;
 }
 
 /** Compute YYYY-MM-DD from days since epoch using lookup table. */
@@ -36,6 +36,10 @@ function computeDate(daysSinceEpoch: number): string {
   let remaining = daysSinceEpoch;
   let year = 1970;
 
+  while (remaining < 0) {
+    year--;
+    remaining += isLeap(year) ? 366 : 365;
+  }
   while (remaining >= (isLeap(year) ? 366 : 365)) {
     remaining -= isLeap(year) ? 366 : 365;
     year++;
@@ -55,7 +59,7 @@ function computeDate(daysSinceEpoch: number): string {
   }
 
   const day = remaining + 1;
-  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  return `${String(year).padStart(4, "0")}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
 /** Add N days to a YYYY-MM-DD string, returns YYYY-MM-DD. */

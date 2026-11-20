@@ -5,7 +5,7 @@ import type {
   CockpitActivityRow,
 } from "@/types/cockpit";
 import type { CockpitAuditRecord } from "@/repos/cockpitRepo";
-import { correctionChangeSummary } from "@/lib/correction-format";
+import { correctionChangeSummary, correctionEntryDate } from "@/lib/correction-format";
 
 const FIELD_LABELS: Record<string, string> = {
   clock_in: "Startzeit",
@@ -36,10 +36,11 @@ function activityCategory(
 }
 
 function activityTitle(record: CockpitAuditRecord): string {
+  if (record.action === "create" && record.field_name === "manual_entry") return "Zeit manuell hinzugefügt";
   if (record.action === "create") return "Eingestempelt";
   if (record.action === "pause") return "Pause gestartet";
   if (record.action === "resume") return "Pause beendet";
-  if (record.action === "delete") return "Zeiteintrag gelöscht";
+  if (record.action === "delete") return record.field_name === "deleted_at" ? "Zeiteintrag storniert" : "Zeiteintrag gelöscht";
   if (
     record.action === "update" &&
     record.field_name === "clock_out" &&
@@ -64,7 +65,12 @@ function formatValue(field: string | null, value: string | null): string {
   return value;
 }
 
-function activityDetail(record: CockpitAuditRecord): string | null {
+function activityDetail(record: CockpitAuditRecord, projectNames: Map<string, string>): string | null {
+  if (record.action === "delete" && record.field_name === "deleted_at") return null;
+  if (record.field_name === "project_id") {
+    const projectName = (id: string | null) => id ? projectNames.get(id) ?? "Unbekanntes Projekt" : "Kein Projekt";
+    return `${projectName(record.old_value)} → ${projectName(record.new_value)}`;
+  }
   const category = activityCategory(record);
   if (category === "correction") {
     const field = FIELD_LABELS[record.field_name ?? ""] ?? "Eintrag";
@@ -99,7 +105,7 @@ export function buildCockpitActivity(
         occurredAt: record.changed_at,
         category: activityCategory(record),
         title: activityTitle(record),
-        detail: activityDetail(record),
+        detail: activityDetail(record, projectNames),
         reason: record.reason && !["Clock in", "Clock out"].includes(record.reason)
           ? record.reason
           : null,
@@ -124,7 +130,10 @@ export function buildCockpitActivity(
       id: `correction-request-${request.id}`,
       occurredAt: request.status === "pending" ? request.created_at : request.updated_at,
       category: "correction",
-      title: request.status === "approved"
+      title: request.request_type === "missing_entry"
+        ? request.status === "approved" ? request.reviewed_by ? "Zeitnachtrag genehmigt" : "Zeitnachtrag direkt gebucht"
+          : request.status === "rejected" ? "Zeitnachtrag abgelehnt" : "Zeitnachtrag angefragt"
+        : request.status === "approved"
         ? "Korrekturanfrage genehmigt"
         : request.status === "rejected"
           ? "Korrekturanfrage abgelehnt"
@@ -142,7 +151,7 @@ export function buildCockpitActivity(
       projectName: request.timeEntry?.project_id
         ? projectNames.get(request.timeEntry.project_id) ?? "Unbekanntes Projekt"
         : null,
-      entryDate: request.timeEntry?.date ?? request.created_at.slice(0, 10),
+      entryDate: correctionEntryDate(request),
     };
   });
 

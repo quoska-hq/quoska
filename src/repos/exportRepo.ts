@@ -13,73 +13,67 @@ import type {
   TimeEntry,
   TimeEntryAudit,
 } from "@/types/database";
+import type { ReportEntry, ReportEntryFilters } from "@/types/export";
+import { UNASSIGNED_PROJECT } from "@/types/project";
 
 // ---------------------------------------------------------------------------
 // Manager CSV/PDF export queries
 // ---------------------------------------------------------------------------
 
 /**
- * Get time entries for export with employee info.
- * Filters by date range, optionally by employee.
- * Returns entries joined with employee names.
+ * Get time entries for reports and exports with their historical employee and
+ * project references, including projects that have since been archived.
  */
-export async function getEntriesForExport(
+export async function getReportEntries(
   supabase: SupabaseClient,
   tenantId: string,
   startDate: string,
   endDate: string,
-  employeeId?: string,
-): Promise<
-  (TimeEntry & {
-    employee_first_name: string;
-    employee_last_name: string;
-  })[]
-> {
+  { employeeId, projectId }: ReportEntryFilters = {},
+): Promise<ReportEntry[]> {
   let query = supabase
     .from("time_entries")
-    .select("*")
+    .select("*, employee:employees!employee_id(first_name,last_name), project:projects!project_id(name,customer_name)")
     .eq("tenant_id", tenantId)
+    .eq("employee.tenant_id", tenantId)
+    .eq("project.tenant_id", tenantId)
     .gte("date", startDate)
     .lte("date", endDate)
     .is("deleted_at", null)
     .order("date", { ascending: true })
-    .order("clock_in", { ascending: true });
+    .order("clock_in", { ascending: true })
+    .order("id", { ascending: true });
 
   if (employeeId) {
     query = query.eq("employee_id", employeeId);
   }
+  if (projectId) {
+    query = projectId === UNASSIGNED_PROJECT
+      ? query.is("project_id", null)
+      : query.eq("project_id", projectId);
+  }
 
-  const { data } = await query;
-
-  if (!data) return [];
-
-  // Fetch employee names separately
-  const entryMap = data as TimeEntry[];
-  const empIds = [...new Set(entryMap.map((e) => e.employee_id))];
-
-  const { data: emps } = await supabase
-    .from("employees")
-    .select("id, first_name, last_name")
-    .in("id", empIds);
-
-  const empMap = new Map(
-    (emps ?? []).map((e: { id: string; first_name: string; last_name: string }) => [
-      e.id,
-      { first_name: e.first_name, last_name: e.last_name },
-    ]),
-  );
-
-  return entryMap.map((entry) => {
-    const emp = empMap.get(entry.employee_id) ?? {
-      first_name: "Unbekannt",
-      last_name: "",
-    };
-    return {
-      ...entry,
-      employee_first_name: emp.first_name,
-      employee_last_name: emp.last_name,
-    };
-  });
+  const entries: ReportEntry[] = [];
+  const pageSize = 1000;
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await query.range(offset, offset + pageSize - 1);
+    if (error) throw error;
+    if (!data) return entries;
+    const page = data as unknown as (TimeEntry & {
+      employee: Pick<Employee, "first_name" | "last_name"> | null;
+      project: { name: string; customer_name: string | null } | null;
+    })[];
+    for (const { employee, project, ...entry } of page) {
+      entries.push({
+        ...entry,
+        employee_first_name: employee?.first_name ?? "Unbekannt",
+        employee_last_name: employee?.last_name ?? "",
+        project_name: project?.name ?? null,
+        project_customer_name: project?.customer_name ?? null,
+      });
+    }
+    if (page.length < pageSize) return entries;
+  }
 }
 
 /**

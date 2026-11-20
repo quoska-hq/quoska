@@ -3,15 +3,29 @@
  */
 
 import { z } from "zod";
+import type { TimeEntry } from "@/types/database";
+import { projectFilterSchema } from "@/types/project";
 
 /** Input for manager CSV/PDF export. */
 export const exportQuerySchema = z.object({
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startDate: z.string().date(),
+  endDate: z.string().date(),
   employeeId: z.string().uuid().optional(),
+  projectId: projectFilterSchema.optional(),
+}).refine(({ startDate, endDate }) => startDate <= endDate, {
+  message: "Das Enddatum muss am oder nach dem Startdatum liegen.",
 });
 
 export type ExportQueryInput = z.infer<typeof exportQuerySchema>;
+
+export type ReportEntryFilters = Pick<ExportQueryInput, "employeeId" | "projectId">;
+
+export interface ReportEntry extends TimeEntry {
+  employee_first_name: string;
+  employee_last_name: string;
+  project_name?: string | null;
+  project_customer_name?: string | null;
+}
 
 /** A single row in the CSV export (time entry with employee name). */
 export interface ExportRow {
@@ -23,6 +37,7 @@ export interface ExportRow {
   breakMinutes: number;
   netMinutes: number;
   notes: string | null;
+  projectName?: string;
 }
 
 /** Full employee data for DSGVO Art 20 portability export. */

@@ -28,8 +28,10 @@ export const reviewLeaveSchema = z.object({
 
 /* eslint-disable @quoska/legal/enforce-max-working-hours -- Urlaubstage, nicht Arbeitsstunden */
 export const updateEntitlementSchema = z.object({
-  total_days: z.number().int().min(20, "Mindestens 20 Tage (BUrlG)").max(40),
-  carried_over: z.number().int().min(0).max(20).default(0),
+  total_days: z.number().int("Bitte ganze Urlaubstage eingeben.")
+    .min(1, "Mindestens ein Urlaubstag erforderlich.").max(40, "Höchstens 40 Urlaubstage möglich."),
+  carried_over: z.number().int("Bitte ganze Urlaubstage eingeben.")
+    .min(0, "Der Resturlaub muss mindestens 0 Tage betragen.").max(20, "Höchstens 20 Tage Resturlaub möglich.").default(0),
 });
 /* eslint-enable @quoska/legal/enforce-max-working-hours */
 

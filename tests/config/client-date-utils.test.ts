@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   berlinDateTimeToIso,
   epochToDate,
@@ -9,6 +9,7 @@ import {
   formatTimeLocal,
   getCurrentEpochDays,
   getDayOfWeekFromEpoch,
+  getMonthBoundsForOffset,
   isoToBerlinDateTime,
 } from "@/config/client/date-utils";
 
@@ -40,6 +41,16 @@ describe("client date utilities", () => {
   it("handles the winter offset in Europe/Berlin", () => {
     const previousUtcDate = Date.parse("2026-01-04T23:30:00.000Z");
     expect(epochToDate(getCurrentEpochDays(previousUtcDate))).toBe("2026-01-05");
+  });
+
+  it("calculates month bounds from the German calendar across a year boundary", () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-12-31T23:30:00Z"));
+    try {
+      expect(getMonthBoundsForOffset(0)).toEqual({ start: "2027-01-01", end: "2027-01-31" });
+      expect(getMonthBoundsForOffset(-1)).toEqual({ start: "2026-12-01", end: "2026-12-31" });
+    } finally {
+      now.mockRestore();
+    }
   });
 
   it("always formats German dates and 24-hour Berlin times", () => {

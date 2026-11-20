@@ -24,8 +24,8 @@ import { getEmployeeAbsenceDates } from "@/services/absenceService";
 import { getHolidayDatesInRange } from "@/repos/holidayRepo";
 import { addDays } from "@/services/holidayService";
 import {
-  calculateScheduleTargetMinutesForRange,
-  scheduledMinutesForDate,
+  calculateEmployeeScheduleTargetMinutesForRange,
+  scheduledEmployeeMinutesForDate,
 } from "@/services/workScheduleService";
 import { employmentStartDate } from "@/services/overtimeService";
 
@@ -138,13 +138,11 @@ export async function GET() {
       );
     }
 
-    // Get employee's actual target hours (not hardcoded)
     const { data: empRecord } = await supabase
       .from("employees")
-      .select("target_hours_week, work_schedule, bundesland, employment_start_date, created_at")
+      .select("target_hours_week, work_schedule, work_schedule_history, bundesland, employment_start_date, created_at")
       .eq("id", employeeId)
       .single();
-    const targetHoursWeek = empRecord?.target_hours_week ?? 40;
     const employeeStart = empRecord
       ? employmentStartDate(empRecord)
       : weekStartStr;
@@ -159,12 +157,11 @@ export async function GET() {
       monthStart < weekStartStr ? monthStart : weekStartStr, todayDate,
     );
     const excludedDates = new Set([...holidayMap.keys(), ...absenceDates]);
-    const targetMinutes = calculateScheduleTargetMinutesForRange(
+    const targetMinutes = calculateEmployeeScheduleTargetMinutesForRange(
       employeeStart > weekStartStr ? employeeStart : weekStartStr,
       todayDate,
       excludedDates,
-      empRecord?.work_schedule,
-      targetHoursWeek,
+      empRecord,
     );
 
     // Calculate monthly carry-over: net minutes from previous days this month
@@ -205,11 +202,7 @@ export async function GET() {
     for (let date = carryStart; date < todayDate; date = addDays(date, 1)) {
       const dayTarget = monthHolidayMap.has(date) || absenceDates.has(date)
         ? 0
-        : scheduledMinutesForDate(
-            empRecord?.work_schedule,
-            date,
-            targetHoursWeek,
-          );
+        : scheduledEmployeeMinutesForDate(empRecord, date);
       monthCarryOverMinutes += (entriesByDate.get(date) ?? 0) - dayTarget;
     }
 
@@ -229,11 +222,7 @@ export async function GET() {
         dailyTargetMinutes:
           todayDate < employeeStart || excludedDates.has(todayDate)
             ? 0
-            : scheduledMinutesForDate(
-                empRecord?.work_schedule,
-                todayDate,
-                targetHoursWeek,
-              ),
+            : scheduledEmployeeMinutesForDate(empRecord, todayDate),
       },
       monthCarryOverMinutes,
     };

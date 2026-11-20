@@ -16,6 +16,7 @@ import {
   getEmployeeAuditRecords,
 } from "@/repos/exportRepo";
 import { buildEmployeeExport, generateDSGVOCSV } from "@/services/exportService";
+import { getTodayDate } from "@/config/server/timestamps";
 import { getOwnFeedback } from "@/repos/feedbackRepo";
 import { generateFeedbackCSV } from "@/services/feedbackExportService";
 
@@ -54,6 +55,7 @@ export async function GET() {
       employee,
       allEntries,
       auditRecords,
+      getTodayDate(),
     );
 
     // Generate CSV

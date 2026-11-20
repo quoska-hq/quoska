@@ -1,8 +1,14 @@
 import { z } from "zod";
-import type { CorrectionRequest, TimeEntry } from "@/types/database";
+import type { CorrectionRequest, TimeEntry, TimeEntryAudit } from "@/types/database";
+
+export type TimeEntryAuditDetails = TimeEntryAudit & {
+  previousProjectName?: string | null;
+  nextProjectName?: string | null;
+};
 
 /** Correction request enriched with the time entry values needed for review. */
 export type CorrectionRequestWithEntry = CorrectionRequest & {
+  employee?: { first_name: string; last_name: string } | null;
   timeEntry?: Pick<
     TimeEntry,
     | "employee_id"
@@ -26,6 +32,10 @@ export const editTimeEntrySchema = z.object({
 });
 
 export type EditTimeEntryInput = z.infer<typeof editTimeEntrySchema>;
+
+export const cancelTimeEntrySchema = z.object({
+  reason: z.string().trim().min(5, "Ein Grund ist erforderlich (mindestens 5 Zeichen)").max(500),
+}).strict();
 
 /** Schema for correction request submission. */
 export const submitCorrectionSchema = z.object({

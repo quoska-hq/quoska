@@ -13,10 +13,11 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { TimeEntry, TimeEntryAudit } from "@/types/database";
+import type { TimeEntry } from "@/types/database";
+import type { TimeEntryAuditDetails } from "@/types/correction";
 import type { ApiResponse } from "@/types/api";
 import { success, failure } from "@/types/api";
-import { getTimeEntryById } from "@/repos/timeEntryRepo";
+import { getEntryProjectNames, getTimeEntryById } from "@/repos/timeEntryRepo";
 import { getAuditTrailForEntry } from "@/repos/auditRepo";
 
 /** Minimum reason length for manager edits. */
@@ -64,6 +65,10 @@ export async function editTimeEntry(
     return failure(
       `Felder können nicht bearbeitet werden: ${invalidFields.join(", ")}`,
     );
+  }
+
+  if ("project_id" in changes) {
+    return correctCompletedEntry(supabase, tenantId, managerEmployeeId, timeEntryId, reason, changes);
   }
 
   // 3. Get current entry for old values
@@ -120,6 +125,7 @@ export async function editTimeEntry(
     .update(updatePayload)
     .eq("id", timeEntryId)
     .eq("tenant_id", tenantId)
+    .is("deleted_at", null)
     .select("*")
     .single();
 
@@ -145,6 +151,40 @@ export async function editTimeEntry(
   return success(updatedEntry);
 }
 
+export async function cancelTimeEntry(
+  supabase: SupabaseClient,
+  tenantId: string,
+  managerEmployeeId: string,
+  timeEntryId: string,
+  reason: string,
+): Promise<ApiResponse<TimeEntry>> {
+  return correctCompletedEntry(supabase, tenantId, managerEmployeeId, timeEntryId, reason);
+}
+
+async function correctCompletedEntry(
+  supabase: SupabaseClient,
+  tenantId: string,
+  managerEmployeeId: string,
+  timeEntryId: string,
+  reason: string,
+  changes?: Record<string, unknown>,
+): Promise<ApiResponse<TimeEntry>> {
+  const { data, error } = await supabase.rpc("correct_completed_time_entry", {
+    p_tenant_id: tenantId,
+    p_actor_id: managerEmployeeId,
+    p_entry_id: timeEntryId,
+    p_reason: reason.trim(),
+    p_changes: changes ?? {},
+    p_cancel: changes === undefined,
+  });
+  if (error?.code === "P0001" || error?.code === "42501") return failure(error.message);
+  if (error || !data) {
+    console.error("Completed entry correction failed:", error);
+    return failure("Der Zeiteintrag konnte nicht geändert werden");
+  }
+  return success(data as TimeEntry);
+}
+
 /**
  * Get the full audit trail for a time entry.
  * Returns audit records in chronological order with changer info.
@@ -153,10 +193,11 @@ export async function getTimeEntryAuditTrail(
   supabase: SupabaseClient,
   tenantId: string,
   timeEntryId: string,
-): Promise<ApiResponse<TimeEntryAudit[]>> {
+  employeeId?: string,
+): Promise<ApiResponse<TimeEntryAuditDetails[]>> {
   // Verify entry exists in tenant
-  const entry = await getTimeEntryById(supabase, tenantId, timeEntryId);
-  if (!entry) {
+  const entry = await getTimeEntryById(supabase, tenantId, timeEntryId, { includeDeleted: true });
+  if (!entry || (employeeId && entry.employee_id !== employeeId)) {
     return failure("Zeiteintrag nicht gefunden");
   }
 
@@ -165,5 +206,11 @@ export async function getTimeEntryAuditTrail(
     tenantId,
     timeEntryId,
   );
-  return success(auditTrail);
+  const names = await getEntryProjectNames(supabase, tenantId, auditTrail.flatMap((item) =>
+    item.field_name === "project_id" ? [item.old_value, item.new_value] : []));
+  return success(auditTrail.map((item) => item.field_name === "project_id" ? {
+    ...item,
+    previousProjectName: item.old_value ? names.get(item.old_value) ?? null : null,
+    nextProjectName: item.new_value ? names.get(item.new_value) ?? null : null,
+  } : item));
 }

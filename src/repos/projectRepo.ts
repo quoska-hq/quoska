@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Project, ProjectAssignment } from "@/types/database";
-import type { ProjectWithStats, ProjectReportRow, ProjectDetailRow } from "@/types/project";
+import type { ProjectWithStats, ProjectDetailRow } from "@/types/project";
 
 // Projects CRUD
 
@@ -227,51 +227,6 @@ export async function getAssignmentsForProject(
 }
 
 // Reports
-
-/** Get aggregated project hours for reports. */
-export async function getProjectReportRows(
-  supabase: SupabaseClient,
-  tenantId: string,
-  startDate: string,
-  endDate: string,
-): Promise<ProjectReportRow[]> {
-  // Fetch time entries with project info in date range
-  const { data: entries } = await supabase
-    .from("time_entries")
-    .select("project_id, employee_id, clock_in, clock_out, break_minutes, status")
-    .eq("tenant_id", tenantId)
-    .gte("date", startDate)
-    .lte("date", endDate)
-    .is("deleted_at", null);
-
-  if (!entries || entries.length === 0) return [];
-  const projectIds = [...new Set(entries.map((e) => e.project_id).filter(Boolean))] as string[];
-  const { data: projects } = await supabase.from("projects").select("id, name, customer_name").in("id", projectIds);
-  const projectMap = new Map((projects ?? []).map((p) => [p.id, p]));
-
-  const agg = new Map<string, { minutes: number; entries: number; employees: Set<string> }>();
-  for (const entry of entries) {
-    const key = entry.project_id ?? "__none__";
-    const existing = agg.get(key) ?? { minutes: 0, entries: 0, employees: new Set<string>() };
-    if (entry.status === "completed" && entry.clock_out) {
-      const totalMin = (Date.parse(entry.clock_out) - Date.parse(entry.clock_in)) / 60_000;
-      existing.minutes += Math.max(0, totalMin - (entry.break_minutes ?? 0));
-    }
-    existing.entries += 1;
-    existing.employees.add(entry.employee_id);
-    agg.set(key, existing);
-  }
-  const result: ProjectReportRow[] = [];
-  for (const [key, val] of agg) {
-    if (key === "__none__") {
-      result.push({ project_id: null, project_name: "Ohne Projekt", customer_name: null, total_minutes: Math.round(val.minutes), entry_count: val.entries, employee_count: val.employees.size });
-    } else {
-      const proj = projectMap.get(key);
-      result.push({ project_id: key, project_name: proj?.name ?? "Unbekannt", customer_name: proj?.customer_name ?? null, total_minutes: Math.round(val.minutes), entry_count: val.entries, employee_count: val.employees.size });
-    }
-  }
-  return result.sort((a, b) => b.total_minutes - a.total_minutes);
-}
 
 /** Get per-employee breakdown for a specific project. */
 export async function getProjectDetailRows(

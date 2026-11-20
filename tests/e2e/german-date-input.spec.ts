@@ -71,4 +71,24 @@ test.describe("German date fields", () => {
     expect(box!.x + box!.width).toBeLessThanOrEqual(375);
     await page.screenshot({ path: testInfo.outputPath("german-date-mobile.png") });
   });
+
+  test("saves a future work schedule and shows its German date in the history", async ({ page }) => {
+    const futureDate = "2046-11-20";
+    const field = page.getByLabel("Arbeitszeitmodell gültig ab", { exact: true });
+    await field.fill("20112046");
+    await field.press("Tab");
+    await expect(field).toHaveValue("20.11.2046");
+    await page.getByRole("button", { name: "30 Std. · 5 Tage", exact: true }).click();
+    await page.getByRole("button", { name: "Speichern", exact: true }).click();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+
+    await openEmployee(page);
+    await expect(page.getByText("40 Std./Woche", { exact: true }).last()).toBeVisible();
+    await page.getByText("Verlauf der Arbeitszeitmodelle", { exact: true }).click();
+    await expect(page.getByText("Ab 20.11.2046 (geplant) · 30 Std./Woche", { exact: true })).toBeVisible();
+    const stored = await adminClient.from("employees").select("work_schedule, work_schedule_history")
+      .eq("id", env.employeeEmpId).single();
+    expect(stored.data?.work_schedule.monday).toBe(480);
+    expect(stored.data?.work_schedule_history[futureDate].monday).toBe(360);
+  });
 });

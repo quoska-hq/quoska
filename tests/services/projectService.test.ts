@@ -42,9 +42,9 @@ vi.mock("@/repos/projectRepo", () => ({
   unassignEmployeeFromProject: vi.fn(),
   getAssignmentsForEmployee: vi.fn(),
   getAssignmentsForProject: vi.fn(),
-  getProjectReportRows: vi.fn(),
   getProjectDetailRows: vi.fn(),
 }));
+vi.mock("@/repos/exportRepo", () => ({ getReportEntries: vi.fn() }));
 
 import {
   createProject,
@@ -58,6 +58,7 @@ import {
 } from "@/services/projectService";
 
 import * as repo from "@/repos/projectRepo";
+import { getReportEntries } from "@/repos/exportRepo";
 
 describe("ProjectService", () => {
   const supabase = createMockSupabase() as unknown as Parameters<typeof createProject>[0];
@@ -256,15 +257,38 @@ describe("ProjectService", () => {
   // ---------------------------------------------------------------------------
 
   describe("getProjectReport", () => {
-    it("returns aggregated rows from repo", async () => {
-      const mockRows = [
-        { project_id: "p1", project_name: "Web", customer_name: null, total_minutes: 480, entry_count: 5, employee_count: 2 },
-        { project_id: null, project_name: "Ohne Projekt", customer_name: null, total_minutes: 120, entry_count: 2, employee_count: 1 },
-      ];
-      vi.mocked(repo.getProjectReportRows).mockResolvedValue(mockRows);
+    it("groups consecutive bookings by project and totals the same net minutes shown in each booking", async () => {
+      const firstBooking = {
+        id: "entry-1", tenant_id: tenantId, employee_id: "emp-1",
+        date: "2026-10-25", clock_in: "2026-10-25T00:00:00Z", clock_out: "2026-10-25T04:00:00Z",
+        break_minutes: 30, status: "completed" as const, notes: null,
+        created_at: "2026-10-25T00:00:00Z", updated_at: "2026-10-25T04:00:00Z", deleted_at: null,
+        employee_first_name: "Max", employee_last_name: "Beispiel",
+        project_id: "p1", project_name: "Web", project_customer_name: "Kunde A",
+      };
+      vi.mocked(getReportEntries).mockResolvedValue([
+        firstBooking,
+        {
+          ...firstBooking, id: "entry-2", clock_in: "2026-10-25T04:00:00Z", clock_out: "2026-10-25T06:00:00Z",
+          break_minutes: 0, project_id: "p2", project_name: "Service",
+        },
+        {
+          ...firstBooking, id: "entry-3", clock_in: "2026-10-25T06:00:00Z", clock_out: null,
+          status: "paused", project_id: null, project_name: null, project_customer_name: null,
+        },
+      ]);
 
-      const result = await getProjectReport(supabase, tenantId, "2026-01-01", "2026-01-31");
-      expect(result.data).toHaveLength(2);
+      const result = await getProjectReport(supabase, tenantId, "2026-10-01", "2026-10-31");
+      expect(getReportEntries).toHaveBeenCalledWith(supabase, tenantId, "2026-10-01", "2026-10-31");
+      expect(result.data).toMatchObject([
+        {
+          project_id: "p1", project_name: "Web", customer_name: "Kunde A", total_minutes: 210,
+          entry_count: 1, employee_count: 1,
+          bookings: [{ id: "entry-1", employee_name: "Max Beispiel", net_minutes: 210, break_minutes: 30 }],
+        },
+        { project_id: "p2", total_minutes: 120, bookings: [{ id: "entry-2", net_minutes: 120 }] },
+        { project_id: null, project_name: "Ohne Projekt", total_minutes: 0, bookings: [{ id: "entry-3", net_minutes: 0 }] },
+      ]);
     });
   });
 });

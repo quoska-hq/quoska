@@ -30,6 +30,7 @@ import { notifyManagers, sendNotification } from "@/services/notificationService
 import { createAdminClient } from "@/config/supabase/server";
 import { correctionChangeSummary } from "@/lib/correction-format";
 import type { CorrectionRequestWithEntry } from "@/types/correction";
+import { reviewMissingTimeRequest } from "@/services/missingTimeRequestService";
 
 /**
  * Submit a correction request for a time entry.
@@ -118,6 +119,11 @@ export async function approveCorrectionRequest(
     return failure("Diese Korrekturanfrage wurde bereits bearbeitet");
   }
 
+  if (request.request_type === "missing_entry") {
+    return reviewMissingTimeRequest(createAdminClient(), tenantId, managerEmployeeId, requestId, "approve");
+  }
+  if (!request.time_entry_id) return failure("Zeiteintrag nicht gefunden");
+
   // 2. Apply the edit via audit-trail flow
   const reason = `Korrekturanfrage (genehmigt): ${request.reason}`;
   const editResult = await editTimeEntry(
@@ -182,6 +188,10 @@ export async function rejectCorrectionRequest(
 
   if (request.status !== "pending") {
     return failure("Diese Korrekturanfrage wurde bereits bearbeitet");
+  }
+
+  if (request.request_type === "missing_entry") {
+    return reviewMissingTimeRequest(createAdminClient(), tenantId, managerEmployeeId, requestId, "reject", reviewNote);
   }
 
   // 2. Update request status to rejected

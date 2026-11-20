@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "@/components/date-picker";
 import { GermanTimeInput } from "@/components/german-time-input";
+import type { TimeTrackingSettings } from "@/types/time-tracking";
 
 interface EmployeeOption {
   id: string;
@@ -27,6 +28,7 @@ interface Props {
   onSaved?: () => void;
   targetEmployee?: { id: string; name: string };
   allowEmployeeSelection?: boolean;
+  selfService?: boolean;
 }
 
 export function ManualTimeEntryDialog({
@@ -35,6 +37,7 @@ export function ManualTimeEntryDialog({
   onSaved,
   targetEmployee,
   allowEmployeeSelection = false,
+  selfService = false,
 }: Props) {
   const queryClient = useQueryClient();
   const [employeeId, setEmployeeId] = useState(targetEmployee?.id ?? "");
@@ -45,14 +48,15 @@ export function ManualTimeEntryDialog({
   const [breakMinutes, setBreakMinutes] = useState(0);
   const [automaticOverride, setAutomaticOverride] = useState<boolean | null>(null);
   const [notes, setNotes] = useState("");
-  const [reason, setReason] = useState("Manuell nachgetragen");
+  const [reason, setReason] = useState(selfService ? "" : "Manuell nachgetragen");
 
-  const { data: settings } = useQuery<{ automaticBreaksEnabled: boolean }>({
+  const { data: settings } = useQuery<TimeTrackingSettings>({
     queryKey: ["timeTrackingSettings"],
     queryFn: async () => {
       const response = await fetch("/api/v1/settings/time-tracking");
       const json = await response.json();
-      return json.data ?? { automaticBreaksEnabled: true };
+      if (!response.ok || !json.data) throw new Error(json.error ?? "Einstellungen konnten nicht geladen werden");
+      return json.data;
     },
   });
 
@@ -67,6 +71,7 @@ export function ManualTimeEntryDialog({
   });
 
   const automaticEnabled = automaticOverride ?? settings?.automaticBreaksEnabled ?? true;
+  const requiresApproval = selfService && (settings?.missingTimeApprovalRequired ?? true);
   const grossMinutes = durationBetween(startTime, endTime, endsNextDay);
   const allocation = allocateBreakMinutes(grossMinutes, breakMinutes, automaticEnabled);
   const netMinutes = Math.max(0, grossMinutes - allocation.totalMinutes);
@@ -74,11 +79,11 @@ export function ManualTimeEntryDialog({
   const mutation = useMutation({
     mutationFn: async () => {
       const selectedTarget = targetEmployee?.id ?? (allowEmployeeSelection ? employeeId : undefined);
-      const response = await fetch("/api/v1/time-entries", {
+      const response = await fetch(selfService ? "/api/v1/time-requests" : "/api/v1/time-entries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          employee_id: selectedTarget || undefined,
+          employee_id: selfService ? undefined : selectedTarget || undefined,
           date,
           start_time: startTime,
           end_time: endTime,
@@ -98,8 +103,15 @@ export function ManualTimeEntryDialog({
         queryClient.invalidateQueries({ queryKey: ["myTimes"] }),
         queryClient.invalidateQueries({ queryKey: ["employeeEntries"] }),
         queryClient.invalidateQueries({ queryKey: ["weeklyReport"] }),
+        queryClient.invalidateQueries({ queryKey: ["projectReport"] }),
         queryClient.invalidateQueries({ queryKey: ["adminCockpit"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+        queryClient.invalidateQueries({ queryKey: ["managerDashboard"] }),
+        queryClient.invalidateQueries({ queryKey: ["datev"] }),
+        queryClient.invalidateQueries({ queryKey: ["clockStatus"] }),
         queryClient.invalidateQueries({ queryKey: ["notificationUnreadCount"] }),
+        queryClient.invalidateQueries({ queryKey: ["myCorrections"] }),
+        queryClient.invalidateQueries({ queryKey: ["corrections"] }),
       ]);
       onSaved?.();
       onClose();
@@ -116,7 +128,7 @@ export function ManualTimeEntryDialog({
     <Dialog open={open} onOpenChange={(value) => { if (!value) onClose(); }}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Zeit manuell hinzufügen</DialogTitle>
+          <DialogTitle>{requiresApproval ? "Zeitnachtrag anfragen" : "Zeit manuell hinzufügen"}</DialogTitle>
           {targetEmployee && <p className="text-sm text-muted-foreground">Für {targetEmployee.name}</p>}
         </DialogHeader>
 
@@ -137,7 +149,7 @@ export function ManualTimeEntryDialog({
             </div>
           )}
 
-          <DatePicker id="manual-date" label="Datum" value={date} onChange={setDate} />
+          <DatePicker id="manual-date" label="Datum" value={date} onChange={setDate} maxDate={selfService ? getLocalToday() : undefined} />
           <div className="grid grid-cols-2 gap-3">
             <GermanTimeInput id="manual-start" label="Beginn" value={startTime} onChange={setStartTime} />
             <GermanTimeInput id="manual-end" label="Ende" value={endTime} onChange={setEndTime} />
@@ -162,12 +174,14 @@ export function ManualTimeEntryDialog({
 
           <div className="space-y-2"><Label htmlFor="manual-notes">Notiz (optional)</Label><Textarea id="manual-notes" value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} rows={2} /></div>
           <div className="space-y-2"><Label htmlFor="manual-reason">Grund</Label><Input id="manual-reason" value={reason} onChange={(event) => setReason(event.target.value)} maxLength={200} /></div>
-          <p className="flex gap-2 text-xs leading-5 text-muted-foreground"><Info className="mt-0.5 size-3.5 shrink-0" />Der Eintrag wird als manuell gekennzeichnet und vollständig im Änderungsverlauf protokolliert.</p>
+          <p className="flex gap-2 text-xs leading-5 text-muted-foreground"><Info className="mt-0.5 size-3.5 shrink-0" />{requiresApproval
+            ? "Deine Anfrage wird von einem Admin oder einer Führungskraft geprüft. Erst nach Genehmigung zählt die Zeit zu deinem Arbeitszeitkonto."
+            : "Der Eintrag wird als manuell gekennzeichnet und vollständig im Änderungsverlauf protokolliert."}</p>
         </div>
 
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>Abbrechen</DialogClose>
-          <Button onClick={() => mutation.mutate()} disabled={!canSave || mutation.isPending}>{mutation.isPending ? "Speichern…" : "Zeit hinzufügen"}</Button>
+          <Button onClick={() => mutation.mutate()} disabled={!canSave || mutation.isPending}>{mutation.isPending ? "Speichern…" : requiresApproval ? "Anfrage senden" : "Zeit hinzufügen"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -181,7 +195,7 @@ function durationBetween(start: string, end: string, nextDay: boolean): number {
 }
 
 function formatMinutes(minutes: number): string {
-  if (minutes <= 0) return "—";
+  if (!Number.isFinite(minutes) || minutes <= 0) return "—";
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
   return rest ? `${hours}h ${rest}m` : `${hours}h`;

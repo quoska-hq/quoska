@@ -76,7 +76,7 @@ describe("CSV Export — Data Accuracy (FR-28)", () => {
     expect(csv).not.toContain("2026-06-03");
   });
 
-  test("CSV uses HH:MM time format", () => {
+  test("CSV uses HH:MM in Europe/Berlin", () => {
     const rows: ExportRow[] = [
       {
         employeeFirstName: "A",
@@ -91,8 +91,8 @@ describe("CSV Export — Data Accuracy (FR-28)", () => {
     ];
 
     const csv = generateCSV(rows);
-    expect(csv).toContain("08:02");
-    expect(csv).toContain("17:04");
+    expect(csv).toContain("10:02");
+    expect(csv).toContain("19:04");
   });
 
   test("CSV calculates net hours correctly", () => {
