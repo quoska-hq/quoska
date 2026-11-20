@@ -8,7 +8,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
 import type { TimeEntry } from "@/types/database";
 import { TimeEntryEditDialog } from "@/components/time-entry-edit-dialog";
@@ -19,11 +19,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ManualTimeEntryDialog } from "@/components/manual-time-entry-dialog";
-import { formatTimeLocal } from "@/config/client/date-utils";
+import { formatDateFullDE, formatTimeLocal } from "@/config/client/date-utils";
 import { Plus, Sparkles } from "lucide-react";
 
 interface TimeEntryWithNet extends TimeEntry {
   netMinutes: number;
+  projectName: string | null;
 }
 
 interface EmployeeEntriesData {
@@ -36,12 +37,6 @@ interface EmployeeEntryListProps {
   startDate: string;
   endDate: string;
   onBack: () => void;
-}
-
-/** Format ISO date to DD.MM.YYYY. */
-function formatDate(iso: string): string {
-  const [y, m, d] = iso.slice(0, 10).split("-");
-  return `${d}.${m}.${y}`;
 }
 
 /** Format minutes to "X Std Y Min". */
@@ -60,7 +55,6 @@ export function EmployeeEntryList({
   endDate,
   onBack,
 }: EmployeeEntryListProps) {
-  const queryClient = useQueryClient();
   const [editEntry, setEditEntry] = useState<TimeEntry | null>(null);
   const [auditEntryId, setAuditEntryId] = useState<string | null>(null);
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
@@ -87,7 +81,7 @@ export function EmployeeEntryList({
           <div className="min-w-0">
             <h3 className="truncate text-lg font-semibold">{employeeName}</h3>
             <p className="text-sm text-muted-foreground">
-              {formatDate(startDate)} – {formatDate(endDate)}
+              {formatDateFullDE(startDate)} – {formatDateFullDE(endDate)}
             </p>
           </div>
         </div>
@@ -133,10 +127,11 @@ export function EmployeeEntryList({
               {index > 0 && <Separator />}
               <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-medium">
-                      {formatDate(entry.date)}
+                      {formatDateFullDE(entry.date)}
                     </p>
+                    {entry.deleted_at && <Badge variant="destructive">Storniert</Badge>}
                     {entry.status === "running" && (
                       <Badge variant="secondary" className="bg-green-100 text-green-800 border-0">
                         Läuft
@@ -152,6 +147,9 @@ export function EmployeeEntryList({
                     )}
                     {entry.entry_source === "import" && <Badge variant="outline">Importiert</Badge>}
                   </div>
+                  <p className="mt-0.5 break-words text-sm">
+                    {entry.projectName ?? (entry.project_id ? "Unbekanntes Projekt" : "Ohne Projekt")}
+                  </p>
                   <p className="break-words text-sm text-muted-foreground">
                     {formatTimeLocal(entry.clock_in)}
                     {entry.clock_out
@@ -159,8 +157,7 @@ export function EmployeeEntryList({
                       : " – …"}
                     {entry.break_minutes > 0 &&
                       ` · Pause: ${entry.break_minutes} Min`}
-                    {" · Netto: "}
-                    {formatDuration(entry.netMinutes)}
+                    {!entry.deleted_at && ` · Netto: ${formatDuration(entry.netMinutes)}`}
                   </p>
                   {(entry.automatic_break_minutes ?? 0) > 0 && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-violet-700">
@@ -176,7 +173,7 @@ export function EmployeeEntryList({
                 </div>
 
                 <div className="flex shrink-0 flex-wrap items-center gap-3 sm:ml-3 sm:gap-2">
-                  {entry.status === "completed" && (
+                  {entry.status === "completed" && !entry.deleted_at && (
                     <Button
                       variant="link"
                       size="sm"
@@ -207,13 +204,7 @@ export function EmployeeEntryList({
           entry={editEntry}
           open={!!editEntry}
           onClose={() => setEditEntry(null)}
-          onSaved={() => {
-            setEditEntry(null);
-            queryClient.invalidateQueries({
-              queryKey: ["employeeEntries", employeeId],
-            });
-            queryClient.invalidateQueries({ queryKey: ["weeklyReport"] });
-          }}
+          onSaved={() => setEditEntry(null)}
         />
       )}
 

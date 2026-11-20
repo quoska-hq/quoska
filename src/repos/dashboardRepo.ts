@@ -9,7 +9,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Employee, TimeEntry } from "@/types/database";
 import {
-  normalizeWorkSchedule,
+  employeeScheduleForDate,
   type WorkdayKey,
 } from "@/types/work-schedule";
 
@@ -121,7 +121,7 @@ export async function getMissingEntries(
   // Get all active employees
   const { data: employees } = await supabase
     .from("employees")
-    .select("id, first_name, last_name, target_hours_week, work_schedule")
+    .select("id, first_name, last_name, target_hours_week, work_schedule, work_schedule_history")
     .eq("tenant_id", tenantId)
     .is("deleted_at", null);
 
@@ -152,15 +152,11 @@ export async function getMissingEntries(
   ];
 
   for (const emp of employees) {
-    const schedule = normalizeWorkSchedule(
-      emp.work_schedule,
-      emp.target_hours_week,
-    );
     let date = startDate;
     while (date <= endDate) {
       const dayKey = dayKeys[getDayOfWeek(date)] ?? "monday";
       if (
-        schedule[dayKey] > 0 &&
+        employeeScheduleForDate(emp, date)[dayKey] > 0 &&
         !holidayDates.has(date) &&
         !entrySet.has(`${emp.id}:${date}`)
       ) {

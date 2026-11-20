@@ -13,6 +13,7 @@ import {
   formatWorkMinutes,
   totalScheduleMinutes,
   workScheduleSchema,
+  sameSchedule,
   type WorkdayKey,
   type WorkSchedule,
 } from "@/types/work-schedule";
@@ -32,10 +33,6 @@ const PRESETS = [
   { label: "32 Std. · 4 Tage", value: FOUR_DAY_WORK_SCHEDULE },
   { label: "30 Std. · 5 Tage", value: THIRTY_HOUR_WORK_SCHEDULE },
 ] as const;
-
-function sameSchedule(a: WorkSchedule, b: WorkSchedule): boolean {
-  return WORKDAY_KEYS.every((day) => a[day] === b[day]);
-}
 
 function activeDays(schedule: WorkSchedule): WorkdayKey[] {
   return WORKDAY_KEYS.filter((day) => schedule[day] > 0);

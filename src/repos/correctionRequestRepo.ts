@@ -17,7 +17,8 @@ export async function createCorrectionRequest(
   data: {
     tenant_id: string;
     employee_id: string;
-    time_entry_id: string;
+    time_entry_id: string | null;
+    request_type?: "correction" | "missing_entry";
     proposed_change: Record<string, unknown>;
     reason: string;
   },
@@ -65,7 +66,7 @@ export async function getPendingCorrectionRequests(
   const { data } = await supabase
     .from("correction_requests")
     .select(
-      "*, timeEntry:time_entries(employee_id, date, project_id, clock_in, clock_out, break_minutes, notes)",
+      "*, timeEntry:time_entries(employee_id, date, project_id, clock_in, clock_out, break_minutes, notes), employee:employees!correction_requests_employee_id_fkey(first_name, last_name)",
     )
     .eq("tenant_id", tenantId)
     .eq("status", "pending")
@@ -110,6 +111,7 @@ export async function updateCorrectionRequestStatus(
     .update(updates)
     .eq("id", requestId)
     .eq("tenant_id", tenantId)
+    .eq("status", "pending")
     .select("*")
     .single();
 

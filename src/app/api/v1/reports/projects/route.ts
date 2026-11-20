@@ -1,7 +1,7 @@
 /**
  * GET /api/v1/reports/projects
  *
- * Project time report — aggregated hours per project.
+ * Project time report with totals and bookings per project.
  * Manager/admin only.
  */
 

@@ -7,11 +7,12 @@
 
 "use client";
 
+import { EmployeeLeaveFields } from "@/components/employee-leave-fields";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
 import type { Employee } from "@/types/database";
-import type { LeaveBalance } from "@/types/leave";
+import { updateEntitlementSchema, type LeaveBalance } from "@/types/leave";
 import type { Bundesland } from "@/types/tenant";
 import { BUNDESLAENDER, BUNDESLAND_LABELS, getBundeslandLabel } from "@/types/tenant";
 import {
@@ -34,22 +35,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EmployeeScheduleHistory } from "@/components/employee-schedule-history";
 import { WorkScheduleEditor } from "@/components/work-schedule-editor";
+import { getLocalToday } from "@/config/client/date-utils";
 import { ROLE_LABELS, ROLE_OPTIONS, type EmployeeListResponse } from "@/types/employee";
 import {
-  normalizeWorkSchedule,
-  scheduleHours,
+  employeeScheduleForDate,
+  sameSchedule,
+  WORKDAY_KEYS,
   type WorkSchedule,
 } from "@/types/work-schedule";
 
 interface EmployeeEditDialogProps {
   employee: Employee;
+  today?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export function EmployeeEditDialog({
   employee,
+  today = getLocalToday(),
   onClose,
   onSuccess,
 }: EmployeeEditDialogProps) {
@@ -57,9 +63,8 @@ export function EmployeeEditDialog({
   const [firstName, setFirstName] = useState(employee.first_name);
   const [lastName, setLastName] = useState(employee.last_name);
   const [role, setRole] = useState<Employee["role"]>(employee.role);
-  const [workSchedule, setWorkSchedule] = useState<WorkSchedule>(
-    normalizeWorkSchedule(employee.work_schedule, employee.target_hours_week),
-  );
+  const [scheduleDraft, setScheduleDraft] = useState<WorkSchedule | null>(null);
+  const [effectiveDateOverride, setEffectiveDateOverride] = useState<string | null>(null);
   const [bundesland, setBundesland] = useState<string>(employee.bundesland ?? "");
   const [employmentStartDate, setEmploymentStartDate] = useState(
     employee.employment_start_date ?? employee.created_at.slice(0, 10),
@@ -72,6 +77,11 @@ export function EmployeeEditDialog({
   const [workScheduleValid, setWorkScheduleValid] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const defaultEffectiveDate = employmentStartDate > today ? employmentStartDate : today;
+  const effectiveDate = effectiveDateOverride ?? defaultEffectiveDate;
+  const savedSchedule = employeeScheduleForDate(employee, effectiveDate || defaultEffectiveDate);
+  const workSchedule = scheduleDraft ?? savedSchedule;
+  const scheduleChanged = !sameSchedule(savedSchedule, workSchedule);
   const leaveBalanceQuery = useQuery<LeaveBalance>({
     queryKey: ["leaveBalance", employee.id],
     queryFn: async () => {
@@ -91,16 +101,27 @@ export function EmployeeEditDialog({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const body: Record<string, unknown> = {
-        first_name: firstName,
-        last_name: lastName,
-        role,
-        target_hours_week: scheduleHours(workSchedule),
-        work_schedule: workSchedule,
-        employment_start_date: employmentStartDate,
-        initial_overtime_minutes: Math.round((Number(initialOvertimeHours) || 0) * 60),
-        bundesland: bundesland || null,
-      };
+      const body: Record<string, unknown> = {};
+      if (firstName !== employee.first_name) body.first_name = firstName;
+      if (lastName !== employee.last_name) body.last_name = lastName;
+      if (role !== employee.role) body.role = role;
+      if ((bundesland || null) !== employee.bundesland) body.bundesland = bundesland || null;
+      if (employmentStartDate !== (employee.employment_start_date ?? employee.created_at.slice(0, 10))) {
+        body.employment_start_date = employmentStartDate;
+      }
+      const openingBalance = Math.round((Number(initialOvertimeHours) || 0) * 60);
+      if (openingBalance !== (employee.initial_overtime_minutes ?? 0)) {
+        body.initial_overtime_minutes = openingBalance;
+      }
+      if (scheduleChanged) {
+        body.work_schedule = workSchedule;
+        body.work_schedule_effective_from = effectiveDate;
+      }
+      if (Number(annualVacationDays) !== leaveBalanceQuery.data?.annual
+        || Number(carriedOverDays) !== leaveBalanceQuery.data?.carried_over) {
+        body.leave_entitlement = { total_days: Number(annualVacationDays), carried_over: Number(carriedOverDays) };
+      }
+      if (!Object.keys(body).length) return employee;
 
       const res = await fetch(`/api/v1/employees/${employee.id}`, {
         method: "PATCH",
@@ -110,27 +131,9 @@ export function EmployeeEditDialog({
       const json: ApiResponse<Employee> = await res.json();
       if (!res.ok || !json.data) throw new Error(json.error ?? "Fehler beim Speichern");
 
-      const entitlementResponse = await fetch(
-        `/api/v1/leave-entitlements/${employee.id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            total_days: Number(annualVacationDays),
-            carried_over: Number(carriedOverDays),
-          }),
-        },
-      );
-      const entitlementJson = await entitlementResponse.json();
-      if (!entitlementResponse.ok) {
-        throw new Error(
-          entitlementJson.error ?? "Urlaubsanspruch konnte nicht gespeichert werden",
-        );
-      }
-
-      return { employee: json.data, entitlement: entitlementJson.data };
+      return json.data;
     },
-    onSuccess: async ({ employee: updatedEmployee }) => {
+    onSuccess: async (updatedEmployee) => {
       // Reopening immediately must use the saved profile, even while the list refetches.
       await queryClient.cancelQueries({ queryKey: ["employees"] });
       queryClient.setQueryData<EmployeeListResponse>(["employees"], (current) => current ? {
@@ -139,6 +142,11 @@ export function EmployeeEditDialog({
         deactivated: current.deactivated.map((item) => item.id === updatedEmployee.id ? updatedEmployee : item),
       } : current);
       queryClient.invalidateQueries({ queryKey: ["leaveBalance"] });
+      if (scheduleChanged) {
+        for (const queryKey of ["adminCockpit", "managerDashboard", "weeklyReport", "myTimes", "clockStatus"]) {
+          queryClient.invalidateQueries({ queryKey: [queryKey] });
+        }
+      }
       onSuccess();
     },
     onError: (err) => setError(err.message),
@@ -150,12 +158,9 @@ export function EmployeeEditDialog({
 
     const annual = Number(annualVacationDays);
     const carriedOver = Number(carriedOverDays);
-    if (!Number.isInteger(annual) || annual < 20 || annual > 40) {
-      setError("Der Jahresanspruch muss zwischen 20 und 40 Tagen liegen.");
-      return;
-    }
-    if (!Number.isInteger(carriedOver) || carriedOver < 0 || carriedOver > 20) {
-      setError("Der Resturlaub muss zwischen 0 und 20 Tagen liegen.");
+    const entitlement = updateEntitlementSchema.safeParse({ total_days: annual, carried_over: carriedOver });
+    if (!entitlement.success) {
+      setError(entitlement.error.issues[0].message);
       return;
     }
 
@@ -247,45 +252,33 @@ export function EmployeeEditDialog({
               <h3 className="text-sm font-semibold">Urlaubsanspruch</h3>
               <p className="text-xs text-muted-foreground">Kontingent für das laufende Kalenderjahr.</p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="edit-annual-vacation-days">Urlaubstage pro Jahr</Label>
-                <Input
-                  id="edit-annual-vacation-days"
-                  type="number"
-                  min="20"
-                  max="40"
-                  step="1"
-                  value={annualVacationDays}
-                  onChange={(event) => setAnnualVacationDaysOverride(event.target.value)}
-                  disabled={leaveBalanceQuery.isLoading || Boolean(leaveBalanceError)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-carried-over-days">Übertragener Resturlaub</Label>
-                <Input
-                  id="edit-carried-over-days"
-                  type="number"
-                  min="0"
-                  max="20"
-                  step="1"
-                  value={carriedOverDays}
-                  onChange={(event) => setCarriedOverDaysOverride(event.target.value)}
-                  disabled={leaveBalanceQuery.isLoading || Boolean(leaveBalanceError)}
-                  required
-                />
-              </div>
-            </div>
+            <EmployeeLeaveFields annualDays={annualVacationDays} carriedDays={carriedOverDays}
+              disabled={leaveBalanceQuery.isLoading || Boolean(leaveBalanceError)}
+              onAnnualChange={setAnnualVacationDaysOverride} onCarriedChange={setCarriedOverDaysOverride} />
           </div>
 
           <div className="space-y-2">
-            <Label>Arbeitszeit</Label>
+            <Label htmlFor="edit-schedule-effective-date">Arbeitszeitmodell gültig ab</Label>
+            <GermanDateInput
+              id="edit-schedule-effective-date"
+              calendarLabel="Kalender für Gültigkeitsdatum öffnen"
+              value={effectiveDate}
+              min={employmentStartDate || undefined}
+              onChange={(date) => {
+                const nextSchedule = employeeScheduleForDate(employee, date || defaultEffectiveDate);
+                if (!sameSchedule(nextSchedule, savedSchedule)) setWorkScheduleValid(true);
+                setEffectiveDateOverride(date);
+              }}
+              required={scheduleChanged}
+            />
+            <p className="text-xs text-muted-foreground">Änderungen gelten ab diesem Datum. Die Sollzeit davor bleibt erhalten.</p>
             <WorkScheduleEditor
+              key={WORKDAY_KEYS.map((day) => savedSchedule[day]).join(",")}
               value={workSchedule}
-              onChange={setWorkSchedule}
+              onChange={setScheduleDraft}
               onValidityChange={setWorkScheduleValid}
             />
+            <EmployeeScheduleHistory employee={employee} today={today} />
           </div>
 
           <div className="space-y-2">
@@ -316,6 +309,7 @@ export function EmployeeEditDialog({
               disabled={
                 mutation.isPending ||
                 !workScheduleValid ||
+                (scheduleChanged && (!effectiveDate || effectiveDate < employmentStartDate)) ||
                 leaveBalanceQuery.isLoading ||
                 Boolean(leaveBalanceError)
               }

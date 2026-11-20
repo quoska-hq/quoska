@@ -21,6 +21,9 @@ import { DayEntryCard } from "@/components/day-entry-card";
 import { ManualTimeEntryDialog } from "@/components/manual-time-entry-dialog";
 import { EmployeeTimeBalanceCards } from "@/components/employee-time-balance-cards";
 import { getWeekBoundsForOffset } from "@/config/client/date-utils";
+import { formatDateFullDE } from "@/config/client/date-utils";
+import { correctionChangeSummary } from "@/lib/correction-format";
+import { Badge } from "@/components/ui/badge";
 import {
   getWeekDays,
   formatFullDate,
@@ -54,7 +57,7 @@ export function EmployeeSelfService() {
       return { role: json.data?.role ?? "employee" };
     },
   });
-  const canAddTime = authInfo?.role === "admin" || authInfo?.role === "manager";
+  const canAddTime = Boolean(authInfo);
   const canEditDirectly = authInfo?.role === "admin";
 
   const { data, isLoading, refetch } = useQuery<MyTimesData>({
@@ -188,6 +191,7 @@ export function EmployeeSelfService() {
 
         {canAddTime && (
           <ManualTimeEntryDialog
+            selfService={authInfo?.role === "employee"}
             open={manualEntryOpen}
             onClose={() => setManualEntryOpen(false)}
             onSaved={() => refetch()}
@@ -201,6 +205,25 @@ export function EmployeeSelfService() {
             initialMinutes={data.initialOvertimeMinutes}
             isCurrentWeek={weekOffset === 0}
           />
+        )}
+
+        {authInfo?.role === "employee" && corrections?.some((request) => request.request_type === "missing_entry") && (
+          <Card className="my-4">
+            <CardContent className="space-y-4">
+              <h2 className="text-sm font-medium">Meine Zeitnachträge</h2>
+              {corrections.filter((request) => request.request_type === "missing_entry").map((request) => (
+                <div key={request.id} className="space-y-1 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">{formatDateFullDE(String(request.proposed_change?.date))}</span>
+                    <Badge variant="secondary">{request.status === "pending" ? "Wartet auf Freigabe" : request.status === "approved" ? request.reviewed_by ? "Genehmigt" : "Direkt gebucht" : "Abgelehnt"}</Badge>
+                  </div>
+                  <p className="text-muted-foreground">{correctionChangeSummary(request)}</p>
+                  <p className="text-muted-foreground">Grund: {request.reason}</p>
+                  {request.review_note && <p className="text-muted-foreground">Rückmeldung: {request.review_note}</p>}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         )}
 
         {/* Correction dialog */}

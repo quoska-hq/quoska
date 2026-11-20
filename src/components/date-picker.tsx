@@ -39,6 +39,7 @@ interface DatePickerProps {
   maxDate?: string;
   /** Compact calendar button next to a separate editable date field. */
   iconOnly?: boolean;
+  calendarLabel?: string;
 }
 
 export function DatePicker({
@@ -52,6 +53,7 @@ export function DatePicker({
   minDate,
   maxDate,
   iconOnly = false,
+  calendarLabel = "Kalender öffnen",
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   // eslint-disable-next-line @quoska/legal/no-client-timestamps -- display-only date for calendar widget
@@ -81,7 +83,7 @@ export function DatePicker({
                 !value && "text-muted-foreground",
                 iconOnly && "h-9 w-9 justify-center px-0",
               )}
-              aria-label={iconOnly ? "Kalender öffnen" : undefined}
+              aria-label={iconOnly ? calendarLabel : undefined}
               disabled={disabled}
             />
           }

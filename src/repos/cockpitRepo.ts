@@ -92,12 +92,12 @@ export async function getCockpitCorrectionRecords(
   let query = supabase
     .from("correction_requests")
     .select(
-      "*, timeEntry:time_entries!inner(employee_id, date, project_id, clock_in, clock_out, break_minutes, notes)",
+      "*, timeEntry:time_entries(employee_id, date, project_id, clock_in, clock_out, break_minutes, notes)",
     )
     .eq("tenant_id", tenantId)
     .or(`status.eq.pending,updated_at.gte.${updatedSince}`);
 
-  if (employeeId) query = query.eq("timeEntry.employee_id", employeeId);
+  if (employeeId) query = query.eq("employee_id", employeeId);
 
   const { data } = await query
     .order("created_at", { ascending: false })

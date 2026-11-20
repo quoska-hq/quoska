@@ -9,7 +9,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
-import type { TimeEntryAudit } from "@/types/database";
+import type { TimeEntryAuditDetails } from "@/types/correction";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ interface AuditTrailDialogProps {
 const ACTION_LABELS: Record<string, string> = {
   create: "Erstellt",
   update: "Bearbeitet",
-  delete: "Gelöscht",
+  delete: "Storniert",
   pause: "Pause gestartet",
   resume: "Pause beendet",
 };
@@ -46,6 +46,8 @@ const FIELD_LABELS: Record<string, string> = {
   manual_entry: "Manueller Eintrag",
   import_entry: "Importierter Eintrag",
   notes: "Notizen",
+  project_id: "Projektzuordnung",
+  deleted_at: "Stornozeitpunkt",
   status: "Status",
 };
 
@@ -58,7 +60,7 @@ export function AuditTrailDialog({
     queryKey: ["auditTrail", timeEntryId],
     queryFn: async () => {
       const res = await fetch(`/api/v1/time-entries/${timeEntryId}`);
-      const json: ApiResponse<TimeEntryAudit[]> = await res.json();
+      const json: ApiResponse<TimeEntryAuditDetails[]> = await res.json();
       return json.data ?? [];
     },
     enabled: open,
@@ -106,11 +108,11 @@ export function AuditTrailDialog({
                       )}
                     </div>
 
-                    {record.old_value !== null && record.new_value !== null && (
+                    {(record.field_name === "project_id" || (record.old_value !== null && record.new_value !== null)) && (
                       <p className="text-muted-foreground mt-0.5">
-                        <span className="line-through">{record.old_value}</span>
+                        <span className="line-through">{record.previousProjectName ?? record.old_value ?? "Kein Projekt"}</span>
                         {" → "}
-                        <span className="font-medium">{record.new_value}</span>
+                        <span className="font-medium">{record.nextProjectName ?? record.new_value ?? "Kein Projekt"}</span>
                       </p>
                     )}
 

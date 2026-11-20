@@ -1,5 +1,5 @@
 /**
- * GET /api/v1/reports/export/csv?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD&employeeId=UUID
+ * GET /api/v1/reports/export/csv?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
  *
  * Manager CSV export of time entries for a date range.
  * Returns CSV file with German headers and formatting.
@@ -11,7 +11,7 @@ import { observeProductAction } from "@/services/productObservationService";
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/config/supabase/server";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
-import { getEntriesForExport } from "@/repos/exportRepo";
+import { getReportEntries } from "@/repos/exportRepo";
 import { entriesToExportRows, generateCSV, csvFilename } from "@/services/exportService";
 import { exportQuerySchema } from "@/types/export";
 
@@ -43,24 +43,25 @@ async function handleGet(request: Request) {
       startDate: searchParams.get("startDate"),
       endDate: searchParams.get("endDate"),
       employeeId: searchParams.get("employeeId") ?? undefined,
+      projectId: searchParams.get("projectId") ?? undefined,
     });
 
     if (!parsed.success) {
       return NextResponse.json(
-        { data: null, error: "Ungültige Parameter. startDate und endDate (YYYY-MM-DD) erforderlich." },
+        { data: null, error: "Ungültiger Zeitraum oder Filter für den Export." },
         { status: 400 },
       );
     }
 
-    const { startDate, endDate, employeeId } = parsed.data;
+    const { startDate, endDate, ...filters } = parsed.data;
 
     // Fetch entries
-    const rawEntries = await getEntriesForExport(
+    const rawEntries = await getReportEntries(
       supabase,
       tenantId,
       startDate,
       endDate,
-      employeeId,
+      filters,
     );
 
     // Convert to export rows

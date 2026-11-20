@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { updateEntitlementSchema } from "./leave";
 import type { Employee } from "./database";
 import { workScheduleSchema, type WorkSchedule } from "./work-schedule";
 
@@ -31,6 +32,7 @@ export const ROLE_LABELS: Record<Role, string> = {
 export const ROLE_OPTIONS: readonly Role[] = ["employee", "manager", "admin"];
 
 export const LAST_ADMIN_ERROR = "Mindestens ein aktiver Admin muss erhalten bleiben. Vergib zuerst einem anderen Mitarbeiter die Admin-Rolle.";
+export const WORK_SCHEDULE_BEFORE_EMPLOYMENT_ERROR = "Das Arbeitszeitmodell kann frühestens ab dem Eintrittsdatum gelten.";
 
 /** Free plan employee limit (for plan enforcement) */
 export const FREE_PLAN_EMPLOYEE_LIMIT = 3;
@@ -87,15 +89,16 @@ export const inviteEmployeeSchema = z.object({
 });
 
 export const updateEmployeeSchema = z.object({
+  leave_entitlement: updateEntitlementSchema.optional(),
   first_name: z.string().min(1, "Vorname ist erforderlich").optional(),
   last_name: z.string().min(1, "Nachname ist erforderlich").optional(),
   role: z.enum(["admin", "manager", "employee"]).optional(),
   target_hours_week: z.number().gt(0).max(48).optional(),
   work_schedule: workScheduleSchema.optional(),
-  employment_start_date: z.string().regex(
-    /^\d{4}-\d{2}-\d{2}$/,
-    "Ungültiges Eintrittsdatum",
+  work_schedule_effective_from: z.string().date("Ungültiges Gültigkeitsdatum").refine(
+    (date) => !date.startsWith("0000-"), "Ungültiges Gültigkeitsdatum",
   ).optional(),
+  employment_start_date: z.string().date("Ungültiges Eintrittsdatum").optional(),
   initial_overtime_minutes: z.number().int().min(-600000).max(600000).optional(),
   bundesland: z
     .enum([
@@ -118,7 +121,10 @@ export const updateEmployeeSchema = z.object({
     ])
     .nullable()
     .optional(),
-});
+}).refine(
+  (input) => !input.work_schedule_effective_from || input.work_schedule || input.target_hours_week,
+  { message: "Ein Arbeitszeitmodell ist erforderlich.", path: ["work_schedule_effective_from"] },
+);
 
 export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>;
 

@@ -6,6 +6,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
@@ -20,7 +21,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Pencil, Search, Trash2, Users } from "lucide-react";
 
-export function ProjectList() {
+interface ProjectListProps {
+  canManage: boolean;
+  canViewReports: boolean;
+}
+
+export function ProjectList({ canManage, canViewReports }: ProjectListProps) {
   const queryClient = useQueryClient();
   const [showInactive, setShowInactive] = useState(false);
   const [search, setSearch] = useState("");
@@ -155,7 +161,7 @@ export function ProjectList() {
             Inaktive anzeigen
           </label>
         </div>
-        <ProjectFormDialog
+        {canManage && <ProjectFormDialog
           key={`${editProject?.id ?? "__create__"}-${dialogOpen}`}
           editProject={dialogOpen ? editProject : null}
           open={dialogOpen}
@@ -168,7 +174,7 @@ export function ProjectList() {
           onSubmit={handleFormSubmit}
           isPending={createMutation.isPending || updateMutation.isPending}
           serverError={(editProject ? updateMutation.error : createMutation.error)?.message}
-        />
+        />}
       </div>
 
       {deleteMutation.error && <p role="alert" className="text-sm text-red-700">{deleteMutation.error.message}</p>}
@@ -232,12 +238,21 @@ export function ProjectList() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {project.employee_count} Mitarbeiter
-                    </p>
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs">
+                      <span className="text-muted-foreground">{project.employee_count} Mitarbeiter</span>
+                      {canViewReports && (
+                        <Link
+                          href={`/app/reports?tab=projects&projectId=${project.id}`}
+                          aria-label={`Projektbericht für ${project.name}`}
+                          className="font-medium text-primary underline underline-offset-2"
+                        >
+                          Projektbericht
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
+                {canManage && <div className="flex items-center gap-1.5 shrink-0">
                   <Button
                     variant="ghost"
                     size="icon-sm"
@@ -263,10 +278,10 @@ export function ProjectList() {
                   >
                     <Trash2 className="size-3.5 text-red-500" />
                   </Button>
-                </div>
+                </div>}
               </div>
 
-              {assignProjectId === project.id && (
+              {canManage && assignProjectId === project.id && (
                 employees.isLoading ? <p className="mt-3 text-sm text-muted-foreground">Mitarbeiter werden geladen…</p>
                 : employees.error ? <div role="alert" className="mt-3 space-y-2 text-sm text-red-700">
                   <p>{employees.error.message}</p>

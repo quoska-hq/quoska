@@ -8,18 +8,23 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface ExportButtonsProps {
-  weekStart: string;
-  weekEnd: string;
+  startDate: string;
+  endDate: string;
+  employeeId?: string;
+  projectId?: string;
+  disabled?: boolean;
 }
 
-export function ExportButtons({ weekStart, weekEnd }: ExportButtonsProps) {
-  const [exporting, setExporting] = useState<"csv" | null>(null);
+export function ExportButtons({ startDate, endDate, employeeId, projectId, disabled }: ExportButtonsProps) {
+  const [exporting, setExporting] = useState(false);
 
-  const handleExport = async (type: "csv") => {
-    setExporting(type);
+  const handleExport = async () => {
+    setExporting(true);
     try {
-      const url = `/api/v1/reports/export/${type}?startDate=${weekStart}&endDate=${weekEnd}`;
-      const res = await fetch(url);
+      const params = new URLSearchParams({ startDate, endDate });
+      if (employeeId) params.set("employeeId", employeeId);
+      if (projectId) params.set("projectId", projectId);
+      const res = await fetch(`/api/v1/reports/export/csv?${params}`);
 
       if (!res.ok) {
         const json = await res.json();
@@ -41,7 +46,7 @@ export function ExportButtons({ weekStart, weekEnd }: ExportButtonsProps) {
     } catch (err) {
       alert(err instanceof Error ? err.message : "Export fehlgeschlagen");
     } finally {
-      setExporting(null);
+      setExporting(false);
     }
   };
 
@@ -51,10 +56,10 @@ export function ExportButtons({ weekStart, weekEnd }: ExportButtonsProps) {
         variant="outline"
         size="sm"
         className="w-full sm:w-auto"
-        onClick={() => handleExport("csv")}
-        disabled={exporting !== null}
+        onClick={handleExport}
+        disabled={disabled || exporting}
       >
-        {exporting === "csv" ? "…" : "CSV Export"}
+        {exporting ? "…" : "CSV Export"}
       </Button>
     </div>
   );

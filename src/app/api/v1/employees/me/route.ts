@@ -9,6 +9,8 @@ import { createAdminClient, createClient } from "@/config/supabase/server";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
 import type { ApiResponse } from "@/types/api";
 import { setupProfileSchema, setupScheduleSchema } from "@/types/setup";
+import { employeeScheduleForDate, scheduleHours } from "@/types/work-schedule";
+import { getTodayDate } from "@/config/server/timestamps";
 import { z } from "zod";
 
 export async function GET() {
@@ -27,7 +29,7 @@ export async function GET() {
 
     const { data: employee } = await supabase
       .from("employees")
-      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, bundesland")
+      .select("id, first_name, last_name, email, role, target_hours_week, work_schedule, work_schedule_history, employment_start_date, initial_overtime_minutes, bundesland")
       .eq("id", employeeId)
       .single();
 
@@ -38,8 +40,10 @@ export async function GET() {
       );
     }
 
+    const { work_schedule_history, ...profile } = employee;
+    const schedule = employeeScheduleForDate({ ...profile, work_schedule_history }, getTodayDate());
     return NextResponse.json(
-      { data: employee, error: null },
+      { data: { ...profile, work_schedule: schedule, target_hours_week: scheduleHours(schedule) }, error: null },
       { status: 200 },
     );
   } catch (error) {

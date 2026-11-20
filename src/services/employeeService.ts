@@ -13,7 +13,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Employee } from "@/types/database";
-import { LAST_ADMIN_ERROR, type EmployeeListResponse } from "@/types/employee";
+import { LAST_ADMIN_ERROR, WORK_SCHEDULE_BEFORE_EMPLOYMENT_ERROR, type EmployeeListResponse, type UpdateEmployeeInput } from "@/types/employee";
 import type { ApiResponse } from "@/types/api";
 import { success, failure } from "@/types/api";
 import { employeeLimitForPlan } from "@/config/plans";
@@ -26,7 +26,7 @@ import {
   getTenantPlan,
 } from "@/repos/employeeRepo";
 import { getNowIso, getTodayDate } from "@/config/server/timestamps";
-import type { WorkSchedule } from "@/types/work-schedule";
+import { workScheduleFromWeeklyHours, type WorkSchedule } from "@/types/work-schedule";
 
 /**
  * Invite a new employee.
@@ -104,8 +104,7 @@ export async function inviteEmployee(
       last_name: input.lastName,
       email: input.email,
       role: input.role,
-      target_hours_week: input.targetHoursWeek ?? 40,
-      ...(input.workSchedule ? { work_schedule: input.workSchedule } : {}),
+      work_schedule: input.workSchedule ?? workScheduleFromWeeklyHours(input.targetHoursWeek ?? 40),
       employment_start_date: input.employmentStartDate ?? getTodayDate(),
       initial_overtime_minutes: input.initialOvertimeMinutes ?? 0,
       bundesland: input.bundesland ?? null,
@@ -157,16 +156,7 @@ export async function updateEmployee(
   adminClient: SupabaseClient,
   tenantId: string,
   employeeId: string,
-  updates: {
-    first_name?: string;
-    last_name?: string;
-    role?: string;
-    target_hours_week?: number;
-    work_schedule?: WorkSchedule;
-    employment_start_date?: string;
-    initial_overtime_minutes?: number;
-    bundesland?: string | null;
-  },
+  updates: UpdateEmployeeInput,
 ): Promise<ApiResponse<Employee>> {
   // 1. Verify employee exists in tenant
   const existing = await getEmployeeById(adminClient, tenantId, employeeId);
@@ -175,17 +165,30 @@ export async function updateEmployee(
   }
 
   // 2. Update employee record
-  const { data: updated, error: updateError } = await adminClient
-    .from("employees")
-    .update(updates)
-    .eq("id", employeeId)
-    .eq("tenant_id", tenantId)
-    .select("*")
-    .single();
+  const { work_schedule, work_schedule_effective_from, target_hours_week, ...profile } = updates;
+  const schedule = work_schedule ?? (target_hours_week !== undefined ? workScheduleFromWeeklyHours(target_hours_week) : null);
+  const { data: updated, error: updateError } = schedule || updates.leave_entitlement
+    ? await adminClient.rpc("update_employee_work_schedule", {
+        p_tenant_id: tenantId,
+        p_employee_id: employeeId,
+        p_schedule: schedule,
+        p_effective_from: work_schedule_effective_from ?? null,
+        p_profile: profile,
+      })
+    : await adminClient
+        .from("employees")
+        .update(profile)
+        .eq("id", employeeId)
+        .eq("tenant_id", tenantId)
+        .select("*")
+        .single();
 
   if (updateError || !updated) {
     if (updateError?.code === "P0001" && updateError.message === "last_active_admin") {
       return failure(LAST_ADMIN_ERROR);
+    }
+    if (updateError?.code === "22023" && updateError.message === "work_schedule_before_employment") {
+      return failure(WORK_SCHEDULE_BEFORE_EMPLOYMENT_ERROR);
     }
     console.error("Employee update failed:", updateError);
     return failure("Fehler beim Aktualisieren des Mitarbeiters");

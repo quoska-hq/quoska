@@ -8,7 +8,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/config/supabase/server";
 import { createAdminClient } from "@/config/supabase/server";
-import { LAST_ADMIN_ERROR, updateEmployeeSchema } from "@/types/employee";
+import { LAST_ADMIN_ERROR, WORK_SCHEDULE_BEFORE_EMPLOYMENT_ERROR, updateEmployeeSchema } from "@/types/employee";
 import {
   updateEmployee,
   deactivateEmployee,
@@ -69,7 +69,7 @@ export async function PATCH(
     if (!result.data) {
       return NextResponse.json<ApiResponse<Employee>>(
         { data: null, error: result.error },
-        { status: result.error === LAST_ADMIN_ERROR ? 409 : 500 },
+        { status: result.error === LAST_ADMIN_ERROR ? 409 : result.error === WORK_SCHEDULE_BEFORE_EMPLOYMENT_ERROR ? 400 : 500 },
       );
     }
 

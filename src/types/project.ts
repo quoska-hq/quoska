@@ -28,9 +28,14 @@ export const assignEmployeesSchema = z.object({
   employee_ids: z.array(z.string().uuid()).min(1, "Mindestens ein Mitarbeiter"),
 });
 
+export const UNASSIGNED_PROJECT = "none";
+export const projectFilterSchema = z.union([z.string().uuid(), z.literal(UNASSIGNED_PROJECT)]);
+
 export const projectReportQuerySchema = z.object({
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startDate: z.string().date(),
+  endDate: z.string().date(),
+}).refine(({ startDate, endDate }) => startDate <= endDate, {
+  message: "Das Enddatum muss am oder nach dem Startdatum liegen.",
 });
 
 export interface ProjectWithStats {
@@ -53,6 +58,18 @@ export interface ProjectReportRow {
   total_minutes: number;
   entry_count: number;
   employee_count: number;
+  bookings: ProjectReportBooking[];
+}
+
+export interface ProjectReportBooking {
+  id: string;
+  employee_id: string;
+  employee_name: string;
+  date: string;
+  clock_in: string;
+  clock_out: string | null;
+  break_minutes: number;
+  net_minutes: number;
 }
 
 export interface ProjectDetailRow {

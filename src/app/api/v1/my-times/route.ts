@@ -30,8 +30,8 @@ import type { ApiResponse } from "@/types/api";
 import type { BreakSession, TimeEntry } from "@/types/database";
 import { weekQuerySchema } from "@/types/holiday";
 import {
-  calculateScheduleTargetMinutesForRange,
-  scheduledMinutesForDate,
+  calculateEmployeeScheduleTargetMinutesForRange,
+  scheduledEmployeeMinutesForDate,
 } from "@/services/workScheduleService";
 
 export interface TimeEntryWithNet extends TimeEntry {
@@ -99,13 +99,12 @@ export async function GET(request: Request) {
     // Get employee config
     const { data: employee } = await supabase
       .from("employees")
-      .select("bundesland, target_hours_week, work_schedule, employment_start_date, initial_overtime_minutes, created_at")
+      .select("bundesland, target_hours_week, work_schedule, work_schedule_history, employment_start_date, initial_overtime_minutes, created_at")
       .eq("id", employeeId)
       .is("deleted_at", null)
       .single();
 
     const bundesland = employee?.bundesland ?? "berlin";
-    const targetHoursWeek = employee?.target_hours_week ?? 40;
     const employeeStart = employee
       ? employmentStartDate(employee)
       : startDate;
@@ -148,12 +147,11 @@ export async function GET(request: Request) {
       const weekSunday = getWeekSunday(weekMonday);
       const targetStart = [weekMonday, startDate, employeeStart].sort().at(-1)!;
       const targetEnd = [weekSunday, endDate, todayDate].sort()[0]!;
-      const targetMin = calculateScheduleTargetMinutesForRange(
+      const targetMin = calculateEmployeeScheduleTargetMinutesForRange(
         targetStart,
         targetEnd,
         excludedDates,
-        employee?.work_schedule,
-        targetHoursWeek,
+        employee,
       );
 
       let workedMinutes = weekEntries
@@ -180,12 +178,11 @@ export async function GET(request: Request) {
     }
 
     const balanceTargetMinutes = hasBalancePeriod
-      ? calculateScheduleTargetMinutesForRange(
+      ? calculateEmployeeScheduleTargetMinutesForRange(
           employeeStart,
           todayDate,
           balanceExcludedDates,
-          employee?.work_schedule,
-          targetHoursWeek,
+          employee,
         )
       : 0;
     const cumulativeOvertimeMinutes = calculateRunningOvertimeBalance(
@@ -199,7 +196,7 @@ export async function GET(request: Request) {
     for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
       dailyTargets[date] = date < employeeStart || date > todayDate || excludedDates.has(date)
         ? 0
-        : scheduledMinutesForDate(employee?.work_schedule, date, targetHoursWeek);
+        : scheduledEmployeeMinutesForDate(employee, date);
     }
 
     const response: MyTimesResponse = {

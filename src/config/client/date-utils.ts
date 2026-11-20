@@ -87,9 +87,18 @@ export function getWeekBoundsForOffset(
   };
 }
 
+/** Get the first and last date of a month relative to the current German month. */
+export function getMonthBoundsForOffset(offset: number): { start: string; end: string } {
+  const [year, month] = getLocalToday().split("-").map(Number);
+  const monthIndex = month - 1 + offset;
+  return {
+    start: epochToDate(Date.UTC(year, monthIndex, 1) / 86_400_000),
+    end: epochToDate(Date.UTC(year, monthIndex + 1, 0) / 86_400_000),
+  };
+}
+
 /**
- * Format an ISO timestamp (UTC) as local time HH:MM.
- * Uses the browser's timezone automatically.
+ * Format an ISO timestamp as HH:MM in Europe/Berlin.
  */
 export function formatTimeLocal(iso: string): string {
   return new Intl.DateTimeFormat("de-DE", {

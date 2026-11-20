@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TimeEntry } from "@/types/database";
+import { DEFAULT_WORK_SCHEDULE, FOUR_DAY_WORK_SCHEDULE, THIRTY_HOUR_WORK_SCHEDULE } from "@/types/work-schedule";
 
 const mocks = vi.hoisted(() => ({
   createClient: vi.fn(),
@@ -100,6 +101,31 @@ describe("GET /api/v1/my-times", () => {
     expect(data.dailyTargets["2026-08-11"]).toBe(0);
     expect(data.dailyTargets["2026-08-12"]).toBe(0);
     expect(data.entries).toHaveLength(1);
+  });
+
+  it("resolves mixed schedules for daily targets, weekly totals and the cumulative balance", async () => {
+    mocks.createClient.mockResolvedValue(employeeClient({
+      target_hours_week: 40,
+      work_schedule: DEFAULT_WORK_SCHEDULE,
+      work_schedule_history: {
+        "2026-08-11": THIRTY_HOUR_WORK_SCHEDULE,
+        "2026-08-13": FOUR_DAY_WORK_SCHEDULE,
+      },
+      employment_start_date: "2026-08-10",
+      created_at: "2026-08-10T00:00:00.000Z",
+    }));
+    const response = await GET(new Request(
+      "http://localhost/api/v1/my-times?startDate=2026-08-10&endDate=2026-08-16",
+    ));
+    const { data } = await response.json();
+    expect(data.dailyTargets).toMatchObject({
+      "2026-08-10": 480,
+      "2026-08-11": 360,
+      "2026-08-12": 360,
+      "2026-08-13": 0,
+    });
+    expect(data.weeklySummaries[0].targetMinutes).toBe(1200);
+    expect(data.cumulativeOvertimeMinutes).toBe(180);
   });
 
   it("loads historical absences even when viewing a later week", async () => {

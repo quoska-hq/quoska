@@ -18,6 +18,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ROLE_LABELS } from "@/types/employee";
+import { employeeScheduleForDate, formatWorkMinutes, totalScheduleMinutes } from "@/types/work-schedule";
+import { formatDateFullDE, getLocalToday } from "@/config/client/date-utils";
 
 export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
   const queryClient = useQueryClient();
@@ -126,8 +128,8 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
                     {emp.email} · {ROLE_LABELS[emp.role]}
-                    {emp.target_hours_week && ` · ${emp.target_hours_week}h/Woche`}
-                    {` · Eintritt ${formatDate(emp.employment_start_date ?? emp.created_at)}`}
+                    {` · ${formatWorkMinutes(totalScheduleMinutes(employeeScheduleForDate(emp, employeeData.defaults.employmentStartDate)))}/Woche`}
+                    {` · Eintritt ${formatDateFullDE(emp.employment_start_date ?? emp.created_at)}`}
                     {(emp.initial_overtime_minutes ?? 0) !== 0 &&
                       ` · Startsaldo ${formatOpeningBalance(emp.initial_overtime_minutes ?? 0)}`}
                   </p>
@@ -214,6 +216,7 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
       {editEmployee && (
         <EmployeeEditDialog
           employee={editEmployee}
+          today={employeeData?.defaults.employmentStartDate ?? getLocalToday()}
           onClose={() => setEditEmployee(null)}
           onSuccess={() => {
             setEditEmployee(null);
@@ -223,11 +226,6 @@ export function EmployeeList({ isAdmin }: { isAdmin: boolean }) {
       )}
     </div>
   );
-}
-
-function formatDate(value: string): string {
-  const [year, month, day] = value.slice(0, 10).split("-");
-  return `${day}.${month}.${year}`;
 }
 
 function formatOpeningBalance(minutes: number): string {

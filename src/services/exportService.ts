@@ -11,12 +11,16 @@ import type {
   ExportRow,
   EmployeeFullExport,
   AuditExportRow,
+  ReportEntry,
 } from "@/types/export";
 import type {
   TimeEntry,
   TimeEntryAudit,
   Employee,
 } from "@/types/database";
+import { formatTimeLocal } from "@/config/client/date-utils";
+import { reportNetMinutes, reportProjectName } from "@/services/projectReportBuilder";
+import { employeeScheduleForDate, scheduleHours } from "@/types/work-schedule";
 
 // ---------------------------------------------------------------------------
 // Date/time formatting (German)
@@ -69,32 +73,19 @@ export function escapeCSV(value: string | null | undefined): string {
  * Calculates net minutes from clock_in/clock_out and break_minutes.
  */
 export function entriesToExportRows(
-  entries: (TimeEntry & {
-    employee_first_name: string;
-    employee_last_name: string;
-  })[],
+  entries: ReportEntry[],
 ): ExportRow[] {
-  return entries.map((entry) => {
-    const grossMinutes = entry.clock_out
-      ? Math.round(
-          Math.abs(
-            Date.parse(entry.clock_out) - Date.parse(entry.clock_in),
-          ) / 60_000,
-        )
-      : 0;
-    const netMinutes = grossMinutes - entry.break_minutes;
-
-    return {
-      employeeFirstName: entry.employee_first_name,
-      employeeLastName: entry.employee_last_name,
-      date: entry.date,
-      clockIn: entry.clock_in,
-      clockOut: entry.clock_out,
-      breakMinutes: entry.break_minutes,
-      netMinutes,
-      notes: entry.notes,
-    };
-  });
+  return entries.map((entry) => ({
+    employeeFirstName: entry.employee_first_name,
+    employeeLastName: entry.employee_last_name,
+    date: entry.date,
+    clockIn: entry.clock_in,
+    clockOut: entry.clock_out,
+    breakMinutes: entry.break_minutes,
+    netMinutes: reportNetMinutes(entry),
+    notes: entry.notes,
+    projectName: reportProjectName(entry),
+  }));
 }
 
 /**
@@ -110,20 +101,22 @@ export function generateCSV(exportRows: ExportRow[]): string {
     "Pause (Min)",
     "Netto-Stunden",
     "Notizen",
+    "Projekt",
   ];
 
   const headerLine = headers.join(",");
 
   const dataLines = exportRows.map((row) => {
-    const name = `${row.employeeFirstName} ${row.employeeLastName}`;
+    const name = `${row.employeeFirstName} ${row.employeeLastName}`.trim();
     return [
       escapeCSV(name),
       formatDateDE(row.date),
-      formatTimeDE(row.clockIn),
-      row.clockOut ? formatTimeDE(row.clockOut) : "–",
+      formatTimeLocal(row.clockIn),
+      row.clockOut ? formatTimeLocal(row.clockOut) : "–",
       String(row.breakMinutes),
       formatNetHours(row.netMinutes),
       escapeCSV(row.notes),
+      escapeCSV(row.projectName ?? "Ohne Projekt"),
     ].join(",");
   });
 
@@ -152,6 +145,7 @@ export function buildEmployeeExport(
     employee_last_name?: string;
   })[],
   auditRecords: TimeEntryAudit[],
+  todayDate?: string,
 ): EmployeeFullExport {
   const exportEntries: ExportRow[] = allEntries.map((entry) => {
     const grossMinutes = entry.clock_out
@@ -191,7 +185,9 @@ export function buildEmployeeExport(
       lastName: employee.last_name,
       email: employee.email,
       role: employee.role,
-      targetHoursWeek: employee.target_hours_week,
+      targetHoursWeek: todayDate
+        ? scheduleHours(employeeScheduleForDate(employee, todayDate))
+        : employee.target_hours_week,
       bundesland: employee.bundesland,
       createdAt: employee.created_at,
     },

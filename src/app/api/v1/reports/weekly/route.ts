@@ -16,7 +16,8 @@ import { netMinutesForEntry, netMinutesForRunningEntry } from "@/services/overti
 import type { ApiResponse } from "@/types/api";
 import type { TimeEntry } from "@/types/database";
 import { z } from "zod";
-import { scheduledMinutesForDate } from "@/services/workScheduleService";
+import { scheduledEmployeeMinutesForDate } from "@/services/workScheduleService";
+import { employeeScheduleForDate, scheduleHours } from "@/types/work-schedule";
 import { employmentStartDate } from "@/services/overtimeService";
 
 /** Per-day cell in the weekly report. */
@@ -154,11 +155,7 @@ export async function GET(request: Request) {
         const dayOfWeek = getDayOfWeek(date);
 
         if (!holiday && date >= employeeStart && date <= todayDate) {
-          targetMinutes += scheduledMinutesForDate(
-            emp.work_schedule,
-            date,
-            emp.target_hours_week,
-          );
+          targetMinutes += scheduledEmployeeMinutesForDate(emp, date);
         }
 
         // Find entries for this day
@@ -232,7 +229,7 @@ export async function GET(request: Request) {
         firstName: emp.first_name,
         lastName: emp.last_name,
         bundesland: emp.bundesland,
-        targetHoursWeek: emp.target_hours_week,
+        targetHoursWeek: scheduleHours(employeeScheduleForDate(emp, weekStart)),
         days,
         totalNetMinutes: totalNet,
         targetMinutes,

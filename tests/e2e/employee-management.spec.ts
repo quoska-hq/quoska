@@ -148,11 +148,14 @@ test.describe("Employee Invite & Edit — Story 3.1", () => {
     const firstNameInput = page.getByLabel("Vorname");
     await firstNameInput.clear();
     await firstNameInput.fill("Edita-Updated");
+    await page.getByLabel("Urlaubstage pro Jahr").fill("10");
     await page.getByRole("button", { name: /speichern/i }).click();
 
     await expect(page.getByText("Edita-Updated")).toBeVisible({
       timeout: 10_000,
     });
+    await row.getByRole("button", { name: /bearbeiten/i }).click();
+    await expect(page.getByLabel("Urlaubstage pro Jahr")).toHaveValue("10");
 
     await cleanupTestUser(editEmail);
   });

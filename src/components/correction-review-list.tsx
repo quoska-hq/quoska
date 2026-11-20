@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiResponse } from "@/types/api";
 import type { CorrectionRequestWithEntry } from "@/types/correction";
-import { correctionChangeSummary } from "@/lib/correction-format";
+import { correctionChangeSummary, correctionEntryDate } from "@/lib/correction-format";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +61,10 @@ export function CorrectionReviewList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["corrections"] });
       queryClient.invalidateQueries({ queryKey: ["adminCockpit"] });
+      queryClient.invalidateQueries({ queryKey: ["myTimes"] });
+      queryClient.invalidateQueries({ queryKey: ["weeklyReport"] });
+      queryClient.invalidateQueries({ queryKey: ["projectReport"] });
+      queryClient.invalidateQueries({ queryKey: ["employeeEntries"] });
       setExpandedId(null);
       setRejectNote("");
     },
@@ -98,8 +102,9 @@ export function CorrectionReviewList() {
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">
-                  Eintrag vom{" "}
-                  {formatDate(req.timeEntry?.date ?? req.created_at)}
+                  {req.request_type === "missing_entry" ? "Zeitnachtrag vom " : "Eintrag vom "}
+                  {formatDate(correctionEntryDate(req))}
+                  {req.employee && ` · ${req.employee.first_name} ${req.employee.last_name}`}
                 </p>
                 <p className="mt-1.5 text-sm text-foreground">
                   {correctionChangeSummary(req)}

@@ -36,3 +36,6 @@ export const manualTimeEntrySchema = z.object({
 });
 
 export type ManualTimeEntryInput = z.infer<typeof manualTimeEntrySchema>;
+
+/** A request always concerns the authenticated employee's own time. */
+export const missingTimeRequestSchema = manualTimeEntrySchema.omit({ employee_id: true }).strict();

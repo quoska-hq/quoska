@@ -10,6 +10,19 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { TimeEntry } from "@/types/database";
 
+/** Names include archived projects still assigned to historical entries. */
+export async function getEntryProjectNames(
+  supabase: SupabaseClient,
+  tenantId: string,
+  projectIds: (string | null | undefined)[],
+): Promise<Map<string, string>> {
+  const ids = [...new Set(projectIds.filter((id): id is string => !!id))];
+  if (!ids.length) return new Map();
+  const { data } = await supabase.from("projects").select("id,name")
+    .eq("tenant_id", tenantId).in("id", ids);
+  return new Map((data ?? []).map((project) => [project.id, project.name]));
+}
+
 /**
  * Get the active (running or paused) time entry for an employee.
  * Returns null if no active entry exists.
@@ -38,14 +51,15 @@ export async function getTimeEntryById(
   supabase: SupabaseClient,
   tenantId: string,
   entryId: string,
+  { includeDeleted = false } = {},
 ): Promise<TimeEntry | null> {
-  const { data } = await supabase
+  let query = supabase
     .from("time_entries")
     .select("*")
     .eq("id", entryId)
-    .eq("tenant_id", tenantId)
-    .is("deleted_at", null)
-    .maybeSingle();
+    .eq("tenant_id", tenantId);
+  if (!includeDeleted) query = query.is("deleted_at", null);
+  const { data } = await query.maybeSingle();
 
   return data;
 }
@@ -60,15 +74,17 @@ export async function getTimeEntriesByDateRange(
   employeeId: string,
   startDate: string,
   endDate: string,
+  { includeDeleted = false } = {},
 ): Promise<TimeEntry[]> {
-  const { data } = await supabase
+  let query = supabase
     .from("time_entries")
     .select("*")
     .eq("tenant_id", tenantId)
     .eq("employee_id", employeeId)
     .gte("date", startDate)
-    .lte("date", endDate)
-    .is("deleted_at", null)
+    .lte("date", endDate);
+  if (!includeDeleted) query = query.is("deleted_at", null);
+  const { data } = await query
     .order("date", { ascending: true })
     .order("clock_in", { ascending: true });
 

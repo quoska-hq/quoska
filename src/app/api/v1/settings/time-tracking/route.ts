@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { createAdminClient, createClient } from "@/config/supabase/server";
 import { getEmployeeFromAuth } from "@/services/timeEntryService";
+import { updateTimeTrackingSettingsSchema } from "@/types/time-tracking";
 
-const updateSchema = z.object({ automaticBreaksEnabled: z.boolean() });
+const settingsColumns = "automatic_breaks_enabled,missing_time_approval_required";
 
 export async function GET() {
   const supabase = await createClient();
@@ -12,14 +12,20 @@ export async function GET() {
     return NextResponse.json({ data: null, error: authResult.error }, { status: 401 });
   }
 
-  const { data } = await createAdminClient()
+  const { data, error } = await createAdminClient()
     .from("tenants")
-    .select("automatic_breaks_enabled")
+    .select(settingsColumns)
     .eq("id", authResult.data.tenantId)
     .single();
+  if (error || !data) {
+    return NextResponse.json({ data: null, error: "Einstellungen konnten nicht geladen werden" }, { status: 500 });
+  }
 
   return NextResponse.json({
-    data: { automaticBreaksEnabled: data?.automatic_breaks_enabled ?? true },
+    data: {
+      automaticBreaksEnabled: data.automatic_breaks_enabled,
+      missingTimeApprovalRequired: data.missing_time_approval_required,
+    },
     error: null,
   });
 }
@@ -33,23 +39,38 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ data: null, error: "Nur Administratoren können diese Einstellung ändern" }, { status: 403 });
   }
 
-  const parsed = updateSchema.safeParse(await request.json());
+  const parsed = updateTimeTrackingSettingsSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ data: null, error: "Ungültige Einstellung" }, { status: 400 });
   }
 
-  const { data, error } = await createAdminClient()
+  const admin = createAdminClient();
+  const { data: actor } = await admin.from("employees").select("id")
+    .eq("id", authResult.data.employeeId).eq("tenant_id", authResult.data.tenantId)
+    .eq("role", "admin").is("deleted_at", null).maybeSingle();
+  if (!actor) {
+    return NextResponse.json({ data: null, error: "Nur Administratoren können diese Einstellung ändern" }, { status: 403 });
+  }
+
+  const { automaticBreaksEnabled, missingTimeApprovalRequired } = parsed.data;
+  const { data, error } = await admin
     .from("tenants")
-    .update({ automatic_breaks_enabled: parsed.data.automaticBreaksEnabled })
+    .update({
+      ...(automaticBreaksEnabled === undefined ? {} : { automatic_breaks_enabled: automaticBreaksEnabled }),
+      ...(missingTimeApprovalRequired === undefined ? {} : { missing_time_approval_required: missingTimeApprovalRequired }),
+    })
     .eq("id", authResult.data.tenantId)
-    .select("automatic_breaks_enabled")
+    .select(settingsColumns)
     .single();
   if (error || !data) {
     return NextResponse.json({ data: null, error: "Einstellung konnte nicht gespeichert werden" }, { status: 500 });
   }
 
   return NextResponse.json({
-    data: { automaticBreaksEnabled: data.automatic_breaks_enabled },
+    data: {
+      automaticBreaksEnabled: data.automatic_breaks_enabled,
+      missingTimeApprovalRequired: data.missing_time_approval_required,
+    },
     error: null,
   });
 }

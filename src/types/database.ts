@@ -1,7 +1,7 @@
 // Database row types matching the Supabase schema exactly.
 // Reference: supabase/migrations/
 
-import type { WorkSchedule } from "@/types/work-schedule";
+import type { WorkSchedule, WorkScheduleHistory } from "@/types/work-schedule";
 import type { SignupAttribution } from "@/lib/signup-attribution";
 
 export interface Tenant {
@@ -12,6 +12,7 @@ export interface Tenant {
   bundesland: string | null;
   default_work_schedule?: WorkSchedule;
   automatic_breaks_enabled?: boolean;
+  missing_time_approval_required?: boolean;
   signup_attribution?: SignupAttribution | null;
   setup_complete: boolean;
   created_at: string;
@@ -28,6 +29,7 @@ export interface Employee {
   role: "admin" | "manager" | "employee";
   target_hours_week: number;
   work_schedule?: WorkSchedule;
+  work_schedule_history?: WorkScheduleHistory;
   /** Optional for legacy rows and test fixtures created before migration 028. */
   employment_start_date?: string;
   /** Opening balance imported when time tracking starts in Quoska. */
@@ -89,7 +91,8 @@ export interface CorrectionRequest {
   id: string;
   tenant_id: string;
   employee_id: string;
-  time_entry_id: string;
+  time_entry_id: string | null;
+  request_type?: "correction" | "missing_entry";
   proposed_change: Record<string, unknown> | null;
   reason: string;
   status: "pending" | "approved" | "rejected";
